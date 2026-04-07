@@ -2,101 +2,100 @@
 {% block title %}Оценки — TCC HUB{% endblock %}
 {% block page_title %}Оценки{% endblock %}
 
+{% block extra_head %}
+<style>
+.gr-card{background:#fff;border:1px solid #E6E8EE;margin-bottom:16px;transition:border-color .2s}
+.gr-card:hover{border-color:#C6A46D}
+.gr-head{display:flex;align-items:center;justify-content:space-between;width:100%;padding:22px 28px;text-align:left;transition:background .2s}
+.gr-head:hover{background:#FAF8F3}
+.gr-num{font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;color:#C6A46D;letter-spacing:.04em;min-width:32px}
+.gr-title{font-family:Montserrat,sans-serif;font-size:16px;font-weight:900;color:#1B2A4A;letter-spacing:-.01em}
+.gr-sub{font-size:10px;font-weight:800;letter-spacing:.14em;color:#8a92a6;text-transform:uppercase;margin-top:4px}
+.gr-row{padding:20px 28px;border-top:1px solid #F0F1F5;transition:background .2s}
+.gr-row:hover{background:#FAF8F3}
+.gr-item-label{font-size:14px;font-weight:700;color:#1B2A4A;letter-spacing:-.005em}
+.gr-bar{height:2px;background:#F0F1F5;overflow:hidden;margin-top:10px}
+.gr-bar-fill{height:100%;transition:width .4s}
+.gr-bar-fill.good{background:#10B981}
+.gr-bar-fill.ok{background:#C6A46D}
+.gr-bar-fill.mid{background:#F59E0B}
+.gr-bar-fill.low{background:#EF4444}
+.gr-pct{font-size:10px;font-weight:800;letter-spacing:.14em;color:#8a92a6;text-transform:uppercase;min-width:40px;text-align:right}
+.gr-score{font-family:Montserrat,sans-serif;font-weight:900;font-size:24px;letter-spacing:-.02em}
+.gr-score.good{color:#10B981}
+.gr-score.ok{color:#C6A46D}
+.gr-score.mid{color:#F59E0B}
+.gr-score.low{color:#EF4444}
+.gr-score-max{font-size:13px;color:#8a92a6;font-weight:700}
+.gr-feedback{background:#FAF8F3;border-left:2px solid #C6A46D;padding:14px 18px;margin-top:14px;margin-left:52px;font-size:13px;color:#3D5070;line-height:1.6}
+.gr-empty{background:#fff;border:1px solid #E6E8EE;padding:80px 40px;text-align:center}
+</style>
+{% endblock %}
+
 {% block content %}
 {% if grades_by_course %}
-<div class="space-y-5">
+<div>
     {% for course_grades in grades_by_course %}
-    <div x-data="{ open: true }" class="bg-white rounded-2xl border border-border overflow-hidden shadow-sm">
-        <!-- Course Header (Accordion Toggle) -->
-        <button @click="open = !open"
-                class="w-full flex items-center justify-between p-5 hover:bg-surface/50 transition text-left">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <span class="material-icons-round text-primary">school</span>
-                </div>
+    <div x-data="{ open: true }" class="gr-card">
+        <button @click="open = !open" class="gr-head">
+            <div class="flex items-center gap-5">
+                <span class="gr-num">{{ forloop.counter|stringformat:"02d" }}</span>
                 <div>
-                    <h2 class="text-navy font-semibold text-[15px]">{{ course_grades.course.title }}</h2>
-                    <p class="text-text-light text-xs mt-0.5">{{ course_grades.grades|length }} элемент{{ course_grades.grades|length|pluralize:",:а,:ов" }}</p>
+                    <h2 class="gr-title">{{ course_grades.course.title }}</h2>
+                    <div class="gr-sub">{{ course_grades.grades|length }} элемент{{ course_grades.grades|length|pluralize:",:а,:ов" }}</div>
                 </div>
             </div>
-            <span class="material-icons-round text-text-light transition-transform duration-200"
-                  :class="open ? 'rotate-180' : ''">expand_more</span>
+            <span class="material-icons-round" style="color:#C6A46D;transition:transform .2s" :class="open ? 'rotate-180' : ''">expand_more</span>
         </button>
 
-        <!-- Grades List -->
         <div x-show="open" x-collapse>
-            <div class="border-t border-border">
-                {% for grade in course_grades.grades %}
-                <div x-data="{ showFeedback: false }"
-                     class="px-5 py-4 {% if not forloop.last %}border-b border-border{% endif %} hover:bg-surface/30 transition">
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                        <!-- Icon -->
-                        <div class="hidden sm:flex w-9 h-9 rounded-lg bg-surface-alt items-center justify-center shrink-0">
-                            <span class="material-icons-round text-text-light text-lg">assignment</span>
-                        </div>
-
-                        <!-- Name + Bar -->
-                        <div class="flex-1 min-w-0">
-                            <p class="text-navy text-sm font-medium truncate">{{ grade.grade_item.name }}</p>
-                            <div class="flex items-center gap-3 mt-1.5">
-                                {% widthratio grade.grade grade.grade_item.max_grade 100 as pct %}
-                                <div class="flex-1 h-2 bg-surface-alt rounded-full overflow-hidden">
-                                    <div class="h-full rounded-full transition-all duration-500
-                                        {% if pct >= 90 %}bg-emerald-500
-                                        {% elif pct >= 70 %}bg-primary
-                                        {% elif pct >= 50 %}bg-amber-400
-                                        {% else %}bg-red-400{% endif %}"
-                                         style="width: {{ pct }}%"></div>
-                                </div>
-                                <span class="text-text-light text-xs font-medium shrink-0 w-10 text-right">{{ pct }}%</span>
+            {% for grade in course_grades.grades %}
+            {% widthratio grade.grade grade.grade_item.max_grade 100 as pct %}
+            <div x-data="{ showFeedback: false }" class="gr-row">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+                    <span class="gr-num hidden sm:inline-block" style="min-width:32px">—</span>
+                    <div class="flex-1 min-w-0">
+                        <div class="gr-item-label truncate">{{ grade.grade_item.name }}</div>
+                        <div class="flex items-center gap-3 mt-2">
+                            <div class="flex-1 gr-bar">
+                                <div class="gr-bar-fill {% if pct >= 90 %}good{% elif pct >= 70 %}ok{% elif pct >= 50 %}mid{% else %}low{% endif %}" style="width:{{ pct }}%"></div>
                             </div>
-                        </div>
-
-                        <!-- Score + Feedback -->
-                        <div class="flex items-center gap-2 sm:gap-3">
-                            <div class="text-right shrink-0">
-                                <span class="text-lg font-bold
-                                    {% if pct >= 90 %}text-emerald-500
-                                    {% elif pct >= 70 %}text-primary
-                                    {% elif pct >= 50 %}text-amber-500
-                                    {% else %}text-red-400{% endif %}">{{ grade.grade|floatformat:1 }}</span>
-                                <span class="text-text-light text-sm"> / {{ grade.grade_item.max_grade|floatformat:0 }}</span>
-                            </div>
-                            {% if grade.feedback %}
-                            <button @click="showFeedback = !showFeedback"
-                                    class="p-1.5 rounded-lg text-text-light hover:text-primary hover:bg-primary/5 transition shrink-0"
-                                    title="Показать отзыв">
-                                <span class="material-icons-round text-lg">comment</span>
-                            </button>
-                            {% endif %}
+                            <span class="gr-pct">{{ pct }}%</span>
                         </div>
                     </div>
-
-                    <!-- Expandable Feedback -->
-                    {% if grade.feedback %}
-                    <div x-show="showFeedback" x-collapse class="mt-3 ml-[52px]">
-                        <div class="bg-surface rounded-xl p-3.5 border border-border">
-                            <div class="flex items-start gap-2">
-                                <span class="material-icons-round text-primary text-base mt-0.5">feedback</span>
-                                <p class="text-text-mid text-sm leading-relaxed">{{ grade.feedback }}</p>
-                            </div>
+                    <div class="flex items-center gap-3 shrink-0">
+                        <div class="text-right">
+                            <span class="gr-score {% if pct >= 90 %}good{% elif pct >= 70 %}ok{% elif pct >= 50 %}mid{% else %}low{% endif %}">{{ grade.grade|floatformat:1 }}</span>
+                            <span class="gr-score-max"> / {{ grade.grade_item.max_grade|floatformat:0 }}</span>
                         </div>
+                        {% if grade.feedback %}
+                        <button @click="showFeedback = !showFeedback" class="p-2 border border-[#E6E8EE] hover:border-[#C6A46D] transition" title="Показать отзыв">
+                            <span class="material-icons-round text-base" style="color:#7a8296">comment</span>
+                        </button>
+                        {% endif %}
                     </div>
-                    {% endif %}
                 </div>
-                {% endfor %}
+                {% if grade.feedback %}
+                <div x-show="showFeedback" x-collapse>
+                    <div class="gr-feedback">{{ grade.feedback }}</div>
+                </div>
+                {% endif %}
             </div>
+            {% endfor %}
         </div>
     </div>
     {% endfor %}
 </div>
 {% else %}
-<div class="bg-white rounded-2xl border border-border p-16 text-center">
-    <div class="w-16 h-16 rounded-2xl bg-surface-alt flex items-center justify-center mx-auto mb-4">
-        <span class="material-icons-round text-3xl text-text-light">grade</span>
+<div class="gr-empty">
+    <div style="display:inline-flex;align-items:center;gap:14px;margin-bottom:18px">
+        <span style="width:28px;height:2px;background:#C6A46D;display:inline-block"></span>
+        <span style="font-size:11px;font-weight:800;letter-spacing:.18em;color:#C6A46D;text-transform:uppercase">Пока пусто</span>
     </div>
-    <h3 class="text-navy font-semibold text-lg mb-1">Нет оценок</h3>
-    <p class="text-text-mid text-sm">Оценки появятся после прохождения заданий</p>
+    <h3 style="font-family:Montserrat;font-size:28px;font-weight:900;color:#1B2A4A;letter-spacing:-.02em;margin-bottom:12px">
+        Оценки появятся после <span style="color:#C6A46D;font-weight:300;font-style:italic">первых заданий</span>
+    </h3>
+    <p style="color:#7a8296;font-size:14px">Проходите тесты и сдавайте задания, чтобы видеть прогресс</p>
 </div>
 {% endif %}
 {% endblock %}

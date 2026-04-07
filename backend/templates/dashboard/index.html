@@ -5,21 +5,29 @@
 {% block page_title_block %}{% endblock %}
 
 {% block content %}
-<!-- Welcome Banner -->
-<div class="bg-gradient-to-r from-navy to-navy-light rounded-2xl p-6 sm:p-8 mb-8">
-    <h1 class="text-2xl sm:text-3xl font-bold text-white mb-1">
-        Добро пожаловать, {{ request.user.first_name|default:request.user.username }}!
-    </h1>
-    <p class="text-white/70 text-sm sm:text-base">Продолжайте обучение и развивайте новые навыки</p>
-</div>
+<!-- Editorial Welcome Hero -->
+<section class="relative overflow-hidden mb-12 rounded-[4px]" style="background:#0F1D35;border:1px solid rgba(198,164,109,.18)">
+    <!-- grid mask -->
+    <div aria-hidden="true" style="position:absolute;inset:0;background-image:linear-gradient(rgba(198,164,109,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(198,164,109,.06) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at top right,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at top right,#000 30%,transparent 75%)"></div>
+    <div style="position:absolute;top:0;right:0;width:380px;height:380px;background:radial-gradient(circle,rgba(198,164,109,.15) 0%,transparent 70%);pointer-events:none"></div>
+
+    <div class="relative px-6 sm:px-10 py-10 sm:py-14">
+        <div class="lms-eyebrow" style="margin-bottom:18px">
+            <span class="lms-eyebrow-bar"></span>
+            <span class="lms-eyebrow-label">Welcome back · {{ request.user.first_name|default:request.user.username }}</span>
+        </div>
+        <h1 style="font-size:clamp(30px,3.6vw,52px);font-weight:900;color:#fff;line-height:1.05;letter-spacing:-.025em;max-width:720px;font-family:Montserrat">
+            Знание&nbsp;—<br>это&nbsp;ваша<br><span style="position:relative;display:inline-block"><span style="position:relative;z-index:1;color:#C6A46D;font-weight:300;font-style:italic">логистика</span><span style="position:absolute;left:0;right:0;bottom:6px;height:14px;background:rgba(198,164,109,.22);z-index:0"></span></span>&nbsp;роста.
+        </h1>
+        <p style="margin-top:24px;max-width:560px;color:rgba(255,255,255,.62);font-size:15px;line-height:1.6">Продолжайте курсы, отслеживайте прогресс и формируйте экспертизу мирового уровня в логистике Среднего коридора.</p>
+    </div>
+</section>
 
 {% if enrollments %}
 <!-- Continue Learning -->
-<section class="mb-8">
-    <h2 class="text-lg font-bold text-navy mb-4 flex items-center gap-2">
-        <span class="material-icons-round text-primary">play_circle</span>
-        Продолжить обучение
-    </h2>
+<section class="mb-12">
+    <div class="lms-eyebrow"><span class="lms-eyebrow-bar"></span><span class="lms-eyebrow-label">01 · Continue</span></div>
+    <h2 style="font-size:clamp(22px,2.2vw,30px);font-weight:900;color:#1B2A4A;letter-spacing:-.02em;margin-bottom:24px">Продолжить <span style="color:#C6A46D;font-weight:300;font-style:italic">обучение</span></h2>
 
     {% for enrollment in enrollments %}
     {% if forloop.first %}
@@ -120,67 +128,51 @@
 </section>
 {% endif %}
 
-<!-- Stats Row -->
-<section class="mb-8">
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
-        <div class="bg-white rounded-xl border border-border p-4 sm:p-5">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-                    <span class="material-icons-round text-blue-500 text-xl">menu_book</span>
-                </div>
-                <div>
-                    <p class="text-2xl font-bold text-navy">{{ enrolled_count }}</p>
-                    <p class="text-xs text-text-light font-medium">Курсов</p>
-                </div>
-            </div>
+<!-- Editorial Stats Row -->
+<section class="mb-12">
+    <div class="lms-eyebrow"><span class="lms-eyebrow-bar"></span><span class="lms-eyebrow-label">02 · Progress</span></div>
+    <h2 style="font-size:clamp(22px,2.2vw,30px);font-weight:900;color:#1B2A4A;letter-spacing:-.02em;margin-bottom:24px">Ваша <span style="color:#C6A46D;font-weight:300;font-style:italic">статистика</span></h2>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        {% for stat in '1234'|make_list %}{% endfor %}
+        <div class="lms-stat-card">
+            <span class="lms-stat-num">01</span>
+            <p class="lms-stat-value">{{ enrolled_count }}</p>
+            <p class="lms-stat-label">Курсов</p>
         </div>
-        <div class="bg-white rounded-xl border border-border p-4 sm:p-5">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
-                    <span class="material-icons-round text-green-500 text-xl">check_circle</span>
-                </div>
-                <div>
-                    <p class="text-2xl font-bold text-navy">{{ completed_count }}</p>
-                    <p class="text-xs text-text-light font-medium">Завершено</p>
-                </div>
-            </div>
+        <div class="lms-stat-card">
+            <span class="lms-stat-num">02</span>
+            <p class="lms-stat-value">{{ completed_count }}</p>
+            <p class="lms-stat-label">Завершено</p>
         </div>
-        <div class="bg-white rounded-xl border border-border p-4 sm:p-5">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
-                    <span class="material-icons-round text-primary text-xl">workspace_premium</span>
-                </div>
-                <div>
-                    <p class="text-2xl font-bold text-navy">{{ certificates_count }}</p>
-                    <p class="text-xs text-text-light font-medium">Сертификатов</p>
-                </div>
-            </div>
+        <div class="lms-stat-card">
+            <span class="lms-stat-num">03</span>
+            <p class="lms-stat-value">{{ certificates_count }}</p>
+            <p class="lms-stat-label">Сертификатов</p>
         </div>
-        <div class="bg-white rounded-xl border border-border p-4 sm:p-5">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
-                    <span class="material-icons-round text-purple-500 text-xl">military_tech</span>
-                </div>
-                <div>
-                    <p class="text-2xl font-bold text-navy">{{ badges_count }}</p>
-                    <p class="text-xs text-text-light font-medium">Значков</p>
-                </div>
-            </div>
+        <div class="lms-stat-card">
+            <span class="lms-stat-num">04</span>
+            <p class="lms-stat-value">{{ badges_count }}</p>
+            <p class="lms-stat-label">Значков</p>
         </div>
     </div>
 </section>
 
+<style>
+.lms-stat-card{position:relative;background:#fff;border:1px solid rgba(27,42,74,.08);padding:28px 22px 22px;transition:border-color .25s,transform .25s;border-radius:2px}
+.lms-stat-card:hover{border-color:rgba(198,164,109,.45);transform:translateY(-2px)}
+.lms-stat-card::before{content:"";position:absolute;left:0;top:0;width:32px;height:2px;background:#C6A46D}
+.lms-stat-num{position:absolute;right:18px;top:18px;font-size:11px;font-weight:800;color:#C6A46D;letter-spacing:.12em}
+.lms-stat-value{font-size:38px;font-weight:900;color:#1B2A4A;line-height:1;letter-spacing:-.03em;margin-bottom:8px;font-family:Montserrat}
+.lms-stat-label{font-size:11px;font-weight:700;color:#7A8BA8;text-transform:uppercase;letter-spacing:.1em}
+</style>
+
 <!-- Recent Notifications -->
 {% if recent_notifications %}
 <section>
-    <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold text-navy flex items-center gap-2">
-            <span class="material-icons-round text-primary">notifications</span>
-            Уведомления
-        </h2>
-        <a href="{% url 'notifications' %}" class="text-sm text-primary font-semibold hover:text-primary-hover transition">
-            Все уведомления
-        </a>
+    <div class="lms-eyebrow"><span class="lms-eyebrow-bar"></span><span class="lms-eyebrow-label">03 · Updates</span></div>
+    <div class="flex items-end justify-between mb-6">
+        <h2 style="font-size:clamp(22px,2.2vw,30px);font-weight:900;color:#1B2A4A;letter-spacing:-.02em">Свежие <span style="color:#C6A46D;font-weight:300;font-style:italic">уведомления</span></h2>
+        <a href="{% url 'notifications' %}" style="font-size:11px;font-weight:800;letter-spacing:.14em;color:#C6A46D;text-transform:uppercase;border-bottom:1px solid #C6A46D;padding-bottom:2px">Все&nbsp;→</a>
     </div>
     <div class="bg-white rounded-xl border border-border divide-y divide-border overflow-hidden">
         {% for notification in recent_notifications %}

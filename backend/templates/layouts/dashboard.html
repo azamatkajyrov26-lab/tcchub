@@ -1,48 +1,47 @@
 {% extends "base.html" %}
 
+{% block extra_head %}
+<style>
+.lms-nav-link{position:relative;font-size:11px;font-weight:800;letter-spacing:.14em;color:#3D5070;padding:24px 0;transition:color .2s}
+.lms-nav-link:hover{color:#1B2A4A}
+.lms-nav-link.is-active{color:#1B2A4A}
+.lms-nav-link.is-active::after{content:"";position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:28px;height:2px;background:#C6A46D}
+.lms-eyebrow{display:inline-flex;align-items:center;gap:14px;margin-bottom:14px}
+.lms-eyebrow-bar{width:36px;height:2px;background:#C6A46D}
+.lms-eyebrow-label{font-size:11px;font-weight:800;letter-spacing:.18em;color:#C6A46D;text-transform:uppercase}
+.lms-h1{font-size:clamp(28px,3.2vw,44px);font-weight:900;color:#1B2A4A;line-height:1.05;letter-spacing:-.025em;font-family:Montserrat}
+.lms-h1 .accent{color:#C6A46D;font-weight:300;font-style:italic;position:relative;display:inline-block}
+.lms-h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:4px;height:10px;background:rgba(198,164,109,.18);z-index:-1}
+</style>
+{% endblock %}
+
 {% block body %}
 <div x-data="{ mobileMenu: false, profileOpen: false }" class="min-h-screen bg-white">
 
     <!-- Top Navigation Bar -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white border-b" style="border-color: rgba(27,42,74,0.08);">
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white" style="border-bottom:1px solid rgba(27,42,74,0.08);box-shadow:0 1px 0 rgba(198,164,109,.12)">
         <div class="max-w-[1440px] mx-auto px-4 lg:px-6">
-            <div class="h-16 flex items-center justify-between">
+            <div class="h-[68px] flex items-center justify-between">
 
                 <!-- Left: Logo + Nav Links -->
                 <div class="flex items-center gap-8">
-                    <!-- Logo -->
-                    <a href="{% url 'dashboard' %}" class="flex items-center gap-2.5 shrink-0">
+                    <!-- Logo (editorial — matches public site) -->
+                    <a href="{% url 'dashboard' %}" class="flex items-center gap-3 shrink-0 group">
                         <img src="https://optim.tildacdn.pro/tild6637-3765-4438-b135-366537363233/-/resize/176x/-/format/webp/noroot.png.webp"
-                             alt="TCC" class="h-8 rounded-md" style="background:#1B2A4A;padding:4px 8px">
-                        <div class="hidden sm:flex flex-col leading-none border-l border-border pl-2.5">
-                            <span class="text-[11px] text-text-light font-medium">Платформа обучения</span>
-                            <span class="text-sm font-bold text-navy tracking-tight">TCC HUB</span>
+                             alt="TCC" class="h-9" style="background:#1B2A4A;padding:5px 9px;border-radius:4px;border:1px solid rgba(198,164,109,.35)">
+                        <div class="hidden sm:flex flex-col leading-tight pl-3" style="border-left:1px solid rgba(27,42,74,.12)">
+                            <span style="font-size:9px;font-weight:800;letter-spacing:.18em;color:#C6A46D;text-transform:uppercase">Learning</span>
+                            <span class="text-[15px] font-black text-navy" style="letter-spacing:-.02em;font-family:Montserrat">TCC <span style="color:#C6A46D;font-weight:300;font-style:italic">Hub</span></span>
                         </div>
                     </a>
 
-                    <!-- Desktop Nav Links -->
-                    <div class="hidden md:flex items-center gap-1" hx-boost="true">
+                    <!-- Desktop Nav Links (editorial — gold underline indicator) -->
+                    <div class="hidden md:flex items-center gap-7" hx-boost="true">
                         {% with request.resolver_match.url_name as current %}
-                        <a href="{% url 'courses' %}"
-                           class="px-3 py-2 rounded-lg text-sm font-semibold transition
-                                  {% if current == 'courses' or current == 'course_detail' %}text-primary bg-primary/10{% else %}text-text-mid hover:text-navy hover:bg-surface{% endif %}">
-                            Моё обучение
-                        </a>
-                        <a href="{% url 'grades' %}"
-                           class="px-3 py-2 rounded-lg text-sm font-semibold transition
-                                  {% if current == 'grades' %}text-primary bg-primary/10{% else %}text-text-mid hover:text-navy hover:bg-surface{% endif %}">
-                            Оценки
-                        </a>
-                        <a href="{% url 'certificates' %}"
-                           class="px-3 py-2 rounded-lg text-sm font-semibold transition
-                                  {% if current == 'certificates' %}text-primary bg-primary/10{% else %}text-text-mid hover:text-navy hover:bg-surface{% endif %}">
-                            Сертификаты
-                        </a>
-                        <a href="{% url 'calendar' %}"
-                           class="px-3 py-2 rounded-lg text-sm font-semibold transition
-                                  {% if current == 'calendar' %}text-primary bg-primary/10{% else %}text-text-mid hover:text-navy hover:bg-surface{% endif %}">
-                            Календарь
-                        </a>
+                        <a href="{% url 'courses' %}" class="lms-nav-link {% if current == 'courses' or current == 'course_detail' %}is-active{% endif %}">МОЁ&nbsp;ОБУЧЕНИЕ</a>
+                        <a href="{% url 'grades' %}" class="lms-nav-link {% if current == 'grades' %}is-active{% endif %}">ОЦЕНКИ</a>
+                        <a href="{% url 'certificates' %}" class="lms-nav-link {% if current == 'certificates' %}is-active{% endif %}">СЕРТИФИКАТЫ</a>
+                        <a href="{% url 'calendar' %}" class="lms-nav-link {% if current == 'calendar' %}is-active{% endif %}">КАЛЕНДАРЬ</a>
                         {% endwith %}
                     </div>
                 </div>
@@ -222,12 +221,18 @@
     </nav>
 
     <!-- Content Area -->
-    <main class="pt-16">
-        <div class="max-w-7xl mx-auto px-4 lg:px-6 py-6 lg:py-8">
+    <main class="pt-[68px]">
+        <div class="max-w-7xl mx-auto px-4 lg:px-6 py-8 lg:py-12">
 
-            <!-- Page Title -->
+            <!-- Editorial Page Title -->
             {% block page_title_block %}
-            <h1 class="text-2xl font-bold text-navy mb-6">{% block page_title %}{% endblock %}</h1>
+            <header class="mb-10">
+                <div class="lms-eyebrow">
+                    <span class="lms-eyebrow-bar"></span>
+                    <span class="lms-eyebrow-label">{% block page_eyebrow %}TCC Hub · Learning{% endblock %}</span>
+                </div>
+                <h1 class="lms-h1">{% block page_title %}{% endblock %}</h1>
+            </header>
             {% endblock %}
 
             <!-- Django Messages -->

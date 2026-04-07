@@ -1,0 +1,30 @@
+{% extends "landing/admin/base_admin.html" %}
+{% block title %}Новый блок — TCC HUB{% endblock %}
+{% block content %}
+
+<section class="hero-head">
+  <div>
+    <div class="eyebrow">02 · Choose type</div>
+    <h1>Новый блок</h1>
+    <div class="subtitle">Выберите <em>тип</em> — новый блок будет создан скрытым, вы сможете настроить его перед публикацией.</div>
+  </div>
+  <a href="{% url 'landing-admin:list' %}" class="btn btn-ghost">← Назад</a>
+</section>
+
+<div class="type-grid">
+  {% for value, label in block_types %}
+  <div class="type-card">
+    <form method="post" action="{% url 'landing-admin:create' %}">
+      {% csrf_token %}
+      <input type="hidden" name="block_type" value="{{ value }}">
+      <button type="submit">
+        <div class="num">{{ forloop.counter|stringformat:"02d" }}</div>
+        <h3 class="t-name">{{ label }}</h3>
+        <div class="t-hint">создан скрытым</div>
+      </button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

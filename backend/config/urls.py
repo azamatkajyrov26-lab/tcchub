@@ -27,6 +27,7 @@ urlpatterns = [
     path("api/v1/calendar/", include("apps.calendar.urls")),
     path("api/v1/analytics/", include("apps.analytics.urls")),
     path("api/v1/landing/", include("apps.landing.urls")),
+    path("site-admin/content/", include("apps.landing.admin_urls")),
     # TCC Analytics Platform
     path("api/v1/tcc/", include("apps.tcc_core.urls")),
     path("api/v1/tcc/data/", include("apps.tcc_data.urls")),

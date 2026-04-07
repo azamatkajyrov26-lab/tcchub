@@ -1,0 +1,68 @@
+{% extends "landing/admin/base_admin.html" %}
+{% block title %}Редактирование блока — TCC HUB{% endblock %}
+{% block content %}
+
+<section class="hero-head">
+  <div>
+    <div class="eyebrow">03 · Edit block</div>
+    <h1>{{ block.get_block_type_display }}</h1>
+    <div class="subtitle">обновите <em>текст и контент</em> блока</div>
+  </div>
+  <a href="{% url 'landing-admin:list' %}" class="btn btn-ghost">← Назад</a>
+</section>
+
+<form class="form-shell" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <div class="form-row">
+    <label>Надзаголовок (eyebrow)</label>
+    <input type="text" name="eyebrow" value="{{ block.eyebrow }}" placeholder="01 · О нас">
+    <div class="hint">Маленькая золотая подпись над заголовком (UPPERCASE).</div>
+  </div>
+
+  <div class="form-row">
+    <label>Заголовок</label>
+    <input type="text" name="heading" value="{{ block.heading }}" placeholder="Главный заголовок блока">
+  </div>
+
+  <div class="form-row">
+    <label>Подзаголовок</label>
+    <input type="text" name="subheading" value="{{ block.subheading }}" placeholder="Короткое пояснение под заголовком">
+  </div>
+
+  <div class="form-row">
+    <label>Основной текст</label>
+    <textarea name="body" placeholder="Полный текст блока. Поддерживаются переносы строк.">{{ block.body }}</textarea>
+  </div>
+
+  <div class="form-grid-2">
+    <div class="form-row">
+      <label>CTA — надпись на кнопке</label>
+      <input type="text" name="cta_label" value="{{ block.cta_label }}" placeholder="Узнать больше">
+    </div>
+    <div class="form-row">
+      <label>CTA — ссылка</label>
+      <input type="text" name="cta_url" value="{{ block.cta_url }}" placeholder="/contacts/">
+    </div>
+  </div>
+
+  <div class="form-row">
+    <label>Изображение</label>
+    {% if block.image %}
+    <div style="margin-bottom:12px">
+      <img src="{{ block.image.url }}" alt="" style="max-width:200px; border:1px solid var(--line)">
+      <label style="display:inline-flex; align-items:center; gap:8px; margin-left:16px; color:#b91c1c; font-size:11px; letter-spacing:1.5px; text-transform:none;">
+        <input type="checkbox" name="remove_image" value="1"> удалить текущее
+      </label>
+    </div>
+    {% endif %}
+    <input type="file" name="image" accept="image/*">
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <a href="{% url 'landing-admin:list' %}" class="btn btn-ghost">Отмена</a>
+  </div>
+</form>
+
+{% endblock %}

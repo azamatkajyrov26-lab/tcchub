@@ -1,0 +1,60 @@
+{% comment %}
+  Renders dynamic ContentBlock instances from the content admin.
+  Safe to include anywhere on the landing page — if no blocks exist,
+  renders nothing.
+{% endcomment %}
+{% if content_blocks %}
+<div class="cb-region">
+<style>
+  .cb-region{background:#FAF8F3; color:#0F172A; font-family:'Montserrat',sans-serif}
+  .cb{padding:80px 20px; border-top:1px solid rgba(27,42,74,.08)}
+  .cb .wrap{max-width:1120px; margin:0 auto}
+  .cb .eyebrow{color:#C6A46D; font-size:11px; letter-spacing:4px; text-transform:uppercase; font-weight:600; display:inline-flex; align-items:center; gap:12px; margin-bottom:18px}
+  .cb .eyebrow::before{content:""; width:28px; height:2px; background:#C6A46D}
+  .cb h2{font-size:42px; font-weight:900; color:#1B2A4A; letter-spacing:-1px; margin:0 0 12px}
+  .cb .sub{font-style:italic; font-weight:300; color:#9C7F4E; font-size:17px; margin-bottom:24px}
+  .cb .body{color:#334155; line-height:1.7; font-size:16px; white-space:pre-line; max-width:780px}
+  .cb .cta{display:inline-flex; align-items:center; gap:10px; margin-top:28px; padding:14px 28px; background:#1B2A4A; color:#C6A46D; font-size:11px; letter-spacing:2px; text-transform:uppercase; font-weight:700; transition:all .2s}
+  .cb .cta:hover{background:#C6A46D; color:#1B2A4A}
+  .cb-hero{background:#1B2A4A; color:#fff}
+  .cb-hero h2{color:#fff; font-size:56px}
+  .cb-hero .body{color:rgba(255,255,255,.7)}
+  .cb-hero .cta{background:#C6A46D; color:#1B2A4A}
+  .cb-hero .cta:hover{background:#fff}
+  .cb-divider{padding:40px 20px}
+  .cb-divider hr{border:none; border-top:1px solid #C6A46D; max-width:120px; margin:0 auto}
+  .cb-img{display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center}
+  .cb-img img{width:100%; border:1px solid rgba(27,42,74,.12)}
+  @media(max-width:780px){.cb h2{font-size:32px}.cb-img{grid-template-columns:1fr}}
+</style>
+
+{% for b in content_blocks %}
+<section class="cb cb-{{ b.block_type }}">
+  <div class="wrap">
+    {% if b.block_type == "divider" %}
+      <hr>
+    {% elif b.block_type == "image_text" %}
+      <div class="cb-img">
+        {% if b.image %}<img src="{{ b.image.url }}" alt="">{% endif %}
+        <div>
+          {% if b.eyebrow %}<div class="eyebrow">{{ b.eyebrow }}</div>{% endif %}
+          {% if b.heading %}<h2>{{ b.heading }}</h2>{% endif %}
+          {% if b.subheading %}<div class="sub">{{ b.subheading }}</div>{% endif %}
+          {% if b.body %}<div class="body">{{ b.body }}</div>{% endif %}
+          {% if b.cta_label and b.cta_url %}<a class="cta" href="{{ b.cta_url }}">{{ b.cta_label }}</a>{% endif %}
+        </div>
+      </div>
+    {% elif b.block_type == "custom_html" %}
+      {% if b.body %}<div class="body">{{ b.body|safe }}</div>{% endif %}
+    {% else %}
+      {% if b.eyebrow %}<div class="eyebrow">{{ b.eyebrow }}</div>{% endif %}
+      {% if b.heading %}<h2>{{ b.heading }}</h2>{% endif %}
+      {% if b.subheading %}<div class="sub">{{ b.subheading }}</div>{% endif %}
+      {% if b.body %}<div class="body">{{ b.body }}</div>{% endif %}
+      {% if b.cta_label and b.cta_url %}<a class="cta" href="{{ b.cta_url }}">{{ b.cta_label }}</a>{% endif %}
+    {% endif %}
+  </div>
+</section>
+{% endfor %}
+</div>
+{% endif %}

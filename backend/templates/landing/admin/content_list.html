@@ -1,0 +1,74 @@
+{% extends "landing/admin/base_admin.html" %}
+{% block title %}Блоки · Контент — TCC HUB{% endblock %}
+{% block content %}
+
+<section class="hero-head">
+  <div>
+    <div class="eyebrow">01 · Content blocks</div>
+    <h1>Блоки сайта</h1>
+    <div class="subtitle">Управляйте контентом <em>безопасно</em> — удаляйте, редактируйте, скрывайте и перемещайте.</div>
+  </div>
+  <div>
+    <a href="{% url 'landing-admin:create' %}" class="btn btn-primary">+ Создать блок</a>
+  </div>
+</section>
+
+{% if blocks %}
+<div class="blocks">
+  {% for block in blocks %}
+  <article class="block-card {% if not block.is_visible %}hidden-block{% endif %}">
+    <div class="block-num">
+      <div class="n">{{ forloop.counter|stringformat:"02d" }}</div>
+      <div class="arrows">
+        {% if not forloop.first %}
+        <form method="post" action="{% url 'landing-admin:move' block.pk 'up' %}">
+          {% csrf_token %}<button type="submit" title="Вверх">▲</button>
+        </form>
+        {% endif %}
+        {% if not forloop.last %}
+        <form method="post" action="{% url 'landing-admin:move' block.pk 'down' %}">
+          {% csrf_token %}<button type="submit" title="Вниз">▼</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="block-body">
+      <div class="block-type">{{ block.get_block_type_display }}</div>
+      <h2 class="block-heading">{{ block.heading|default:"— без заголовка —" }}</h2>
+      {% if block.subheading %}<div class="block-sub">{{ block.subheading }}</div>
+      {% elif block.body %}<div class="block-sub">{{ block.body|truncatechars:160 }}</div>{% endif %}
+      {% if not block.is_editable %}
+      <div class="non-editable">— сложный блок, редактирование текста недоступно, можно скрыть/удалить</div>
+      {% endif %}
+    </div>
+
+    <div class="block-actions">
+      {% if block.is_editable %}
+      <a href="{% url 'landing-admin:edit' block.pk %}" class="btn btn-outline btn-sm">Редактировать</a>
+      {% endif %}
+      <form method="post" action="{% url 'landing-admin:toggle' block.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-ghost btn-sm">
+          {% if block.is_visible %}Скрыть{% else %}Показать{% endif %}
+        </button>
+      </form>
+      <form method="post" action="{% url 'landing-admin:delete' block.pk %}"
+            onsubmit="return confirm('Удалить блок «{{ block.heading|escapejs }}»? Это не сломает сайт — остальные блоки останутся.');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+      </form>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <div class="eyebrow">— Пусто —</div>
+  <h2>Пока нет блоков</h2>
+  <div class="italic">создайте первый, чтобы наполнить страницу</div>
+  <a href="{% url 'landing-admin:create' %}" class="btn btn-primary">+ Создать блок</a>
+</div>
+{% endif %}
+
+{% endblock %}

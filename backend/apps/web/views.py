@@ -20,6 +20,7 @@ from apps.grades.models import Grade, GradeItem
 from apps.landing.models import (
     Advantage,
     ContactInfo,
+    ContentBlock,
     HeroSection,
     Metric,
     Partner,
@@ -42,6 +43,7 @@ def landing_view(request):
     advantages = Advantage.objects.all()
     contact = ContactInfo.objects.first()
     featured_courses = Course.objects.filter(is_published=True)[:3]
+    content_blocks = ContentBlock.objects.filter(is_visible=True)
 
     return render(request, "site/index.html", {
         "active_page": "home",
@@ -52,6 +54,7 @@ def landing_view(request):
         "advantages": advantages,
         "contact": contact,
         "featured_courses": featured_courses,
+        "content_blocks": content_blocks,
         "current_year": datetime.now().year,
     })
 

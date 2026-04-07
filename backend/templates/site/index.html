@@ -1716,6 +1716,8 @@
     </div>
   </div>
 </div>
+
+{% include "landing/_content_blocks.html" %}
 {% endblock %}
 
 {% block page_js %}
@@ -1871,7 +1873,7 @@ let t=0,hoveredCity=null;
 const rot=proj.rotate();
 const logo=new Image();logo.crossOrigin='anonymous';let logoOk=false;
 logo.onload=()=>{logoOk=true};
-logo.src='https://optim.tildacdn.pro/tild6637-3765-4438-b135-366537363233/-/resize/176x/-/format/webp/noroot.png.webp';
+logo.src='{% static "img/favicon.png" %}';
 
 function render(){
   t+=.003;

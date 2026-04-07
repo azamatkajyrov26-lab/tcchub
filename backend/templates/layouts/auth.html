@@ -1,16 +1,32 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+  .tcc-auth-bg{background:linear-gradient(135deg,var(--tcc-bg) 0%,var(--tcc-surface-alt) 100%)}
+  .tcc-auth-logo{background:var(--tcc-navy);padding:6px 10px;border-radius:6px;border:1px solid rgba(198,164,109,.35)}
+  html.dark .tcc-auth-logo{background:#1B2A4A;border-color:rgba(212,184,126,.45)}
+  .tcc-auth-card{background:var(--tcc-bg-card);border:1px solid var(--tcc-border);box-shadow:var(--tcc-shadow)}
+</style>
+{% endblock %}
 
 {% block body %}
-<div class="min-h-screen flex items-center justify-center bg-surface px-4 py-12" hx-boost="false" style="background:linear-gradient(135deg,#FAFBFD 0%,#F0EDE8 100%)">
+<div class="tcc-auth-bg min-h-screen flex items-center justify-center px-4 py-12" hx-boost="false">
+    <button type="button" class="fixed top-4 right-4 p-2 rounded-lg" style="color:var(--tcc-text-mid)"
+            x-data="{ dark: document.documentElement.classList.contains('dark') }"
+            @click="dark = !dark; document.documentElement.classList.toggle('dark', dark); try{localStorage.setItem('tcc_theme', dark ? 'dark' : 'light')}catch(e){}"
+            aria-label="Переключить тему">
+        <span class="material-icons-round text-[22px]" x-text="dark ? 'light_mode' : 'dark_mode'">dark_mode</span>
+    </button>
     <div class="w-full max-w-md">
         <div class="text-center mb-8">
             <a href="{% url 'landing' %}" class="inline-flex items-center gap-3">
-                <img src="https://optim.tildacdn.pro/tild6637-3765-4438-b135-366537363233/-/resize/176x/-/format/webp/noroot.png.webp" alt="TCC" class="h-10 rounded-lg" style="background:#1B2A4A;padding:6px 12px">
+                <img src="{% static 'img/favicon.png' %}" alt="TCC" class="h-10 w-10 tcc-auth-logo object-contain">
                 <span class="text-2xl font-bold text-navy tracking-tight">HUB</span>
             </a>
             <p class="text-text-light mt-3 text-sm font-medium">Образовательная платформа</p>
         </div>
-        <div class="bg-white rounded-2xl border border-border p-8 shadow-sm">
+        <div class="tcc-auth-card rounded-2xl p-8">
             {% if messages %}
             <div class="mb-4 space-y-2">
                 {% for message in messages %}

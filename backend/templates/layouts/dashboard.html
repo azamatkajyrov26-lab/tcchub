@@ -1,34 +1,41 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block extra_head %}
 <style>
-.lms-nav-link{position:relative;font-size:11px;font-weight:800;letter-spacing:.14em;color:#3D5070;padding:24px 0;transition:color .2s}
-.lms-nav-link:hover{color:#1B2A4A}
-.lms-nav-link.is-active{color:#1B2A4A}
-.lms-nav-link.is-active::after{content:"";position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:28px;height:2px;background:#C6A46D}
+.lms-nav-link{position:relative;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--tcc-text-mid);padding:24px 0;transition:color .2s}
+.lms-nav-link:hover{color:var(--tcc-text-main)}
+.lms-nav-link.is-active{color:var(--tcc-text-main)}
+.lms-nav-link.is-active::after{content:"";position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:28px;height:2px;background:var(--tcc-gold)}
 .lms-eyebrow{display:inline-flex;align-items:center;gap:14px;margin-bottom:14px}
-.lms-eyebrow-bar{width:36px;height:2px;background:#C6A46D}
-.lms-eyebrow-label{font-size:11px;font-weight:800;letter-spacing:.18em;color:#C6A46D;text-transform:uppercase}
-.lms-h1{font-size:clamp(28px,3.2vw,44px);font-weight:900;color:#1B2A4A;line-height:1.05;letter-spacing:-.025em;font-family:Montserrat}
-.lms-h1 .accent{color:#C6A46D;font-weight:300;font-style:italic;position:relative;display:inline-block}
-.lms-h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:4px;height:10px;background:rgba(198,164,109,.18);z-index:-1}
+.lms-eyebrow-bar{width:36px;height:2px;background:var(--tcc-gold)}
+.lms-eyebrow-label{font-size:11px;font-weight:800;letter-spacing:.18em;color:var(--tcc-gold);text-transform:uppercase}
+.lms-h1{font-size:clamp(28px,3.2vw,44px);font-weight:900;color:var(--tcc-text-main);line-height:1.05;letter-spacing:-.025em;font-family:Montserrat}
+.lms-h1 .accent{color:var(--tcc-gold);font-weight:300;font-style:italic;position:relative;display:inline-block}
+.lms-h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:4px;height:10px;background:var(--tcc-gold-soft);z-index:-1}
+.lms-topbar{background:var(--tcc-bg-card);border-bottom:1px solid var(--tcc-border-soft);box-shadow:0 1px 0 var(--tcc-gold-soft)}
+.lms-logo-badge{background:var(--tcc-navy);padding:5px 9px;border-radius:4px;border:1px solid rgba(198,164,109,.35)}
+html.dark .lms-logo-badge{background:#1B2A4A;border-color:rgba(212,184,126,.45)}
+.lms-theme-btn{position:relative;padding:8px;border-radius:10px;color:var(--tcc-text-mid);transition:color .2s,background-color .2s}
+.lms-theme-btn:hover{color:var(--tcc-text-main);background:var(--tcc-surface-alt)}
+.lms-dropdown{background:var(--tcc-bg-card);border:1px solid var(--tcc-border-soft);box-shadow:var(--tcc-shadow)}
+.lms-mobile-menu{background:var(--tcc-bg-card);border-top:1px solid var(--tcc-border-soft)}
 </style>
 {% endblock %}
 
 {% block body %}
-<div x-data="{ mobileMenu: false, profileOpen: false }" class="min-h-screen bg-white">
+<div x-data="{ mobileMenu: false, profileOpen: false }" class="min-h-screen">
 
     <!-- Top Navigation Bar -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white" style="border-bottom:1px solid rgba(27,42,74,0.08);box-shadow:0 1px 0 rgba(198,164,109,.12)">
+    <nav class="lms-topbar fixed top-0 left-0 right-0 z-50">
         <div class="max-w-[1440px] mx-auto px-4 lg:px-6">
-            <div class="h-[68px] flex items-center justify-between">
+            <div class="h-[68px] flex items-center justify-between" x-data="{ dark: document.documentElement.classList.contains('dark') }">
 
                 <!-- Left: Logo + Nav Links -->
                 <div class="flex items-center gap-8">
                     <!-- Logo (editorial — matches public site) -->
                     <a href="{% url 'dashboard' %}" class="flex items-center gap-3 shrink-0 group">
-                        <img src="https://optim.tildacdn.pro/tild6637-3765-4438-b135-366537363233/-/resize/176x/-/format/webp/noroot.png.webp"
-                             alt="TCC" class="h-9" style="background:#1B2A4A;padding:5px 9px;border-radius:4px;border:1px solid rgba(198,164,109,.35)">
+                        <img src="{% static 'img/favicon.png' %}" alt="TCC" class="h-9 w-9 lms-logo-badge object-contain">
                         <div class="hidden sm:flex flex-col leading-tight pl-3" style="border-left:1px solid rgba(27,42,74,.12)">
                             <span style="font-size:9px;font-weight:800;letter-spacing:.18em;color:#C6A46D;text-transform:uppercase">Learning</span>
                             <span class="text-[15px] font-black text-navy" style="letter-spacing:-.02em;font-family:Montserrat">TCC <span style="color:#C6A46D;font-weight:300;font-style:italic">Hub</span></span>
@@ -61,6 +68,12 @@
                         <span class="material-icons-round text-[22px]">chat</span>
                     </a>
 
+                    <!-- Theme Toggle -->
+                    <button type="button" class="lms-theme-btn" aria-label="Переключить тему"
+                            @click="dark = !dark; document.documentElement.classList.toggle('dark', dark); try{localStorage.setItem('tcc_theme', dark ? 'dark' : 'light')}catch(e){}">
+                        <span class="material-icons-round text-[22px]" x-text="dark ? 'light_mode' : 'dark_mode'">dark_mode</span>
+                    </button>
+
                     <!-- Profile Dropdown -->
                     <div class="relative ml-1" x-data @click.outside="profileOpen = false">
                         <button @click="profileOpen = !profileOpen"
@@ -87,10 +100,10 @@
                              x-transition:leave-start="opacity-100 scale-100"
                              x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
                              x-cloak
-                             class="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-lg ring-1 ring-black/5 py-2 z-50">
+                             class="lms-dropdown absolute right-0 top-full mt-2 w-64 rounded-xl py-2 z-50">
 
                             <!-- User Info -->
-                            <div class="px-4 py-3 border-b" style="border-color: rgba(27,42,74,0.08);">
+                            <div class="px-4 py-3 border-b">
                                 <p class="text-sm font-semibold text-navy truncate">{{ request.user.get_full_name|default:request.user.email }}</p>
                                 <p class="text-xs text-text-light truncate mt-0.5">{{ request.user.email }}</p>
                             </div>
@@ -113,7 +126,7 @@
                                 </a>
                             </div>
 
-                            <div class="border-t pt-1" style="border-color: rgba(27,42,74,0.08);">
+                            <div class="border-t pt-1">
                                 <form action="{% url 'logout' %}" method="post" hx-boost="false">
                                     {% csrf_token %}
                                     <button type="submit"
@@ -144,7 +157,7 @@
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 -translate-y-2"
              x-cloak
-             class="md:hidden bg-white border-t px-4 pb-4 shadow-lg" style="border-color: rgba(27,42,74,0.08);">
+             class="lms-mobile-menu md:hidden border-t px-4 pb-4 shadow-lg">
 
             {% with request.resolver_match.url_name as current %}
             <div class="space-y-1 py-3" hx-boost="true">
@@ -181,7 +194,7 @@
             </div>
 
             <!-- Mobile user section -->
-            <div class="border-t pt-3 space-y-1" style="border-color: rgba(27,42,74,0.08);">
+            <div class="border-t pt-3 space-y-1">
                 <div class="flex items-center gap-3 px-3 py-2">
                     {% if request.user.avatar %}
                         <img src="{{ request.user.avatar.url }}" alt="" class="w-8 h-8 rounded-full object-cover">

@@ -8,13 +8,28 @@
     <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
     <link rel="shortcut icon" type="image/png" href="{% static 'img/favicon.png' %}">
     <link rel="apple-touch-icon" href="{% static 'img/favicon.png' %}">
+    <meta name="theme-color" content="#1B2A4A" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#FAF8F3" media="(prefers-color-scheme: light)">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <script>
+      // Apply theme BEFORE Tailwind/paint to prevent FOUC flash.
+      (function(){
+        try {
+          var stored = localStorage.getItem('tcc_theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var theme = stored || (prefersDark ? 'dark' : 'light');
+          if (theme === 'dark') document.documentElement.classList.add('dark');
+          document.documentElement.dataset.theme = theme;
+        } catch(e) {}
+      })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -25,12 +40,12 @@
                             DEFAULT: '#1B2A4A',
                             light: '#2D4A7A',
                         },
-                        surface: '#FAFBFD',
-                        'surface-alt': '#F3F4F8',
-                        border: 'rgba(27,42,74,0.08)',
-                        'text-main': '#1B2A4A',
-                        'text-mid': '#3D5070',
-                        'text-light': '#7A8BA8',
+                        surface: 'var(--tcc-surface)',
+                        'surface-alt': 'var(--tcc-surface-alt)',
+                        border: 'var(--tcc-border)',
+                        'text-main': 'var(--tcc-text-main)',
+                        'text-mid': 'var(--tcc-text-mid)',
+                        'text-light': 'var(--tcc-text-light)',
                     },
                     fontFamily: {
                         sans: ['Montserrat', 'sans-serif'],
@@ -42,13 +57,121 @@
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
     <style>
+        /* ── Editorial Theme Tokens (Light + Dark) ── */
+        :root {
+            --tcc-bg:           #FAFBFD;
+            --tcc-bg-card:      #FFFFFF;
+            --tcc-surface:      #FAFBFD;
+            --tcc-surface-alt:  #F3F4F8;
+            --tcc-border:       rgba(27,42,74,0.10);
+            --tcc-border-soft:  rgba(27,42,74,0.06);
+            --tcc-text-main:    #1B2A4A;
+            --tcc-text-mid:     #3D5070;
+            --tcc-text-light:   #7A8BA8;
+            --tcc-navy:         #1B2A4A;
+            --tcc-navy-light:   #2D4A7A;
+            --tcc-gold:         #C6A46D;
+            --tcc-gold-soft:    rgba(198,164,109,0.12);
+            --tcc-danger:       #B91C1C;
+            --tcc-danger-bg:    #FEF2F2;
+            --tcc-success:      #15803D;
+            --tcc-success-bg:   #F0FDF4;
+            --tcc-shadow:       0 4px 24px rgba(27,42,74,0.06);
+            --tcc-scroll-track: #F3F4F8;
+            color-scheme: light;
+        }
+        html.dark {
+            --tcc-bg:           #0B1220;
+            --tcc-bg-card:      #111A2E;
+            --tcc-surface:      #0F1830;
+            --tcc-surface-alt:  #162344;
+            --tcc-border:       rgba(198,164,109,0.18);
+            --tcc-border-soft:  rgba(255,255,255,0.06);
+            --tcc-text-main:    #EEF0F6;
+            --tcc-text-mid:     #A8B2C9;
+            --tcc-text-light:   #6F7C9A;
+            --tcc-navy:         #D4B87E;           /* нейви в тёмной теме → золотой как акцент */
+            --tcc-navy-light:   #E8D2A0;
+            --tcc-gold:         #D4B87E;
+            --tcc-gold-soft:    rgba(212,184,126,0.18);
+            --tcc-danger:       #F87171;
+            --tcc-danger-bg:    rgba(248,113,113,0.10);
+            --tcc-success:      #4ADE80;
+            --tcc-success-bg:   rgba(74,222,128,0.10);
+            --tcc-shadow:       0 4px 32px rgba(0,0,0,0.45);
+            --tcc-scroll-track: #0F1830;
+            color-scheme: dark;
+        }
         [x-cloak] { display: none !important; }
         html { scrollbar-gutter: stable; }
-        body { font-family: 'Montserrat', sans-serif; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--tcc-bg);
+            color: var(--tcc-text-main);
+            transition: background-color .25s ease, color .25s ease;
+        }
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #F3F4F8; }
+        ::-webkit-scrollbar-track { background: var(--tcc-scroll-track); }
         ::-webkit-scrollbar-thumb { background: #C6A46D; border-radius: 3px; opacity: 0.5; }
         ::-webkit-scrollbar-thumb:hover { background: #A38450; }
+
+        /* ── Dark-mode override layer: remaps hardcoded Tailwind utilities ── */
+        html.dark .bg-white { background-color: var(--tcc-bg-card) !important; }
+        html.dark .bg-surface { background-color: var(--tcc-surface) !important; }
+        html.dark .bg-surface-alt { background-color: var(--tcc-surface-alt) !important; }
+        html.dark .bg-gray-50,
+        html.dark .bg-gray-100,
+        html.dark .bg-slate-50,
+        html.dark .bg-slate-100,
+        html.dark .bg-neutral-50 { background-color: var(--tcc-surface-alt) !important; }
+        html.dark .bg-navy\/5,
+        html.dark .bg-navy\/10 { background-color: rgba(212,184,126,0.08) !important; }
+        html.dark .text-navy,
+        html.dark .text-text-main { color: var(--tcc-text-main) !important; }
+        html.dark .text-text-mid,
+        html.dark .text-gray-600,
+        html.dark .text-slate-600 { color: var(--tcc-text-mid) !important; }
+        html.dark .text-text-light,
+        html.dark .text-gray-500,
+        html.dark .text-gray-400,
+        html.dark .text-slate-500 { color: var(--tcc-text-light) !important; }
+        html.dark .border,
+        html.dark .border-t,
+        html.dark .border-b,
+        html.dark .border-l,
+        html.dark .border-r { border-color: var(--tcc-border-soft) !important; }
+        html.dark .border-border,
+        html.dark [class*="border-navy"] { border-color: var(--tcc-border) !important; }
+        html.dark .divide-y > :not([hidden]) ~ :not([hidden]) { border-color: var(--tcc-border-soft) !important; }
+        html.dark .ring-black\/5 { --tw-ring-color: rgba(255,255,255,0.08) !important; }
+        html.dark .shadow,
+        html.dark .shadow-sm,
+        html.dark .shadow-md,
+        html.dark .shadow-lg,
+        html.dark .shadow-xl { box-shadow: var(--tcc-shadow) !important; }
+        html.dark .bg-red-50 { background-color: var(--tcc-danger-bg) !important; }
+        html.dark .text-red-500,
+        html.dark .text-red-600 { color: var(--tcc-danger) !important; }
+        html.dark .border-red-200 { border-color: rgba(248,113,113,0.22) !important; }
+        html.dark .bg-green-50 { background-color: var(--tcc-success-bg) !important; }
+        html.dark .text-green-500,
+        html.dark .text-green-600 { color: var(--tcc-success) !important; }
+        html.dark .border-green-200 { border-color: rgba(74,222,128,0.22) !important; }
+        html.dark .bg-amber-50 { background-color: rgba(212,184,126,0.10) !important; }
+        html.dark .border-amber-200 { border-color: rgba(212,184,126,0.25) !important; }
+        html.dark input,
+        html.dark textarea,
+        html.dark select {
+            background-color: var(--tcc-surface) !important;
+            color: var(--tcc-text-main) !important;
+            border-color: var(--tcc-border) !important;
+        }
+        html.dark input::placeholder,
+        html.dark textarea::placeholder { color: var(--tcc-text-light) !important; }
+        html.dark img.tcc-logo-invert { filter: brightness(0) invert(1) sepia(.5) saturate(5) hue-rotate(10deg); }
+        html.dark .tcc-card,
+        html.dark .rounded-xl.bg-white,
+        html.dark .rounded-2xl.bg-white { box-shadow: var(--tcc-shadow) !important; }
         .htmx-indicator { display: none; }
         .htmx-request .htmx-indicator { display: inline-block; }
         .htmx-request.htmx-indicator { display: inline-block; }

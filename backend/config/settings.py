@@ -11,6 +11,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", "insecure-dev-key-change-me")
 DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes")
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+for _h in ("89.207.255.107.sslip.io", "89.207.255.107"):
+    if _h not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_h)
 
 INSTALLED_APPS = [
     "unfold",
@@ -588,9 +591,12 @@ UNFOLD = {
 CSRF_TRUSTED_ORIGINS = [
     o.strip() for o in os.getenv(
         "CSRF_TRUSTED_ORIGINS",
-        "https://tc-cargo.kz,https://www.tc-cargo.kz"
+        "https://89.207.255.107.sslip.io,http://89.207.255.107.sslip.io"
     ).split(",") if o.strip()
 ]
+for _o in ("https://89.207.255.107.sslip.io", "http://89.207.255.107.sslip.io"):
+    if _o not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(_o)
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

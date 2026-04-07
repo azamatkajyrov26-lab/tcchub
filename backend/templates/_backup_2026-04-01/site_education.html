@@ -1,0 +1,271 @@
+{% extends "layouts/site.html" %}
+{% load static %}
+
+{% block title %}Образование — TransCaspian Cargo{% endblock %}
+
+{% block page_css %}
+<style>
+.formats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.format-card{background:var(--bg-card);border:1px solid var(--border-light);border-radius:16px;padding:32px;transition:all .4s;position:relative;overflow:hidden}
+.format-card:hover{border-color:rgba(198,164,109,.25);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.06)}
+.format-card .icon-wrap{width:56px;height:56px;border-radius:14px;background:rgba(198,164,109,.08);display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.format-card h3{font-size:18px;font-weight:800;margin-bottom:10px;color:var(--text)}
+.format-card p{font-size:13px;color:var(--text-mid);line-height:1.7;margin-bottom:16px}
+.format-card .tag-list{display:flex;flex-wrap:wrap;gap:6px}
+.format-card .tag-item{font-size:10px;font-weight:600;color:var(--gold-dark);background:rgba(198,164,109,.08);padding:4px 10px;border-radius:8px;letter-spacing:.02em}
+.themes-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:48px}
+.theme-card{background:var(--bg-card);border:1px solid var(--border-light);border-radius:14px;padding:28px 24px;text-align:center;transition:all .4s}
+.theme-card:hover{border-color:rgba(198,164,109,.2);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.04)}
+.theme-card .theme-icon{width:48px;height:48px;border-radius:12px;background:rgba(198,164,109,.06);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.theme-card h4{font-size:14px;font-weight:700;margin-bottom:8px;color:var(--text)}
+.theme-card p{font-size:12px;color:var(--text-light);line-height:1.6}
+.courses-section{background:var(--bg-alt);padding:100px 24px}
+.courses-inner{max-width:1240px;margin:0 auto}
+.course-card{background:var(--bg-card);border:1px solid var(--border-light);border-radius:16px;padding:32px;display:grid;grid-template-columns:1.2fr 1fr;gap:32px;align-items:center;margin-bottom:24px}
+.course-card h3{font-size:22px;font-weight:800;margin-bottom:12px;line-height:1.2}
+.course-card h3 .gold{color:var(--gold)}
+.course-card p{font-size:14px;color:var(--text-mid);line-height:1.7;margin-bottom:12px}
+.course-card .tag{display:inline-block;font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;background:rgba(198,164,109,.08);padding:4px 12px;border-radius:10px;margin-bottom:12px}
+.course-card .course-meta{text-align:center;padding:28px;background:rgba(198,164,109,.04);border-radius:12px}
+.course-card .course-meta .meta-title{font-size:18px;font-weight:800;color:var(--gold);margin-bottom:8px}
+.course-card .course-meta .meta-desc{font-size:12px;color:var(--text-light);margin-bottom:12px}
+.course-card .course-meta .meta-cert{font-size:12px;color:var(--text-light);margin-bottom:24px}
+.experts-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:48px}
+.expert-card{text-align:center;padding:24px 16px;background:var(--bg-card);border:1px solid var(--border-light);border-radius:12px}
+.expert-card .avatar{width:64px;height:64px;border-radius:50%;background:rgba(198,164,109,.1);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:20px;font-weight:700}
+.expert-card h4{font-size:13px;font-weight:700;margin-bottom:4px}
+.expert-card p{font-size:11px;color:var(--text-light);line-height:1.5}
+@media(max-width:1024px){
+  .formats-grid{grid-template-columns:1fr}
+  .themes-grid{grid-template-columns:repeat(2,1fr)}
+  .course-card{grid-template-columns:1fr}
+  .experts-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:640px){
+  .themes-grid{grid-template-columns:1fr}
+  .experts-grid{grid-template-columns:1fr}
+  .courses-section{padding:64px 16px}
+  .format-card{padding:24px}
+  .course-card{padding:24px;gap:20px}
+  .course-card h3{font-size:18px}
+  .course-card .course-meta{padding:20px}
+}
+@media(max-width:480px){
+  .format-card{padding:20px 16px}
+  .format-card h3{font-size:16px}
+  .format-card p{font-size:12px}
+  .theme-card{padding:20px 16px}
+  .theme-card h4{font-size:13px}
+  .course-card{padding:20px 16px}
+  .course-card h3{font-size:16px}
+  .course-card p{font-size:13px}
+  .course-card .course-meta .meta-title{font-size:16px}
+  .expert-card{padding:20px 12px}
+  .expert-card .avatar{width:52px;height:52px;font-size:16px}
+  .courses-section{padding:48px 12px}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="section-label" style="justify-content:center">Образование</div>
+  <h2 class="section-title">Развитие <span class="gold">компетенций</span> в логистике</h2>
+  <p class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center">Курсы, практикумы и корпоративные программы по логистике, управлению цепями поставок, геоэкономике торговли и санкционным рискам</p>
+</div>
+
+<!-- ФОРМАТЫ ОБУЧЕНИЯ -->
+<section class="section">
+  <div class="reveal" style="text-align:center">
+    <div class="section-label" style="justify-content:center">Форматы</div>
+    <h2 class="section-title">Форматы <span class="gold">обучения</span></h2>
+    <p class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center">Три формата образовательных программ, адаптированных под различные цели и уровень подготовки</p>
+  </div>
+
+  <div class="formats-grid">
+    <!-- Курсы -->
+    <div class="format-card reveal-scale">
+      <div class="icon-wrap">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      </div>
+      <h3>Курсы</h3>
+      <p>Структурированные образовательные программы с модульной системой, живыми лекциями и практическими кейсами. От начального до продвинутого уровня.</p>
+      <div class="tag-list">
+        <span class="tag-item">Онлайн</span>
+        <span class="tag-item">Гибридный формат</span>
+        <span class="tag-item">Сертификат</span>
+      </div>
+    </div>
+
+    <!-- Практикумы -->
+    <div class="format-card reveal-scale">
+      <div class="icon-wrap">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      </div>
+      <h3>Практикумы</h3>
+      <p>Интенсивные форматы обучения с фокусом на реальные кейсы, симуляции и проектную работу. Решение задач из практики логистической отрасли.</p>
+      <div class="tag-list">
+        <span class="tag-item">Кейсы</span>
+        <span class="tag-item">Симуляции</span>
+        <span class="tag-item">Воркшопы</span>
+      </div>
+    </div>
+
+    <!-- Корпоративные программы -->
+    <div class="format-card reveal-scale">
+      <div class="icon-wrap">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <h3>Корпоративные программы</h3>
+      <p>Индивидуальные программы для компаний и организаций. Адаптация под специфику бизнеса, отраслевые задачи и уровень команды.</p>
+      <div class="tag-list">
+        <span class="tag-item">Для команд</span>
+        <span class="tag-item">Индивидуальная программа</span>
+        <span class="tag-item">Консалтинг</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ТЕМАТИЧЕСКИЕ НАПРАВЛЕНИЯ -->
+<div class="section-divider"></div>
+<section class="section">
+  <div class="reveal" style="text-align:center">
+    <div class="section-label" style="justify-content:center">Темы</div>
+    <h2 class="section-title">Тематические <span class="gold">направления</span></h2>
+    <p class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center">Ключевые области знаний, формирующие экспертизу в сфере международной логистики</p>
+  </div>
+
+  <div class="themes-grid">
+    <div class="theme-card reveal-scale">
+      <div class="theme-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-4"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      </div>
+      <h4>Логистика</h4>
+      <p>Транспортная, складская и международная логистика. Морские, автомобильные, железнодорожные и авиационные перевозки.</p>
+    </div>
+
+    <div class="theme-card reveal-scale">
+      <div class="theme-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <h4>Управление цепями поставок</h4>
+      <p>Проектирование и оптимизация цепей поставок, управление рисками, цифровизация и международные стандарты.</p>
+    </div>
+
+    <div class="theme-card reveal-scale">
+      <div class="theme-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+      <h4>Геоэкономика торговли</h4>
+      <p>Роль Центральной Азии в глобальной архитектуре торговли, Средний коридор и евразийская интеграция.</p>
+    </div>
+
+    <div class="theme-card reveal-scale">
+      <div class="theme-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h4>Санкционные риски</h4>
+      <p>Работа с санкционными режимами, геополитическими ограничениями и адаптация логистических стратегий.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ПРОГРАММЫ КУРСОВ -->
+<div class="courses-section">
+  <div class="courses-inner">
+    <div class="reveal" style="text-align:center;margin-bottom:48px">
+      <div class="section-label" style="justify-content:center">Программы</div>
+      <h2 class="section-title">Авторские <span class="gold">программы</span> обучения</h2>
+      <p class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center">Образовательные программы от практиков отрасли с многолетним опытом</p>
+    </div>
+
+    <!-- Курс 1 -->
+    <div class="course-card reveal-scale">
+      <div>
+        <div class="tag">Курс | 24 часа | 7 модулей</div>
+        <h3>Логистика <span class="gold">с нуля</span></h3>
+        <p>Авторская программа для начинающих специалистов. Системное понимание транспортной, складской и международной логистики с акцентом на реальные кейсы и специфику Центральной Азии.</p>
+        <p style="font-size:12px;color:var(--text-light);line-height:1.6"><strong style="color:var(--text-mid)">Темы:</strong> логистика, Incoterms, морские и сухопутные перевозки, складское управление, карьера в логистике</p>
+      </div>
+      <div class="course-meta">
+        <div class="meta-title">Онлайн-курс</div>
+        <div class="meta-desc">Живые лекции, практические кейсы, шаблоны</div>
+        <div class="meta-cert">Сертификат о прохождении курса</div>
+        <button class="btn-gold" onclick="location.href='{% url 'contacts' %}'" style="width:100%">ЗАПИСАТЬСЯ</button>
+      </div>
+    </div>
+
+    <!-- Курс 2 -->
+    <div class="course-card reveal-scale">
+      <div>
+        <div class="tag">Курс | 72 часа | 9 модулей</div>
+        <h3>Стратегическая навигация <span class="gold">PRO</span></h3>
+        <p>Продвинутая программа для специалистов и руководителей. Управление рисками, цифровизация, международные стандарты и финансовое планирование в логистике.</p>
+        <p style="font-size:12px;color:var(--text-light);line-height:1.6"><strong style="color:var(--text-mid)">Темы:</strong> управление цепями поставок, санкционные риски, геополитические ограничения, инфраструктурные решения</p>
+      </div>
+      <div class="course-meta">
+        <div class="meta-title">72 часа | 9 модулей</div>
+        <div class="meta-desc">Лекции, кейсы, воркшопы, симуляции</div>
+        <div class="meta-cert">Сертификат о профессиональном развитии</div>
+        <button class="btn-gold" onclick="location.href='{% url 'contacts' %}'" style="width:100%">ПОЛУЧИТЬ КОНСУЛЬТАЦИЮ</button>
+      </div>
+    </div>
+
+    <!-- Курс 3 -->
+    <div class="course-card reveal-scale">
+      <div>
+        <div class="tag">Практикум | 24 часа | 7 модулей | Гибридный формат</div>
+        <h3>BRI Logistics: <span class="gold">инфраструктура и риски</span></h3>
+        <p>Стратегический курс для специалистов и аналитиков международной логистики. Геоэкономическая роль Центральной Азии, инфраструктура и коридоры, риски и сценарии развития до 2035.</p>
+        <p style="font-size:12px;color:var(--text-light);line-height:1.6"><strong style="color:var(--text-mid)">Темы:</strong> геоэкономика торговли, Средний коридор, санкционные риски, ESG и blended finance</p>
+      </div>
+      <div class="course-meta">
+        <div class="meta-title">24 часа | 7 модулей</div>
+        <div class="meta-desc">Лекции, кейсы, симуляции, проектная работа</div>
+        <div class="meta-cert">Профессиональный сертификат</div>
+        <button class="btn-gold" onclick="location.href='{% url 'contacts' %}'" style="width:100%">ПОЛУЧИТЬ КОНСУЛЬТАЦИЮ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ЭКСПЕРТЫ -->
+<section class="section">
+  <div class="reveal" style="text-align:center">
+    <div class="section-label" style="justify-content:center">Преподаватели</div>
+    <h2 class="section-title">Эксперты <span class="gold">программ</span></h2>
+    <p class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center">Практики отрасли с многолетним опытом в логистике и цепях поставок</p>
+  </div>
+  <div class="experts-grid">
+    <div class="expert-card reveal-scale">
+      <div class="avatar">АТ</div>
+      <h4>Айслу Тайсаринова</h4>
+      <p>Эксперт по логистике и транспортному планированию. Опыт 23+ лет</p>
+    </div>
+    <div class="expert-card reveal-scale">
+      <div class="avatar">РХ</div>
+      <h4>Рустам Хуснутдинов</h4>
+      <p>Эксперт по проектной логистике и снабжению. Опыт 25+ лет</p>
+    </div>
+    <div class="expert-card reveal-scale">
+      <div class="avatar">ОС</div>
+      <h4>Оксана Сорокина</h4>
+      <p>Эксперт в международной логистике и авиационных перевозках. Опыт 22+ лет</p>
+    </div>
+    <div class="expert-card reveal-scale">
+      <div class="avatar">НТ</div>
+      <h4>Наргиза Турарбек</h4>
+      <p>Эксперт в сфере рекрутинга и HR. Опыт 7+ лет</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-banner">
+  <h2>Начните обучение</h2>
+  <p>Выберите формат и тему — мы поможем подобрать оптимальную программу</p>
+  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">СВЯЗАТЬСЯ С НАМИ</button>
+</div>
+{% endblock %}

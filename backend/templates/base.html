@@ -1,0 +1,186 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TCC HUB{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#C6A46D',
+                        'primary-hover': '#A38450',
+                        'primary-light': '#D4B87E',
+                        navy: {
+                            DEFAULT: '#1B2A4A',
+                            light: '#2D4A7A',
+                        },
+                        surface: '#FAFBFD',
+                        'surface-alt': '#F3F4F8',
+                        border: 'rgba(27,42,74,0.08)',
+                        'text-main': '#1B2A4A',
+                        'text-mid': '#3D5070',
+                        'text-light': '#7A8BA8',
+                    },
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        html { scrollbar-gutter: stable; }
+        body { font-family: 'Montserrat', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #F3F4F8; }
+        ::-webkit-scrollbar-thumb { background: #C6A46D; border-radius: 3px; opacity: 0.5; }
+        ::-webkit-scrollbar-thumb:hover { background: #A38450; }
+        .htmx-indicator { display: none; }
+        .htmx-request .htmx-indicator { display: inline-block; }
+        .htmx-request.htmx-indicator { display: inline-block; }
+
+        /* Page loading bar */
+        #tcc-loading-bar {
+            position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 99999;
+            background: linear-gradient(90deg, #C6A46D, #D4B87E, #C6A46D);
+            background-size: 200% 100%;
+            transform: scaleX(0); transform-origin: left;
+            transition: transform .4s cubic-bezier(.4,0,.2,1);
+            pointer-events: none;
+        }
+        #tcc-loading-bar.loading {
+            transform: scaleX(.7);
+            animation: tcc-bar-shimmer 1.2s ease infinite;
+        }
+        #tcc-loading-bar.done { transform: scaleX(1); transition-duration: .15s; }
+        @keyframes tcc-bar-shimmer { 0%,100%{background-position:200% 0} 50%{background-position:0 0} }
+
+        /* Smooth page enter — disabled, can cause flash on slow loads */
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-white text-text-main min-h-screen font-sans" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <div id="tcc-loading-bar"></div>
+    {% block body %}{% endblock %}
+    {% block extra_scripts %}{% endblock %}
+
+    <script>
+    /* ── TCC State Manager ── */
+    (function(){
+        var S = window.tccState = {
+            get: function(k, d) { try { var v = localStorage.getItem('tcc_'+k); return v !== null ? JSON.parse(v) : d; } catch(e) { return d; } },
+            set: function(k, v) { try { localStorage.setItem('tcc_'+k, JSON.stringify(v)); } catch(e) {} },
+            remove: function(k) { try { localStorage.removeItem('tcc_'+k); } catch(e) {} }
+        };
+
+        /* ── Scroll position restore on back/forward ── */
+        var SCROLL_KEY = 'tcc_scroll';
+        function saveScroll() {
+            try {
+                var store = JSON.parse(sessionStorage.getItem(SCROLL_KEY) || '{}');
+                store[location.pathname + location.search] = { y: window.scrollY, t: Date.now() };
+                // keep max 50 entries
+                var keys = Object.keys(store);
+                if (keys.length > 50) {
+                    keys.sort(function(a,b){ return store[a].t - store[b].t; });
+                    for (var i = 0; i < keys.length - 50; i++) delete store[keys[i]];
+                }
+                sessionStorage.setItem(SCROLL_KEY, JSON.stringify(store));
+            } catch(e) {}
+        }
+
+        function restoreScroll() {
+            try {
+                var store = JSON.parse(sessionStorage.getItem(SCROLL_KEY) || '{}');
+                var entry = store[location.pathname + location.search];
+                if (entry && (Date.now() - entry.t) < 1800000) { // 30 min max
+                    requestAnimationFrame(function(){ window.scrollTo(0, entry.y); });
+                }
+            } catch(e) {}
+        }
+
+        // Detect back/forward navigation
+        var navType = performance.getEntriesByType && performance.getEntriesByType('navigation');
+        if (navType && navType[0] && navType[0].type === 'back_forward') {
+            restoreScroll();
+        }
+
+        // Also restore on popstate (for hx-boost and browser back)
+        window.addEventListener('popstate', function() {
+            setTimeout(restoreScroll, 50);
+        });
+
+        // Save scroll before navigating away
+        document.addEventListener('click', function(e) {
+            var a = e.target.closest('a[href]');
+            if (a && a.href && !a.href.startsWith('javascript:') && !a.hasAttribute('download')) {
+                saveScroll();
+            }
+        }, true);
+
+        // Also save on form submit and before unload
+        document.addEventListener('submit', saveScroll, true);
+        window.addEventListener('beforeunload', saveScroll);
+
+        /* ── Loading bar ── */
+        var bar = document.getElementById('tcc-loading-bar');
+        if (bar) {
+            document.addEventListener('click', function(e) {
+                var a = e.target.closest('a[href]');
+                if (a && a.href && !a.href.startsWith('#') && !a.href.startsWith('javascript:')
+                    && !a.hasAttribute('download') && !a.target && a.hostname === location.hostname
+                    && !a.closest('[hx-get],[hx-post],[hx-put],[hx-delete]')) {
+                    bar.classList.remove('done');
+                    bar.classList.add('loading');
+                }
+            }, true);
+
+            // HTMX loading events
+            document.addEventListener('htmx:beforeRequest', function() {
+                bar.classList.remove('done');
+                bar.classList.add('loading');
+            });
+            document.addEventListener('htmx:afterSettle', function() {
+                bar.classList.remove('loading');
+                bar.classList.add('done');
+                setTimeout(function(){ bar.classList.remove('done'); bar.style.transform = ''; }, 300);
+            });
+
+            // Clear on DOM ready (early) and page fully loaded
+            document.addEventListener('DOMContentLoaded', function(){
+                bar.classList.remove('loading');
+            });
+            window.addEventListener('load', function(){
+                bar.classList.remove('loading');
+                bar.classList.add('done');
+                setTimeout(function(){ bar.classList.remove('done'); }, 300);
+            });
+        }
+
+        /* ── Defensive: ensure page is never stuck in dimmed/unclickable state ── */
+        document.addEventListener('DOMContentLoaded', function(){
+            document.body.style.opacity = '';
+            document.body.style.pointerEvents = '';
+            // Remove any stray full-screen overlays that shouldn't exist
+            var stray = document.querySelectorAll('[style*="position: fixed"][style*="inset: 0"], [style*="position:fixed"][style*="inset:0"]');
+            stray.forEach(function(el){
+                if (el.id !== 'tcc-loading-bar' && el.tagName !== 'NAV' && !el.closest('nav')) {
+                    el.remove();
+                }
+            });
+        });
+    })();
+    </script>
+</body>
+</html>

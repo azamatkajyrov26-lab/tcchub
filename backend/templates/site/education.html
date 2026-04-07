@@ -1,0 +1,299 @@
+{% extends "layouts/site.html" %}
+{% load static %}
+
+{% block title %}Образование — TCC HUB{% endblock %}
+
+{% block page_css %}
+<style>
+.ed-hero{position:relative;padding:140px 24px 80px;background:#080e1a;color:#fff;overflow:hidden}
+.ed-hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 900px 500px at 25% 30%,rgba(198,164,109,.12),transparent 70%),radial-gradient(ellipse 700px 400px at 80% 80%,rgba(100,180,255,.06),transparent 70%)}
+.ed-hero::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%)}
+.ed-hero-wrap{max-width:1280px;margin:0 auto;position:relative;z-index:2;display:grid;grid-template-columns:1.4fr 1fr;gap:60px;align-items:end}
+.ed-eyebrow{display:inline-flex;align-items:center;gap:14px;font-size:11px;font-weight:800;color:var(--gold-light);letter-spacing:.22em;text-transform:uppercase;margin-bottom:24px}
+.ed-eyebrow .bar{width:32px;height:2px;background:var(--gold-light)}
+.ed-title{font-size:clamp(40px,6vw,76px);font-weight:900;line-height:1.02;letter-spacing:-.03em;margin:0 0 24px}
+.ed-title em{font-style:italic;font-weight:300;color:var(--gold-light)}
+.ed-lead{font-size:17px;line-height:1.7;color:rgba(255,255,255,.6);max-width:600px;margin:0}
+.ed-quote{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-left:3px solid var(--gold);border-radius:14px;padding:28px;font-size:14px;line-height:1.7;color:rgba(255,255,255,.75);position:relative}
+.ed-quote::before{content:"„";position:absolute;top:-12px;left:18px;font-size:80px;color:var(--gold-light);font-family:Georgia,serif;line-height:1;opacity:.5}
+.ed-quote b{color:#fff;font-weight:800;display:block;margin-top:14px;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+
+/* SECTIONS */
+.ed-section{max-width:1280px;margin:0 auto;padding:90px 24px 30px}
+.ed-section-head{margin-bottom:48px;display:flex;justify-content:space-between;align-items:end;gap:40px;flex-wrap:wrap}
+.ed-section-head h2{font-size:clamp(32px,4vw,52px);font-weight:900;color:var(--navy);letter-spacing:-.025em;line-height:1.05;margin:0;max-width:680px}
+.ed-section-head h2 em{font-style:italic;font-weight:300;color:var(--gold)}
+.ed-section-head .sub{font-size:13px;color:var(--text-light);font-weight:600;letter-spacing:.05em;text-transform:uppercase;max-width:280px;text-align:right;line-height:1.7}
+
+/* FORMATS */
+.ed-formats{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.ed-fmt{position:relative;background:#fff;border:1px solid var(--border-light);border-radius:22px;padding:36px 32px;transition:all .4s cubic-bezier(.2,.9,.3,1.2);overflow:hidden}
+.ed-fmt:hover{transform:translateY(-6px);box-shadow:0 24px 60px rgba(27,42,74,.10);border-color:rgba(198,164,109,.25)}
+.ed-fmt::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-light));transform:scaleX(0);transform-origin:left;transition:transform .5s}
+.ed-fmt:hover::before{transform:scaleX(1)}
+.ed-fmt .num{font-size:11px;font-weight:800;color:var(--gold);letter-spacing:.15em;margin-bottom:18px;font-feature-settings:"tnum"}
+.ed-fmt .icon{width:60px;height:60px;border-radius:16px;background:rgba(198,164,109,.08);border:1px solid rgba(198,164,109,.16);display:flex;align-items:center;justify-content:center;color:var(--gold);margin-bottom:22px;transition:all .4s}
+.ed-fmt:hover .icon{background:var(--gold);color:#fff;transform:rotate(-6deg)}
+.ed-fmt h3{font-size:22px;font-weight:800;color:var(--navy);margin:0 0 12px;letter-spacing:-.01em}
+.ed-fmt p{font-size:13px;color:var(--text-mid);line-height:1.65;margin:0 0 18px}
+.ed-fmt .tags{display:flex;flex-wrap:wrap;gap:6px}
+.ed-fmt .tag{font-size:10px;font-weight:800;color:var(--gold-dark);background:rgba(198,164,109,.1);border:1px solid rgba(198,164,109,.2);padding:5px 11px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase}
+
+/* THEMES - asymmetric */
+.ed-themes{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.ed-theme{position:relative;background:#fff;border:1px solid var(--border-light);border-radius:18px;padding:30px 24px;transition:all .4s;overflow:hidden}
+.ed-theme:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,42,74,.08);border-color:rgba(198,164,109,.25)}
+.ed-theme:nth-child(odd){background:var(--bg-alt)}
+.ed-theme .big-num{position:absolute;top:14px;right:18px;font-size:54px;font-weight:900;color:rgba(27,42,74,.05);line-height:1;letter-spacing:-.03em}
+.ed-theme .icon{width:48px;height:48px;border-radius:12px;background:#fff;border:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;color:var(--gold);margin-bottom:18px;transition:all .4s}
+.ed-theme:hover .icon{background:var(--gold);color:#fff}
+.ed-theme h4{font-size:16px;font-weight:800;color:var(--navy);margin:0 0 8px;letter-spacing:-.01em;line-height:1.25}
+.ed-theme p{font-size:12px;color:var(--text-mid);line-height:1.6;margin:0;position:relative}
+
+/* COURSES */
+.ed-courses-wrap{background:var(--bg-alt);padding:90px 0 40px;margin-top:60px}
+.ed-courses{max-width:1280px;margin:0 auto;padding:0 24px}
+.ed-course{background:#fff;border:1px solid var(--border-light);border-radius:24px;overflow:hidden;display:grid;grid-template-columns:1.4fr 1fr;margin-bottom:24px;transition:all .4s}
+.ed-course:hover{transform:translateY(-4px);box-shadow:0 24px 60px rgba(27,42,74,.10);border-color:rgba(198,164,109,.25)}
+.ed-course-content{padding:42px 40px}
+.ed-course-tag{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:18px}
+.ed-course-tag::before{content:"";width:18px;height:2px;background:var(--gold)}
+.ed-course h3{font-size:28px;font-weight:900;color:var(--navy);margin:0 0 14px;letter-spacing:-.02em;line-height:1.15}
+.ed-course h3 em{font-style:italic;font-weight:300;color:var(--gold)}
+.ed-course .desc{font-size:14px;color:var(--text-mid);line-height:1.7;margin:0 0 18px}
+.ed-course .topics{font-size:12px;color:var(--text-light);line-height:1.65}
+.ed-course .topics b{color:var(--text-mid);font-weight:800}
+.ed-course-side{background:linear-gradient(135deg,var(--navy),#0F1D35);color:#fff;padding:42px 36px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.ed-course-side::before{content:"";position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(198,164,109,.18),transparent 70%)}
+.ed-course-side .meta-num{font-size:42px;font-weight:900;color:var(--gold-light);line-height:1;letter-spacing:-.02em;position:relative;margin-bottom:8px}
+.ed-course-side .meta-lab{font-size:11px;color:rgba(255,255,255,.5);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px;position:relative}
+.ed-course-side .meta-list{font-size:13px;color:rgba(255,255,255,.75);line-height:1.7;margin-bottom:24px;position:relative}
+.ed-course-side .meta-list div{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;gap:10px}
+.ed-course-side .meta-list div:last-child{border:none}
+.ed-course-side .meta-list span{color:#fff;font-weight:700}
+.ed-course-side .btn{position:relative;background:var(--gold);color:#fff;border:none;padding:14px 24px;border-radius:30px;font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.ed-course-side .btn:hover{background:var(--gold-light);transform:translateY(-2px);box-shadow:0 10px 30px rgba(198,164,109,.35)}
+
+/* EXPERTS */
+.ed-experts{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.ed-expert{position:relative;background:#fff;border:1px solid var(--border-light);border-radius:18px;padding:32px 24px;text-align:center;transition:all .4s;overflow:hidden}
+.ed-expert:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,42,74,.08);border-color:rgba(198,164,109,.25)}
+.ed-expert::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%) scaleX(0);transform-origin:center;width:60px;height:3px;background:var(--gold);border-radius:0 0 3px 3px;transition:transform .4s}
+.ed-expert:hover::before{transform:translateX(-50%) scaleX(1)}
+.ed-expert .av{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,rgba(198,164,109,.18),rgba(198,164,109,.06));border:2px solid rgba(198,164,109,.25);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:900;font-size:24px;letter-spacing:-.02em;margin:0 auto 18px;transition:all .4s}
+.ed-expert:hover .av{transform:scale(1.05);background:var(--gold);color:#fff}
+.ed-expert h4{font-size:14px;font-weight:800;color:var(--navy);margin:0 0 6px;letter-spacing:-.01em}
+.ed-expert p{font-size:11px;color:var(--text-light);line-height:1.55;margin:0}
+.ed-expert .years{display:inline-block;margin-top:12px;padding:4px 10px;background:rgba(198,164,109,.1);color:var(--gold-dark);border-radius:10px;font-size:10px;font-weight:800;letter-spacing:.05em}
+
+@media(max-width:1024px){
+  .ed-hero-wrap{grid-template-columns:1fr;gap:40px}
+  .ed-formats{grid-template-columns:1fr}
+  .ed-themes{grid-template-columns:repeat(2,1fr)}
+  .ed-course{grid-template-columns:1fr}
+  .ed-experts{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:640px){
+  .ed-hero{padding:120px 20px 60px}
+  .ed-themes,.ed-experts{grid-template-columns:1fr}
+  .ed-section{padding:60px 20px 30px}
+  .ed-courses-wrap{padding:60px 0 30px}
+  .ed-courses{padding:0 20px}
+  .ed-course-content{padding:32px 24px}
+  .ed-course h3{font-size:22px}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="ed-hero">
+  <div class="ed-hero-wrap">
+    <div>
+      <div class="ed-eyebrow"><span class="bar"></span>Образование TCC</div>
+      <h1 class="ed-title">Развитие<br><em>профессиональных компетенций</em></h1>
+      <p class="ed-lead">Образовательные программы, executive-форматы и партнёрства с университетами для специалистов логистики, supply chain и стратегического управления.</p>
+    </div>
+    <div class="ed-quote">
+      Инфраструктурные проекты Центральной Азии развиваются быстрее, чем отраслевые компетенции. Это создаёт опасный разрыв: физические возможности растут, но управление не успевает.
+      <b>— Видение TCC HUB</b>
+    </div>
+  </div>
+</section>
+
+<!-- FORMATS -->
+<section class="ed-section">
+  <div class="ed-section-head">
+    <h2>Форматы<br><em>обучения</em></h2>
+    <div class="sub">Образовательные программы, практикумы и корпоративное обучение</div>
+  </div>
+
+  <div class="ed-formats">
+    <div class="ed-fmt reveal">
+      <div class="num">01 — ПРОГРАММЫ</div>
+      <div class="icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+      <h3>Курсы</h3>
+      <p>Структурированные программы по логистике, supply chain и стратегическому управлению. Цель — специалист, способный мыслить системно и видеть связь логистики с экономикой.</p>
+      <div class="tags"><span class="tag">Онлайн</span><span class="tag">Гибрид</span><span class="tag">Сертификат</span></div>
+    </div>
+
+    <div class="ed-fmt reveal">
+      <div class="num">02 — EXECUTIVE</div>
+      <div class="icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+      <h3>Практикумы</h3>
+      <p>Executive-форматы с фокусом на реальные кейсы, симуляции и проектную работу. Интенсивное развитие управленческих компетенций для руководителей.</p>
+      <div class="tags"><span class="tag">Кейсы</span><span class="tag">Симуляции</span><span class="tag">Воркшопы</span></div>
+    </div>
+
+    <div class="ed-fmt reveal">
+      <div class="num">03 — B2B</div>
+      <div class="icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <h3>Корпоративные программы</h3>
+      <p>Партнёрские проекты с университетами и индивидуальные программы для компаний. Адаптация под специфику бизнеса и уровень команды.</p>
+      <div class="tags"><span class="tag">Команды</span><span class="tag">Кастом</span><span class="tag">Консалтинг</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- THEMES -->
+<section class="ed-section">
+  <div class="ed-section-head">
+    <h2>Тематические<br><em>направления</em></h2>
+    <div class="sub">Ключевые области знаний для специалиста нового типа</div>
+  </div>
+
+  <div class="ed-themes">
+    <div class="ed-theme reveal">
+      <div class="big-num">01</div>
+      <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-4"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+      <h4>Логистика</h4>
+      <p>Транспортная, складская, международная. Морские, авто, ЖД и авиа-перевозки.</p>
+    </div>
+    <div class="ed-theme reveal">
+      <div class="big-num">02</div>
+      <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <h4>Supply Chain</h4>
+      <p>Проектирование и оптимизация цепей поставок, риски, цифровизация, стандарты.</p>
+    </div>
+    <div class="ed-theme reveal">
+      <div class="big-num">03</div>
+      <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+      <h4>Геоэкономика</h4>
+      <p>Роль ЦА в глобальной торговле, Средний коридор, евразийская интеграция.</p>
+    </div>
+    <div class="ed-theme reveal">
+      <div class="big-num">04</div>
+      <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <h4>Санкционные риски</h4>
+      <p>Работа с санкциями, геополитическими ограничениями, адаптация стратегий.</p>
+    </div>
+  </div>
+</section>
+
+<!-- COURSES -->
+<div class="ed-courses-wrap">
+  <div class="ed-section-head" style="max-width:1280px;margin:0 auto 48px;padding:0 24px">
+    <h2>Авторские<br><em>программы обучения</em></h2>
+    <div class="sub">От практиков отрасли с многолетним опытом</div>
+  </div>
+  <div class="ed-courses">
+
+    <div class="ed-course reveal">
+      <div class="ed-course-content">
+        <div class="ed-course-tag">Базовый уровень</div>
+        <h3>Логистика <em>с нуля</em></h3>
+        <p class="desc">Авторская программа для начинающих специалистов. Системное понимание транспортной, складской и международной логистики с акцентом на реальные кейсы и специфику Центральной Азии.</p>
+        <p class="topics"><b>Темы:</b> Incoterms, морские и сухопутные перевозки, складское управление, карьера в логистике</p>
+      </div>
+      <div class="ed-course-side">
+        <div class="meta-num">24<span style="font-size:.5em;color:rgba(255,255,255,.45);font-weight:600;margin-left:6px">часа</span></div>
+        <div class="meta-lab">7 модулей · Онлайн</div>
+        <div class="meta-list">
+          <div><span>Формат</span> Живые лекции</div>
+          <div><span>Практика</span> Кейсы и шаблоны</div>
+          <div><span>Документ</span> Сертификат</div>
+        </div>
+        <button class="btn" onclick="location.href='{% url 'contacts' %}'">Записаться →</button>
+      </div>
+    </div>
+
+    <div class="ed-course reveal">
+      <div class="ed-course-content">
+        <div class="ed-course-tag">Продвинутый уровень</div>
+        <h3>Стратегическая навигация <em>PRO</em></h3>
+        <p class="desc">Продвинутая программа для специалистов и руководителей. Управление рисками, цифровизация, международные стандарты и финансовое планирование в логистике.</p>
+        <p class="topics"><b>Темы:</b> SCM, санкционные риски, геополитика, инфраструктурные решения</p>
+      </div>
+      <div class="ed-course-side">
+        <div class="meta-num">72<span style="font-size:.5em;color:rgba(255,255,255,.45);font-weight:600;margin-left:6px">часа</span></div>
+        <div class="meta-lab">9 модулей · Гибрид</div>
+        <div class="meta-list">
+          <div><span>Формат</span> Лекции + воркшопы</div>
+          <div><span>Практика</span> Симуляции</div>
+          <div><span>Документ</span> Проф. сертификат</div>
+        </div>
+        <button class="btn" onclick="location.href='{% url 'contacts' %}'">Консультация →</button>
+      </div>
+    </div>
+
+    <div class="ed-course reveal">
+      <div class="ed-course-content">
+        <div class="ed-course-tag">Экспертный уровень</div>
+        <h3>BRI Logistics: <em>инфраструктура и риски</em></h3>
+        <p class="desc">Стратегический курс для специалистов и аналитиков международной логистики. Геоэкономическая роль Центральной Азии, инфраструктура и коридоры, риски и сценарии развития до 2035.</p>
+        <p class="topics"><b>Темы:</b> геоэкономика, Средний коридор, санкции, ESG, blended finance</p>
+      </div>
+      <div class="ed-course-side">
+        <div class="meta-num">24<span style="font-size:.5em;color:rgba(255,255,255,.45);font-weight:600;margin-left:6px">часа</span></div>
+        <div class="meta-lab">7 модулей · Гибрид</div>
+        <div class="meta-list">
+          <div><span>Формат</span> Лекции + проекты</div>
+          <div><span>Практика</span> Кейсы и симуляции</div>
+          <div><span>Документ</span> Проф. сертификат</div>
+        </div>
+        <button class="btn" onclick="location.href='{% url 'contacts' %}'">Консультация →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPERTS -->
+<section class="ed-section">
+  <div class="ed-section-head">
+    <h2>Эксперты<br><em>программ</em></h2>
+    <div class="sub">Практики отрасли с многолетним опытом</div>
+  </div>
+  <div class="ed-experts">
+    <div class="ed-expert reveal">
+      <div class="av">АТ</div>
+      <h4>Айслу Тайсаринова</h4>
+      <p>Эксперт по логистике и транспортному планированию</p>
+      <div class="years">23+ лет</div>
+    </div>
+    <div class="ed-expert reveal">
+      <div class="av">РХ</div>
+      <h4>Рустам Хуснутдинов</h4>
+      <p>Эксперт по проектной логистике и снабжению</p>
+      <div class="years">25+ лет</div>
+    </div>
+    <div class="ed-expert reveal">
+      <div class="av">ОС</div>
+      <h4>Оксана Сорокина</h4>
+      <p>Международная логистика и авиаперевозки</p>
+      <div class="years">22+ лет</div>
+    </div>
+    <div class="ed-expert reveal">
+      <div class="av">НТ</div>
+      <h4>Наргиза Турарбек</h4>
+      <p>Рекрутинг и HR в логистической отрасли</p>
+      <div class="years">7+ лет</div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-banner">
+  <h2>Развивайте компетенции с TCC</h2>
+  <p>Эволюция требований к специалисту в логистике отражает трансформацию самой экономики</p>
+  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">СВЯЗАТЬСЯ С НАМИ</button>
+</div>
+{% endblock %}

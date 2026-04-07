@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block body %}
+<!-- Public Navigation -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-body/80 backdrop-blur-xl border-b border-white/5" x-data="{ open: false }">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <a href="/" class="flex items-center gap-2">
+                <span class="text-2xl font-bold text-white">TCC</span>
+                <span class="text-2xl font-bold text-primary">HUB</span>
+            </a>
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#about" class="text-gray-400 hover:text-white transition">О нас</a>
+                <a href="#courses" class="text-gray-400 hover:text-white transition">Курсы</a>
+                <a href="#advantages" class="text-gray-400 hover:text-white transition">Преимущества</a>
+                <a href="#testimonials" class="text-gray-400 hover:text-white transition">Отзывы</a>
+            </div>
+            <div class="hidden md:flex items-center gap-3">
+                {% if user.is_authenticated %}
+                    <a href="/dashboard/" class="px-5 py-2 bg-primary text-dark font-semibold rounded-xl hover:bg-primary-hover transition">Кабинет</a>
+                {% else %}
+                    <a href="/login/" class="px-5 py-2 text-gray-300 hover:text-white transition">Войти</a>
+                    <a href="/register/" class="px-5 py-2 bg-primary text-dark font-semibold rounded-xl hover:bg-primary-hover transition">Регистрация</a>
+                {% endif %}
+            </div>
+            <button @click="open = !open" class="md:hidden text-gray-400 hover:text-white">
+                <span class="material-icons-round" x-text="open ? 'close' : 'menu'">menu</span>
+            </button>
+        </div>
+    </div>
+    <!-- Mobile menu -->
+    <div x-show="open" x-transition x-cloak class="md:hidden bg-dark border-t border-white/5">
+        <div class="px-4 py-4 space-y-3">
+            <a href="#about" @click="open = false" class="block text-gray-400 hover:text-white">О нас</a>
+            <a href="#courses" @click="open = false" class="block text-gray-400 hover:text-white">Курсы</a>
+            <a href="#advantages" @click="open = false" class="block text-gray-400 hover:text-white">Преимущества</a>
+            <a href="#testimonials" @click="open = false" class="block text-gray-400 hover:text-white">Отзывы</a>
+            <hr class="border-white/10">
+            {% if user.is_authenticated %}
+                <a href="/dashboard/" class="block px-4 py-2 bg-primary text-dark font-semibold rounded-xl text-center">Кабинет</a>
+            {% else %}
+                <a href="/login/" class="block text-gray-400 hover:text-white">Войти</a>
+                <a href="/register/" class="block px-4 py-2 bg-primary text-dark font-semibold rounded-xl text-center">Регистрация</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<main class="pt-16">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- Footer -->
+<footer class="bg-dark border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8">
+            <div class="md:col-span-2">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="text-2xl font-bold text-white">TCC</span>
+                    <span class="text-2xl font-bold text-primary">HUB</span>
+                </div>
+                <p class="text-gray-400 max-w-md">Образовательная платформа TransCaspian Cargo для развития профессиональных навыков в сфере логистики и грузоперевозок.</p>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-4">Навигация</h4>
+                <ul class="space-y-2">
+                    <li><a href="#about" class="text-gray-400 hover:text-primary transition">О нас</a></li>
+                    <li><a href="#courses" class="text-gray-400 hover:text-primary transition">Курсы</a></li>
+                    <li><a href="#advantages" class="text-gray-400 hover:text-primary transition">Преимущества</a></li>
+                    <li><a href="#testimonials" class="text-gray-400 hover:text-primary transition">Отзывы</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-4">Контакты</h4>
+                {% if contact %}
+                    {% if contact.email %}<p class="text-gray-400 mb-2">{{ contact.email }}</p>{% endif %}
+                    {% if contact.phone %}<p class="text-gray-400 mb-2">{{ contact.phone }}</p>{% endif %}
+                    {% if contact.address %}<p class="text-gray-400 mb-2">{{ contact.address }}</p>{% endif %}
+                    <div class="flex gap-3 mt-4">
+                        {% if contact.whatsapp %}<a href="https://wa.me/{{ contact.whatsapp }}" target="_blank" class="text-gray-400 hover:text-primary transition"><span class="material-icons-round">chat</span></a>{% endif %}
+                        {% if contact.instagram %}<a href="{{ contact.instagram }}" target="_blank" class="text-gray-400 hover:text-primary transition"><span class="material-icons-round">photo_camera</span></a>{% endif %}
+                        {% if contact.linkedin %}<a href="{{ contact.linkedin }}" target="_blank" class="text-gray-400 hover:text-primary transition"><span class="material-icons-round">work</span></a>{% endif %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-400">info@tcchub.kz</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="border-t border-white/5 mt-8 pt-8 text-center text-gray-500 text-sm">
+            &copy; {{ current_year }} TCC HUB. Все права защищены.
+        </div>
+    </div>
+</footer>
+{% endblock %}

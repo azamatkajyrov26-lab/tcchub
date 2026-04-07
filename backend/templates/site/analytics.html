@@ -1,0 +1,198 @@
+{% extends "layouts/site.html" %}
+{% load static %}
+
+{% block title %}Аналитика и исследования — TCC HUB{% endblock %}
+
+{% block page_css %}
+<style>
+.an-hero{position:relative;padding:140px 24px 80px;background:#fff;overflow:hidden;border-bottom:1px solid var(--border-light)}
+.an-hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(27,42,74,.07) 1px,transparent 0);background-size:28px 28px;mask-image:radial-gradient(ellipse at 50% 40%,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 30%,transparent 75%)}
+.an-hero-wrap{max-width:1280px;margin:0 auto;position:relative;z-index:2}
+.an-eyebrow{display:inline-flex;align-items:center;gap:14px;font-size:11px;font-weight:800;color:var(--gold-dark);letter-spacing:.22em;text-transform:uppercase;margin-bottom:24px}
+.an-eyebrow .bar{width:32px;height:2px;background:var(--gold)}
+.an-title{font-size:clamp(40px,6vw,76px);font-weight:900;line-height:1.02;letter-spacing:-.03em;color:var(--navy);margin:0 0 24px;max-width:920px}
+.an-title em{font-style:italic;font-weight:300;color:var(--gold)}
+.an-lead{font-size:17px;line-height:1.7;color:var(--text-mid);max-width:620px;margin:0 0 50px}
+
+.an-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border-light);border:1px solid var(--border-light);border-radius:18px;overflow:hidden}
+.an-stat{background:#fff;padding:28px}
+.an-stat-num{font-size:clamp(28px,3.2vw,42px);font-weight:900;color:var(--navy);line-height:1;letter-spacing:-.025em}
+.an-stat-num em{color:var(--gold);font-style:normal}
+.an-stat-lab{margin-top:10px;font-size:11px;color:var(--text-light);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+
+.an-toolbar{max-width:1280px;margin:0 auto;padding:48px 24px 0;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.an-tab{padding:11px 22px;border-radius:30px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--border-light);background:#fff;color:var(--text-mid);cursor:pointer;transition:all .3s}
+.an-tab:hover{border-color:var(--gold);color:var(--gold)}
+.an-tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+.an-grid-wrap{max-width:1280px;margin:0 auto;padding:36px 24px 80px}
+.an-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+
+.an-card{position:relative;background:#fff;border-radius:20px;border:1px solid var(--border-light);overflow:hidden;display:flex;flex-direction:column;transition:all .35s cubic-bezier(.2,.9,.3,1.2);text-decoration:none;color:inherit}
+.an-card:hover{transform:translateY(-6px);box-shadow:0 22px 55px rgba(27,42,74,.10);border-color:rgba(198,164,109,.25)}
+.an-card .img{position:relative;height:200px;overflow:hidden}
+.an-card .img img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.an-card:hover .img img{transform:scale(1.06)}
+.an-card .img::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.55) 100%)}
+.an-card .tag{position:absolute;top:14px;left:14px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);padding:6px 12px;border-radius:14px;font-size:10px;font-weight:800;color:var(--navy);letter-spacing:.06em;text-transform:uppercase;z-index:2}
+.an-card .body{padding:24px;flex:1;display:flex;flex-direction:column;gap:12px}
+.an-card h3{font-size:17px;font-weight:800;color:var(--navy);line-height:1.3;letter-spacing:-.01em;margin:0}
+.an-card p{font-size:13px;color:var(--text-mid);line-height:1.55;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.an-metrics{display:flex;gap:8px;flex-wrap:wrap}
+.an-metric{font-size:11px;font-weight:800;color:var(--gold-dark);background:rgba(198,164,109,.1);padding:5px 11px;border-radius:10px;border:1px solid rgba(198,164,109,.18);font-feature-settings:"tnum"}
+.an-card .read{margin-top:auto;padding-top:14px;border-top:1px solid var(--border-light);font-size:12px;font-weight:800;color:var(--gold);display:inline-flex;align-items:center;gap:6px;transition:gap .3s}
+.an-card:hover .read{gap:10px}
+
+/* Featured */
+.an-card.featured{grid-column:span 2;display:grid;grid-template-columns:1.1fr 1fr;flex-direction:row}
+.an-card.featured .img{height:auto;min-height:340px}
+.an-card.featured .body{padding:36px;justify-content:center}
+.an-card.featured h3{font-size:24px;line-height:1.2}
+.an-card.featured p{-webkit-line-clamp:4;font-size:14px}
+.an-card.hidden{display:none}
+
+@media(max-width:1024px){.an-grid{grid-template-columns:repeat(2,1fr)}.an-card.featured{grid-column:span 2;grid-template-columns:1fr;flex-direction:column}.an-card.featured .img{height:240px;min-height:auto}.an-stats{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.an-grid{grid-template-columns:1fr}.an-card.featured{grid-column:span 1}.an-hero{padding:120px 20px 60px}.an-grid-wrap{padding:24px 20px 60px}}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="an-hero">
+  <div class="an-hero-wrap">
+    <div class="an-eyebrow"><span class="bar"></span>Аналитика TCC</div>
+    <h1 class="an-title">Глубокая <em>экспертиза рынка</em><br>и точные данные</h1>
+    <p class="an-lead">Комплексные исследования логистики и инфраструктуры Центральной Азии, торговых коридоров Евразии и геоэкономических трендов для стратегических решений бизнеса.</p>
+
+    <div class="an-stats">
+      <div class="an-stat"><div class="an-stat-num">8</div><div class="an-stat-lab">Материалов</div></div>
+      <div class="an-stat"><div class="an-stat-num">4</div><div class="an-stat-lab">Категории</div></div>
+      <div class="an-stat"><div class="an-stat-num">11</div><div class="an-stat-lab">Коридоров</div></div>
+      <div class="an-stat"><div class="an-stat-num">10<em>+</em></div><div class="an-stat-lab">Стран в анализе</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLBAR -->
+<section class="an-toolbar">
+  <button class="an-tab active" data-filter="all">Все материалы</button>
+  <button class="an-tab" data-filter="обзор">Отраслевые обзоры</button>
+  <button class="an-tab" data-filter="статья">Аналитические статьи</button>
+  <button class="an-tab" data-filter="исследование">Исследования рынка</button>
+  <button class="an-tab" data-filter="отчёт">Экспертные отчёты</button>
+</section>
+
+<!-- GRID -->
+<section class="an-grid-wrap">
+  <div class="an-grid">
+
+    <a href="{% url 'article_detail' slug='transkaspiyskiy-marshrut' %}" class="an-card featured reveal" data-type="обзор">
+      <div class="img"><span class="tag">Отраслевой обзор</span><img loading="lazy" src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=1200&h=700&fit=crop" alt="Транскаспийский маршрут"></div>
+      <div class="body">
+        <h3>Транскаспийский маршрут: пятикратный рост за 7 лет</h3>
+        <p>Транскаспийский международный транспортный маршрут (Средний коридор) достиг объёма 4.5 млн тонн грузоперевозок. Разрыв инвестиций в инфраструктуру оценивается в EUR 18.5 млрд.</p>
+        <div class="an-metrics"><span class="an-metric">4.5 млн тонн</span><span class="an-metric">EUR 18.5 млрд</span></div>
+        <div class="read">Читать полный обзор →</div>
+      </div>
+    </a>
+
+    <a href="{% url 'article_detail' slug='sanktsii-peremarshrutizatsiya' %}" class="an-card reveal" data-type="статья">
+      <div class="img"><span class="tag">Статья</span><img loading="lazy" src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&h=400&fit=crop" alt="Санкции"></div>
+      <div class="body">
+        <h3>Санкции и перемаршрутизация: новая карта Евразии</h3>
+        <p>Трафик через Суэц сократился на 90%, ставки фрахта выросли на 80%. Как давление формирует новые торговые коридоры.</p>
+        <div class="an-metrics"><span class="an-metric">Суэц −90%</span><span class="an-metric">Фрахт +80%</span></div>
+        <div class="read">Читать →</div>
+      </div>
+    </a>
+
+    <a href="{% url 'article_detail' slug='konteynernyy-rynok-evrazii' %}" class="an-card reveal" data-type="исследование">
+      <div class="img"><span class="tag">Исследование</span><img loading="lazy" src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&h=400&fit=crop" alt="Контейнеры"></div>
+      <div class="body">
+        <h3>Контейнерный рынок Евразии 2025–2026</h3>
+        <p>Направление Китай-Европа сократилось на 18%, Средний коридор вырос на 14%. Обзор ключевых контейнерных потоков.</p>
+        <div class="an-metrics"><span class="an-metric">Китай-Европа −18%</span><span class="an-metric">СК +14%</span></div>
+        <div class="read">Читать →</div>
+      </div>
+    </a>
+
+    <a href="{% url 'article_detail' slug='koridor-sever-yug' %}" class="an-card reveal" data-type="отчёт">
+      <div class="img"><span class="tag">Отчёт</span><img loading="lazy" src="https://images.unsplash.com/photo-1605732562742-3023a888e56e?w=600&h=400&fit=crop" alt="INSTC"></div>
+      <div class="body">
+        <h3>Коридор Север-Юг: 26.9 млн тонн</h3>
+        <p>INSTC показал рост на 19%. Пакистан присоединился, расширяя географию маршрута.</p>
+        <div class="an-metrics"><span class="an-metric">INSTC +19%</span><span class="an-metric">26.9 млн т</span></div>
+        <div class="read">Читать →</div>
+      </div>
+    </a>
+
+    <a href="{% url 'article_detail' slug='tsifrovaya-transformatsiya' %}" class="an-card reveal" data-type="статья">
+      <div class="img"><span class="tag">Статья</span><img loading="lazy" src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=400&fit=crop" alt="Цифровизация"></div>
+      <div class="body">
+        <h3>Цифровая трансформация логистики Центральной Азии</h3>
+        <p>Внедрение ASYCUDAWorld, рост e-commerce и цифровых платформ меняют логистическую инфраструктуру региона.</p>
+        <div class="an-metrics"><span class="an-metric">ASYCUDAWorld</span><span class="an-metric">E-commerce</span></div>
+        <div class="read">Читать →</div>
+      </div>
+    </a>
+
+    <a href="{% url 'article_detail' slug='kazakhstan-tranzitnyy-hab' %}" class="an-card reveal" data-type="исследование">
+      <div class="img"><span class="tag">Исследование</span><img loading="lazy" src="https://images.unsplash.com/photo-1545128485-c400e7702796?w=600&h=400&fit=crop" alt="Казахстан"></div>
+      <div class="body">
+        <h3>Казахстан: 36.9 млн тонн транзита</h3>
+        <p>Хоргос обработал 372K TEU. Казахстан укрепляет позиции ключевого транзитного хаба Евразии.</p>
+        <div class="an-metrics"><span class="an-metric">36.9 млн т</span><span class="an-metric">372K TEU</span></div>
+        <div class="read">Читать →</div>
+      </div>
+    </a>
+
+    <a href="{% url 'article_detail' slug='bri-2025' %}" class="an-card reveal" data-type="обзор">
+      <div class="img"><span class="tag">Обзор</span><img loading="lazy" src="https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=600&h=400&fit=crop" alt="BRI"></div>
+      <div class="body">
+        <h3>BRI 2025: рекордные $128 млрд контрактов</h3>
+        <p>«Один пояс, один путь» показала рост на 81%. Анализ влияния на логистику Центральной Азии.</p>
+        <div class="an-metrics"><span class="an-metric">$128 млрд</span><span class="an-metric">+81%</span></div>
+        <div class="read">Читать →</div>
+      </div>
+    </a>
+
+    <a href="{% url 'article_detail' slug='krasnoye-more-krizis' %}" class="an-card reveal" data-type="отчёт">
+      <div class="img"><span class="tag">Отчёт</span><img loading="lazy" src="https://images.unsplash.com/photo-1524522173746-f628baad3644?w=600&h=400&fit=crop" alt="Красное море"></div>
+      <div class="body">
+        <h3>Красное море: как кризис меняет глобальные маршруты</h3>
+        <p>Трафик через Суэцкий канал упал на 90%. Перераспределение грузопотоков создаёт возможности для сухопутных коридоров.</p>
+        <div class="an-metrics"><span class="an-metric">Суэц −90%</span><span class="an-metric">Альтернативы</span></div>
+        <div class="read">Читать →</div>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<div class="cta-banner">
+  <h2>Получайте аналитику первыми</h2>
+  <p>Подпишитесь на еженедельный дайджест TCC с экспертными материалами</p>
+  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">ПОДПИСАТЬСЯ</button>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+document.querySelectorAll('.an-tab').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.an-tab').forEach(function(b){b.classList.remove('active')});
+    btn.classList.add('active');
+    var filter=btn.dataset.filter;
+    document.querySelectorAll('.an-card[data-type]').forEach(function(card){
+      if(filter==='all'||card.dataset.type===filter){
+        card.classList.remove('hidden');
+        card.style.display='';
+      } else {
+        card.classList.add('hidden');
+        card.style.display='none';
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

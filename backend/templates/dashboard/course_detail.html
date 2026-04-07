@@ -1,0 +1,303 @@
+{% extends "layouts/dashboard.html" %}
+{% block title %}{{ course.title }} — TCC HUB{% endblock %}
+{% block page_title_block %}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="bg-navy rounded-2xl px-4 sm:px-6 py-6 sm:py-10 mb-6 sm:mb-8 -mt-2">
+    <div class="flex items-center gap-2 text-sm text-white/50 mb-4">
+        <a href="{% url 'courses' %}" class="hover:text-white transition">Курсы</a>
+        <span class="material-icons-round text-xs">chevron_right</span>
+        {% if course.category %}
+            <span class="text-white/70">{{ course.category.name }}</span>
+        {% endif %}
+    </div>
+
+    <h1 class="text-2xl sm:text-3xl font-bold text-white mb-3">{{ course.title }}</h1>
+    <p class="text-white/70 max-w-3xl mb-5">{{ course.short_description|default:course.description|truncatewords:30 }}</p>
+
+    <!-- Metadata -->
+    <div class="flex flex-wrap items-center gap-5 text-sm text-white/60 mb-6">
+        <span class="flex items-center gap-1.5">
+            <span class="material-icons-round text-base">play_circle</span>
+            {{ video_count }} видеолекций
+        </span>
+        <span class="flex items-center gap-1.5">
+            <span class="material-icons-round text-base">view_list</span>
+            {{ sections|length }} модулей
+        </span>
+        <span class="flex items-center gap-1.5">
+            <span class="material-icons-round text-base">people</span>
+            {{ students_count }} студентов
+        </span>
+        <span class="flex items-center gap-1.5">
+            <span class="material-icons-round text-base">person</span>
+            {{ course.created_by.get_full_name|default:course.created_by.email }}
+        </span>
+    </div>
+
+    {% if enrollment %}
+        <div class="flex items-center gap-3 max-w-md">
+            <div class="flex-1 h-2.5 bg-white/10 rounded-full overflow-hidden">
+                <div class="h-full bg-primary rounded-full transition-all" style="width: {{ enrollment.progress }}%"></div>
+            </div>
+            <span class="text-white font-semibold text-sm">{{ enrollment.progress|floatformat:0 }}%</span>
+        </div>
+    {% else %}
+        <form method="post" action="{% url 'enroll' slug=course.slug %}">
+            {% csrf_token %}
+            <button type="submit" class="px-8 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition text-base shadow-lg shadow-primary/20">
+                Записаться на курс
+            </button>
+        </form>
+    {% endif %}
+</div>
+
+<!-- Two-column content -->
+<div class="grid lg:grid-cols-3 gap-5 sm:gap-8">
+    <!-- Main content -->
+    <div class="lg:col-span-2 space-y-8">
+        <!-- Course description -->
+        {% if course.description %}
+        <div class="bg-white rounded-2xl border border-border p-6">
+            <h2 class="text-lg font-bold text-navy mb-4">О курсе</h2>
+            <div class="prose max-w-none text-text-mid leading-relaxed text-sm">
+                {{ course.description|linebreaksbr }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Curriculum — Udemy style -->
+        <div>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-navy">Содержание курса</h2>
+                <span class="text-text-light text-sm">{{ structured_sections|length }} модулей · {{ video_count }} видео</span>
+            </div>
+
+            <div class="space-y-3" x-data="{ open: tccState.get('courseAccordion_{{ course.slug }}', 1) }"
+                 x-init="$watch('open', v => tccState.set('courseAccordion_{{ course.slug }}', v))"
+            >
+                {% for item in structured_sections %}
+                <div class="bg-white rounded-2xl border border-border overflow-hidden">
+                    <!-- Section header -->
+                    <button @click="open = open === {{ forloop.counter }} ? null : {{ forloop.counter }}"
+                            class="w-full flex items-center justify-between p-5 text-left hover:bg-surface/50 transition group">
+                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                            <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary text-sm font-bold shrink-0">
+                                {{ forloop.counter }}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <h3 class="text-navy font-semibold group-hover:text-primary transition truncate">{{ item.section.title }}</h3>
+                                <div class="flex items-center gap-3 mt-0.5 text-text-light text-xs">
+                                    {% if item.primary %}
+                                    <span class="flex items-center gap-1">
+                                        <span class="material-icons-round text-xs">play_circle</span>
+                                        1 видео
+                                    </span>
+                                    {% endif %}
+                                    {% if item.materials %}
+                                    <span class="flex items-center gap-1">
+                                        <span class="material-icons-round text-xs">attach_file</span>
+                                        {{ item.materials|length }} мат.
+                                    </span>
+                                    {% endif %}
+                                    {% if item.quizzes %}
+                                    <span class="flex items-center gap-1">
+                                        <span class="material-icons-round text-xs">quiz</span>
+                                        {{ item.quizzes|length }} тест
+                                    </span>
+                                    {% endif %}
+                                    {% if item.assignments %}
+                                    <span class="flex items-center gap-1">
+                                        <span class="material-icons-round text-xs">assignment</span>
+                                        {{ item.assignments|length }} задание
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="material-icons-round text-text-light transition-transform duration-200 shrink-0 ml-2"
+                              :class="open === {{ forloop.counter }} ? 'rotate-180' : ''">expand_more</span>
+                    </button>
+
+                    <!-- Section content -->
+                    <div x-show="open === {{ forloop.counter }}" x-collapse x-cloak class="border-t border-border">
+
+                        <!-- PRIMARY: Video lesson (main clickable row) -->
+                        {% if item.primary %}
+                        <a href="{% if enrollment %}{% url 'activity_detail' slug=course.slug activity_id=item.primary.id %}{% else %}#{% endif %}"
+                           class="flex items-start gap-3 px-5 py-4 hover:bg-surface/50 transition group {% if item.materials or item.quizzes or item.assignments %}border-b border-border/50{% endif %}">
+                            <!-- Completion / play icon -->
+                            {% if item.primary.id in completed_ids %}
+                                <span class="material-icons-round text-xl text-green-500 shrink-0 mt-0.5">check_circle</span>
+                            {% else %}
+                                <span class="material-icons-round text-xl text-primary shrink-0 mt-0.5 group-hover:scale-110 transition-transform">play_circle</span>
+                            {% endif %}
+
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-semibold {% if item.primary.id in completed_ids %}text-green-600{% else %}text-navy group-hover:text-primary{% endif %} transition leading-snug">
+                                    {{ item.primary.title }}
+                                </p>
+                                {% if item.primary.description %}
+                                <p class="text-text-light text-xs mt-1 line-clamp-2">{{ item.primary.description|truncatewords:25 }}</p>
+                                {% endif %}
+                            </div>
+
+                            {% if enrollment %}
+                            <span class="text-xs text-primary font-medium shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition hidden sm:inline">Смотреть →</span>
+                            {% endif %}
+                        </a>
+                        {% endif %}
+
+                        <!-- SUPPLEMENTARY: Materials, quizzes, assignments as compact list -->
+                        {% if item.materials or item.quizzes or item.assignments %}
+                        <div class="px-5 py-3 bg-surface/30">
+                            {% if item.materials %}
+                            <div class="{% if item.quizzes or item.assignments %}mb-2{% endif %}">
+                                {% for mat in item.materials %}
+                                <div class="flex items-center gap-2.5 py-1.5 text-text-mid text-xs">
+                                    <span class="material-icons-round text-sm text-text-light">
+                                        {% if mat.activity_type == 'document' %}description
+                                        {% elif mat.activity_type == 'resource' %}attach_file
+                                        {% elif mat.activity_type == 'url' %}link
+                                        {% else %}insert_drive_file{% endif %}
+                                    </span>
+                                    {% if enrollment %}
+                                    <a href="{% url 'activity_detail' slug=course.slug activity_id=mat.id %}"
+                                       class="hover:text-primary transition truncate">{{ mat.title }}</a>
+                                    {% else %}
+                                    <span class="truncate">{{ mat.title }}</span>
+                                    {% endif %}
+                                    {% if mat.id in completed_ids %}
+                                    <span class="material-icons-round text-green-500 text-xs shrink-0">check</span>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            {% for q in item.quizzes %}
+                            <div class="flex items-center gap-2.5 py-1.5 text-text-mid text-xs">
+                                <span class="material-icons-round text-sm text-navy/50">quiz</span>
+                                {% if enrollment %}
+                                <a href="{% url 'activity_detail' slug=course.slug activity_id=q.id %}"
+                                   class="hover:text-primary transition truncate font-medium">{{ q.title }}</a>
+                                {% else %}
+                                <span class="truncate font-medium">{{ q.title }}</span>
+                                {% endif %}
+                                {% if q.id in completed_ids %}
+                                <span class="material-icons-round text-green-500 text-xs shrink-0">check</span>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+
+                            {% for a in item.assignments %}
+                            <div class="flex items-center gap-2.5 py-1.5 text-text-mid text-xs">
+                                <span class="material-icons-round text-sm text-navy/50">assignment</span>
+                                {% if enrollment %}
+                                <a href="{% url 'activity_detail' slug=course.slug activity_id=a.id %}"
+                                   class="hover:text-primary transition truncate font-medium">{{ a.title }}</a>
+                                {% else %}
+                                <span class="truncate font-medium">{{ a.title }}</span>
+                                {% endif %}
+                                {% if a.id in completed_ids %}
+                                <span class="material-icons-round text-green-500 text-xs shrink-0">check</span>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Empty state -->
+                        {% if not item.primary and not item.materials and not item.quizzes and not item.assignments %}
+                        <div class="px-5 py-4 text-text-light text-sm">Нет содержимого</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="bg-white rounded-2xl border border-border p-12 text-center">
+                    <span class="material-icons-round text-5xl text-text-light/50 mb-3">view_list</span>
+                    <p class="text-text-mid">Содержимое курса ещё не добавлено</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1">
+        <div class="sticky top-20 space-y-5">
+            <!-- Cover / CTA card -->
+            <div class="bg-white rounded-2xl border border-border overflow-hidden shadow-sm">
+                <div class="aspect-video bg-surface relative overflow-hidden">
+                    {% if course.cover_image %}
+                        <img src="{{ course.cover_image.url }}" alt="{{ course.title }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-navy/5 to-primary/10">
+                            <span class="material-icons-round text-6xl text-primary/30">play_circle</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="p-5">
+                    {% if enrollment %}
+                        {% if next_uncompleted_url %}
+                        <a href="{{ next_uncompleted_url }}"
+                           class="w-full flex items-center justify-center gap-2 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition">
+                            <span class="material-icons-round text-lg">play_arrow</span>
+                            Продолжить обучение
+                        </a>
+                        {% else %}
+                        <a href="{% url 'courses' %}"
+                           class="w-full flex items-center justify-center gap-2 py-3 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600 transition">
+                            <span class="material-icons-round text-lg">check_circle</span>
+                            Курс завершён
+                        </a>
+                        {% endif %}
+                    {% else %}
+                        <form method="post" action="{% url 'enroll' slug=course.slug %}">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition text-base">
+                                Записаться бесплатно
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Stats card -->
+            <div class="bg-white rounded-2xl border border-border p-5">
+                <h3 class="text-navy font-semibold mb-4">Этот курс включает</h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="material-icons-round text-text-light text-lg">play_circle</span>
+                        <span class="text-text-mid">{{ video_count }} видеолекций</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="material-icons-round text-text-light text-lg">view_list</span>
+                        <span class="text-text-mid">{{ sections|length }} модулей</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="material-icons-round text-text-light text-lg">task</span>
+                        <span class="text-text-mid">{{ activities_count }} активностей</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="material-icons-round text-text-light text-lg">people</span>
+                        <span class="text-text-mid">{{ students_count }} студентов</span>
+                    </div>
+                    {% if course.duration_hours %}
+                    <div class="flex items-center gap-3">
+                        <span class="material-icons-round text-text-light text-lg">schedule</span>
+                        <span class="text-text-mid">{{ course.duration_hours }} часов</span>
+                    </div>
+                    {% endif %}
+                    <div class="flex items-center gap-3">
+                        <span class="material-icons-round text-text-light text-lg">workspace_premium</span>
+                        <span class="text-text-mid">Сертификат по завершении</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

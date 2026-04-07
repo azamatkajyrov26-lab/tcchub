@@ -1,0 +1,219 @@
+{% extends "layouts/site.html" %}
+{% load static %}
+
+{% block title %}Решения для бизнеса — TCC HUB{% endblock %}
+
+{% block page_css %}
+<style>
+.sol-hero{position:relative;padding:140px 24px 80px;background:#080e1a;color:#fff;overflow:hidden}
+.sol-hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 900px 500px at 80% 30%,rgba(198,164,109,.12),transparent 70%),radial-gradient(ellipse 700px 400px at 15% 80%,rgba(100,180,255,.06),transparent 70%);pointer-events:none}
+.sol-hero::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%)}
+.sol-hero-wrap{max-width:1280px;margin:0 auto;position:relative;z-index:2;display:grid;grid-template-columns:1.3fr 1fr;gap:80px;align-items:end}
+.sol-eyebrow{display:inline-flex;align-items:center;gap:14px;font-size:11px;font-weight:800;color:var(--gold-light);letter-spacing:.22em;text-transform:uppercase;margin-bottom:24px}
+.sol-eyebrow .bar{width:32px;height:2px;background:var(--gold-light)}
+.sol-title{font-size:clamp(40px,6vw,76px);font-weight:900;line-height:1.02;letter-spacing:-.03em;margin:0 0 24px}
+.sol-title em{font-style:italic;font-weight:300;color:var(--gold-light)}
+.sol-lead{font-size:17px;line-height:1.7;color:rgba(255,255,255,.6);max-width:580px;margin:0}
+.sol-hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06);border-radius:18px;overflow:hidden}
+.sol-hs{background:#080e1a;padding:24px}
+.sol-hs-num{font-size:42px;font-weight:900;color:var(--gold-light);line-height:1;letter-spacing:-.025em}
+.sol-hs-lab{margin-top:8px;font-size:11px;color:rgba(255,255,255,.5);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+
+/* BENTO */
+.sol-section{max-width:1280px;margin:0 auto;padding:90px 24px 40px}
+.sol-section-head{margin-bottom:48px;display:flex;justify-content:space-between;align-items:end;gap:40px;flex-wrap:wrap}
+.sol-section-head h2{font-size:clamp(32px,4vw,52px);font-weight:900;color:var(--navy);letter-spacing:-.025em;line-height:1.05;margin:0;max-width:680px}
+.sol-section-head h2 em{font-style:italic;font-weight:300;color:var(--gold)}
+.sol-section-head .sub{font-size:13px;color:var(--text-light);font-weight:600;letter-spacing:.05em;text-transform:uppercase;max-width:280px;text-align:right;line-height:1.7}
+
+.sol-bento{display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:minmax(0,auto);gap:20px}
+.sol-card{position:relative;background:#fff;border:1px solid var(--border-light);border-radius:22px;padding:32px;transition:all .4s cubic-bezier(.2,.9,.3,1.2);overflow:hidden;display:flex;flex-direction:column;gap:14px}
+.sol-card:hover{transform:translateY(-6px);box-shadow:0 24px 60px rgba(27,42,74,.10);border-color:rgba(198,164,109,.25)}
+.sol-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-light));transform:scaleX(0);transform-origin:left;transition:transform .5s}
+.sol-card:hover::before{transform:scaleX(1)}
+.sol-card .num{position:absolute;top:24px;right:30px;font-size:78px;font-weight:900;color:rgba(27,42,74,.04);line-height:1;letter-spacing:-.04em;font-feature-settings:"tnum"}
+.sol-card .icon{width:54px;height:54px;border-radius:14px;background:rgba(198,164,109,.08);border:1px solid rgba(198,164,109,.16);display:flex;align-items:center;justify-content:center;color:var(--gold);transition:all .4s;position:relative}
+.sol-card:hover .icon{background:var(--gold);color:#fff;transform:rotate(-6deg) scale(1.05)}
+.sol-card h3{font-size:19px;font-weight:800;color:var(--navy);letter-spacing:-.01em;line-height:1.3;margin:0;position:relative}
+.sol-card .desc{font-size:13px;color:var(--text-mid);line-height:1.6;margin:0;position:relative}
+.sol-card ul{list-style:none;padding:0;margin:auto 0 0;display:flex;flex-direction:column;gap:8px;position:relative}
+.sol-card li{font-size:12px;color:var(--text-mid);padding-left:18px;position:relative;line-height:1.5}
+.sol-card li::before{content:"";position:absolute;left:0;top:8px;width:8px;height:1.5px;background:var(--gold)}
+
+/* Bento layout: 5 cards over 6 cols → 2-2-2 + first row 3-3, last full */
+.sol-bento .c1{grid-column:span 3}
+.sol-bento .c2{grid-column:span 3}
+.sol-bento .c3{grid-column:span 2}
+.sol-bento .c4{grid-column:span 2}
+.sol-bento .c5{grid-column:span 2}
+
+.sol-card.hl{background:linear-gradient(135deg,var(--navy) 0%,#0F1D35 100%);color:#fff;border:none}
+.sol-card.hl::before{background:linear-gradient(90deg,var(--gold-light),var(--gold))}
+.sol-card.hl .num{color:rgba(255,255,255,.06)}
+.sol-card.hl h3{color:#fff}
+.sol-card.hl .desc,.sol-card.hl li{color:rgba(255,255,255,.7)}
+.sol-card.hl .icon{background:rgba(198,164,109,.18);border-color:rgba(198,164,109,.3);color:var(--gold-light)}
+.sol-card.hl li::before{background:var(--gold-light)}
+
+/* PROCESS - zigzag flow */
+.sol-process-wrap{background:var(--bg-alt);padding:90px 24px;margin-top:60px}
+.sol-process-inner{max-width:1280px;margin:0 auto}
+.sol-process-grid{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:60px}
+.sol-process-grid::before{content:"";position:absolute;top:50px;left:12%;right:12%;height:2px;background:repeating-linear-gradient(90deg,var(--gold) 0 8px,transparent 8px 16px);z-index:0}
+.sol-step{position:relative;background:#fff;border:1px solid var(--border-light);border-radius:20px;padding:32px 24px;text-align:center;z-index:1;transition:all .4s}
+.sol-step:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(27,42,74,.08);border-color:rgba(198,164,109,.3)}
+.sol-step:nth-child(even){transform:translateY(20px)}
+.sol-step:nth-child(even):hover{transform:translateY(14px)}
+.sol-step-circle{width:72px;height:72px;border-radius:50%;background:#fff;border:2px solid var(--gold);color:var(--navy);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;margin:0 auto 20px;letter-spacing:-.02em;box-shadow:0 8px 24px rgba(198,164,109,.18);transition:all .4s}
+.sol-step:hover .sol-step-circle{background:var(--gold);color:#fff;transform:scale(1.05)}
+.sol-step h4{font-size:16px;font-weight:800;color:var(--navy);margin:0 0 8px;letter-spacing:-.01em}
+.sol-step p{font-size:12px;color:var(--text-light);line-height:1.6;margin:0}
+
+@media(max-width:1024px){
+  .sol-hero-wrap{grid-template-columns:1fr;gap:40px}
+  .sol-bento{grid-template-columns:repeat(2,1fr)}
+  .sol-bento .c1,.sol-bento .c2,.sol-bento .c3,.sol-bento .c4,.sol-bento .c5{grid-column:span 1}
+  .sol-bento .c5{grid-column:span 2}
+  .sol-process-grid{grid-template-columns:repeat(2,1fr)}
+  .sol-process-grid::before{display:none}
+  .sol-step:nth-child(even){transform:none}
+}
+@media(max-width:640px){
+  .sol-hero{padding:120px 20px 60px}
+  .sol-bento{grid-template-columns:1fr}
+  .sol-bento .c5{grid-column:span 1}
+  .sol-process-grid{grid-template-columns:1fr}
+  .sol-section{padding:60px 20px 30px}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="sol-hero">
+  <div class="sol-hero-wrap">
+    <div>
+      <div class="sol-eyebrow"><span class="bar"></span>Решения для бизнеса</div>
+      <h1 class="sol-title">Стратегическое<br><em>сопровождение бизнеса</em></h1>
+      <p class="sol-lead">TCC помогает организациям анализировать цепи поставок, выявлять уязвимости, находить устойчивые маршруты и адаптироваться к быстро меняющимся условиям логистики Евразии.</p>
+    </div>
+    <div class="sol-hero-stats">
+      <div class="sol-hs"><div class="sol-hs-num">5</div><div class="sol-hs-lab">Направлений работы</div></div>
+      <div class="sol-hs"><div class="sol-hs-num">4</div><div class="sol-hs-lab">Этапа процесса</div></div>
+      <div class="sol-hs"><div class="sol-hs-num">11</div><div class="sol-hs-lab">Коридоров в анализе</div></div>
+      <div class="sol-hs"><div class="sol-hs-num">10<span style="font-size:.5em;color:rgba(255,255,255,.45);font-weight:600">+</span></div><div class="sol-hs-lab">Лет экспертизы</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- BENTO -->
+<section class="sol-section">
+  <div class="sol-section-head">
+    <h2>Направления практической<br><em>работы TCC</em></h2>
+    <div class="sub">От стратегии до выхода на новые рынки — комплексное сопровождение бизнеса</div>
+  </div>
+
+  <div class="sol-bento">
+
+    <div class="sol-card hl c1 reveal">
+      <div class="num">01</div>
+      <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <h3>Стратегические сессии для компаний</h3>
+      <p class="desc">Экспертное сопровождение, оценка цепей поставок, моделирование сценариев и разработка решений для повышения устойчивости.</p>
+      <ul>
+        <li>Стратегические сессии и экспертное сопровождение</li>
+        <li>Моделирование сценариев цепей поставок</li>
+        <li>Решения для инфраструктурных и международных проектов</li>
+      </ul>
+    </div>
+
+    <div class="sol-card c2 reveal">
+      <div class="num">02</div>
+      <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div>
+      <h3>Анализ цепей поставок</h3>
+      <p class="desc">Комплексный аудит supply chain — от поставщиков до конечного потребителя. Узкие места, оптимизация, эффективность.</p>
+      <ul>
+        <li>Аудит цепи и ключевых звеньев</li>
+        <li>Оценка стоимости, сроков, надёжности</li>
+        <li>Бенчмаркинг с лучшими практиками отрасли</li>
+        <li>Рекомендации по снижению затрат</li>
+      </ul>
+    </div>
+
+    <div class="sol-card c3 reveal">
+      <div class="num">03</div>
+      <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+      <h3>Логистические риски</h3>
+      <p class="desc">Карта рисков по каждому звену: санкции, геополитика, инфраструктура, зависимость от контрагентов.</p>
+      <ul>
+        <li>Карта рисков по звеньям</li>
+        <li>Санкционный скрининг</li>
+        <li>Планы митигации</li>
+      </ul>
+    </div>
+
+    <div class="sol-card c4 reveal">
+      <div class="num">04</div>
+      <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+      <h3>Альтернативные маршруты</h3>
+      <p class="desc">Средний коридор, Север-Юг, мультимодальные схемы — проектирование и оценка маршрутов.</p>
+      <ul>
+        <li>Сравнение маршрутов</li>
+        <li>Готовность инфраструктуры</li>
+        <li>Сценарии перемаршрутизации</li>
+      </ul>
+    </div>
+
+    <div class="sol-card c5 reveal">
+      <div class="num">05</div>
+      <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+      <h3>Выход на новые рынки</h3>
+      <p class="desc">Сопровождение при выходе на рынки ЦА, Каспия, Китая и Европы. От анализа до B2B-связей.</p>
+      <ul>
+        <li>Анализ ёмкости и барьеров</li>
+        <li>Регуляторика и таможня</li>
+        <li>B2B-встречи, поиск партнёров</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROCESS -->
+<div class="sol-process-wrap">
+  <div class="sol-process-inner">
+    <div class="sol-section-head" style="margin-bottom:0">
+      <h2>Как мы<br><em>работаем</em></h2>
+      <div class="sub">Четыре этапа от первичной диагностики до внедрения решений</div>
+    </div>
+    <div class="sol-process-grid">
+      <div class="sol-step reveal">
+        <div class="sol-step-circle">01</div>
+        <h4>Диагностика</h4>
+        <p>Глубокий анализ текущих процессов, выявление узких мест и точек роста</p>
+      </div>
+      <div class="sol-step reveal">
+        <div class="sol-step-circle">02</div>
+        <h4>Анализ</h4>
+        <p>Исследование рынка, конкурентов, маршрутов и геополитических факторов</p>
+      </div>
+      <div class="sol-step reveal">
+        <div class="sol-step-circle">03</div>
+        <h4>Стратегия</h4>
+        <p>Пошаговый план действий с KPI и временными рамками</p>
+      </div>
+      <div class="sol-step reveal">
+        <div class="sol-step-circle">04</div>
+        <h4>Внедрение</h4>
+        <p>Сопровождение реализации стратегии и корректировка по результатам</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cta-banner">
+  <h2>Запросить стратегическую сессию</h2>
+  <p>Получите экспертную оценку ваших цепей поставок и моделирование сценариев от специалистов TCC</p>
+  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">СВЯЗАТЬСЯ С ЭКСПЕРТОМ</button>
+</div>
+{% endblock %}

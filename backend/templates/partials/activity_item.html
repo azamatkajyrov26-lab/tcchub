@@ -1,0 +1,36 @@
+<a href="/courses/{{ course_slug }}/activity/{{ activity.id }}/"
+   class="flex items-center gap-3 px-5 py-3.5 border-b border-border hover:bg-surface/80 transition-colors group">
+
+    <!-- Type / completion icon -->
+    <span class="material-icons-round text-xl shrink-0
+        {% if is_completed %}text-green-500{% else %}text-text-light group-hover:text-primary{% endif %}">
+        {% if is_completed %}check_circle
+        {% elif activity.activity_type == 'lesson' %}article
+        {% elif activity.activity_type == 'video' %}play_circle
+        {% elif activity.activity_type == 'document' %}description
+        {% elif activity.activity_type == 'quiz' %}quiz
+        {% elif activity.activity_type == 'assignment' %}assignment
+        {% elif activity.activity_type == 'forum' %}forum
+        {% elif activity.activity_type == 'url' %}link
+        {% elif activity.activity_type == 'folder' %}folder
+        {% elif activity.activity_type == 'resource' %}attach_file
+        {% else %}circle{% endif %}
+    </span>
+
+    <!-- Title -->
+    <div class="flex-1 min-w-0">
+        <span class="text-sm text-navy group-hover:text-primary transition-colors truncate block">
+            {{ activity.title }}
+        </span>
+    </div>
+
+    <!-- Completion check -->
+    {% if is_completed %}
+        <span class="material-icons-round text-green-500 text-lg shrink-0">done</span>
+    {% endif %}
+
+    <!-- Type label -->
+    <span class="text-xs text-text-light capitalize shrink-0 hidden sm:inline">
+        {{ activity.get_activity_type_display }}
+    </span>
+</a>

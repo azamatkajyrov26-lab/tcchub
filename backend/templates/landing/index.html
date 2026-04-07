@@ -1,0 +1,289 @@
+{% extends "layouts/landing.html" %}
+{% block title %}TCC HUB — Образовательная платформа{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative min-h-[90vh] flex items-center overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-body via-dark to-body"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="max-w-3xl">
+            {% if hero %}
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
+                    {{ hero.title }}
+                </h1>
+                {% if hero.subtitle %}
+                    <p class="text-lg sm:text-xl text-gray-400 mb-8 leading-relaxed">{{ hero.subtitle }}</p>
+                {% endif %}
+            {% else %}
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
+                    Развивайте карьеру<br>в <span class="text-primary">логистике</span>
+                </h1>
+                <p class="text-lg sm:text-xl text-gray-400 mb-8 leading-relaxed">
+                    Профессиональные курсы от экспертов TransCaspian Cargo. Получите знания и навыки для успешной карьеры в сфере международных грузоперевозок.
+                </p>
+            {% endif %}
+            <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
+                <a href="/register/" class="px-6 sm:px-8 py-3 sm:py-4 bg-primary text-dark font-bold rounded-xl hover:bg-primary-hover transition text-base sm:text-lg text-center">
+                    Начать обучение
+                </a>
+                <a href="#courses" class="px-6 sm:px-8 py-3 sm:py-4 border border-white/20 text-white font-semibold rounded-xl hover:bg-white/5 transition text-base sm:text-lg text-center">
+                    Смотреть курсы
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- Decorative elements -->
+    <div class="absolute top-1/4 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="py-20 bg-dark/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+                <span class="text-primary text-sm font-semibold uppercase tracking-wider">О платформе</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-white mt-3 mb-6">О нас</h2>
+                <p class="text-gray-400 leading-relaxed mb-6">
+                    TCC HUB — образовательная платформа компании TransCaspian Cargo, созданная для профессионального развития сотрудников и всех, кто интересуется сферой логистики и международных грузоперевозок.
+                </p>
+                <p class="text-gray-400 leading-relaxed">
+                    Наша миссия — сделать профессиональное обучение доступным и эффективным. Мы предлагаем курсы, разработанные практикующими экспертами отрасли, с современными методами обучения и подтверждением квалификации.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div class="bg-dark rounded-2xl p-6 border border-white/5">
+                    <span class="material-icons-round text-primary text-3xl mb-3">school</span>
+                    <h3 class="text-white font-semibold mb-1">Экспертные курсы</h3>
+                    <p class="text-gray-500 text-sm">От практикующих специалистов</p>
+                </div>
+                <div class="bg-dark rounded-2xl p-6 border border-white/5">
+                    <span class="material-icons-round text-primary text-3xl mb-3">verified</span>
+                    <h3 class="text-white font-semibold mb-1">Сертификаты</h3>
+                    <p class="text-gray-500 text-sm">Подтверждение квалификации</p>
+                </div>
+                <div class="bg-dark rounded-2xl p-6 border border-white/5">
+                    <span class="material-icons-round text-primary text-3xl mb-3">schedule</span>
+                    <h3 class="text-white font-semibold mb-1">Гибкий формат</h3>
+                    <p class="text-gray-500 text-sm">Учитесь в своём темпе</p>
+                </div>
+                <div class="bg-dark rounded-2xl p-6 border border-white/5">
+                    <span class="material-icons-round text-primary text-3xl mb-3">support_agent</span>
+                    <h3 class="text-white font-semibold mb-1">Поддержка</h3>
+                    <p class="text-gray-500 text-sm">Преподаватели всегда на связи</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Metrics Section -->
+{% if metrics %}
+<section class="py-20" x-data="{ shown: false }" x-intersect.once="shown = true">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <span class="text-primary text-sm font-semibold uppercase tracking-wider">Наши достижения</span>
+            <h2 class="text-3xl sm:text-4xl font-bold text-white mt-3">Цифры говорят сами за себя</h2>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-{{ metrics|length|default:6 }} gap-3 sm:gap-6">
+            {% for metric in metrics %}
+            <div class="bg-dark rounded-2xl p-6 border border-white/5 text-center"
+                 x-data="{ count: 0, target: parseInt('{{ metric.value }}'.replace(/\D/g, '')) || 0, suffix: '{{ metric.value }}'.replace(/[\d]/g, '') }"
+                 x-init="if(shown) { let interval = setInterval(() => { if(count < target) { count += Math.ceil(target / 50); if(count > target) count = target; } else { clearInterval(interval); } }, 30); }">
+                <div class="text-3xl sm:text-4xl font-bold text-primary mb-2">
+                    <span x-text="count + suffix">{{ metric.value }}</span>
+                </div>
+                <div class="text-white font-medium">{{ metric.label }}</div>
+                {% if metric.description %}
+                    <div class="text-gray-500 text-sm mt-1">{{ metric.description }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Courses Preview Section -->
+<section id="courses" class="py-20 bg-dark/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <span class="text-primary text-sm font-semibold uppercase tracking-wider">Обучение</span>
+            <h2 class="text-3xl sm:text-4xl font-bold text-white mt-3">Популярные курсы</h2>
+        </div>
+        {% if featured_courses %}
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for course in featured_courses %}
+            <div class="bg-dark rounded-2xl border border-white/5 overflow-hidden group hover:border-primary/30 transition duration-300">
+                <div class="h-48 bg-surface-light relative overflow-hidden">
+                    {% if course.cover_image %}
+                        <img src="{{ course.cover_image.url }}" alt="{{ course.title }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                            <span class="material-icons-round text-6xl text-primary/30">menu_book</span>
+                        </div>
+                    {% endif %}
+                    {% if course.category %}
+                        <span class="absolute top-3 left-3 px-3 py-1 bg-dark/80 backdrop-blur-sm text-primary text-xs font-medium rounded-lg">{{ course.category.name }}</span>
+                    {% endif %}
+                </div>
+                <div class="p-5">
+                    <h3 class="text-lg font-semibold text-white mb-2 group-hover:text-primary transition">{{ course.title }}</h3>
+                    <p class="text-gray-500 text-sm mb-4 line-clamp-2">{{ course.short_description|default:course.description|truncatewords:20 }}</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-gray-500 text-sm">
+                            <span class="material-icons-round text-base">schedule</span>
+                            <span>{{ course.duration_hours }} ч.</span>
+                        </div>
+                        <a href="/courses/{{ course.slug }}/" class="text-primary text-sm font-medium hover:underline">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-10">
+            <a href="/courses/" class="inline-flex items-center gap-2 px-8 py-3 border border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-dark transition">
+                Все курсы
+                <span class="material-icons-round text-xl">arrow_forward</span>
+            </a>
+        </div>
+        {% else %}
+        <div class="text-center text-gray-500 py-12">
+            <span class="material-icons-round text-5xl mb-4">menu_book</span>
+            <p>Курсы скоро появятся</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Partners Section -->
+{% if partners %}
+<section class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <span class="text-primary text-sm font-semibold uppercase tracking-wider">Сотрудничество</span>
+            <h2 class="text-3xl sm:text-4xl font-bold text-white mt-3">Наши партнёры</h2>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-6 items-center">
+            {% for partner in partners %}
+            <a href="{{ partner.url|default:'#' }}" target="_blank" class="bg-dark rounded-2xl p-6 border border-white/5 flex items-center justify-center hover:border-primary/30 transition group">
+                {% if partner.logo %}
+                    <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" class="max-h-12 opacity-60 group-hover:opacity-100 transition">
+                {% else %}
+                    <span class="text-gray-500 text-sm font-medium">{{ partner.name }}</span>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Testimonials Section -->
+{% if testimonials %}
+<section id="testimonials" class="py-20 bg-dark/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <span class="text-primary text-sm font-semibold uppercase tracking-wider">Отзывы</span>
+            <h2 class="text-3xl sm:text-4xl font-bold text-white mt-3">Что говорят наши студенты</h2>
+        </div>
+        <div x-data="{ active: 0, testimonials: {{ testimonials|length }} }" class="relative max-w-3xl mx-auto">
+            <div class="overflow-hidden">
+                {% for testimonial in testimonials %}
+                <div x-show="active === {{ forloop.counter0 }}" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+                    <div class="bg-dark rounded-2xl p-8 border border-white/5 text-center">
+                        <div class="flex justify-center mb-4">
+                            {% if testimonial.avatar %}
+                                <img src="{{ testimonial.avatar.url }}" alt="{{ testimonial.author_name }}" class="w-16 h-16 rounded-full object-cover">
+                            {% else %}
+                                <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+                                    <span class="text-primary text-xl font-bold">{{ testimonial.author_name|first }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-6 italic">"{{ testimonial.content }}"</p>
+                        <div>
+                            <p class="text-white font-semibold">{{ testimonial.author_name }}</p>
+                            {% if testimonial.author_role %}
+                                <p class="text-gray-500 text-sm">{{ testimonial.author_role }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- Dots -->
+            <div class="flex justify-center gap-2 mt-6">
+                {% for testimonial in testimonials %}
+                <button @click="active = {{ forloop.counter0 }}" :class="active === {{ forloop.counter0 }} ? 'bg-primary w-8' : 'bg-white/20 w-3'" class="h-3 rounded-full transition-all duration-300"></button>
+                {% endfor %}
+            </div>
+            <!-- Arrows -->
+            <button @click="active = (active - 1 + testimonials) % testimonials" class="absolute top-1/2 -left-12 -translate-y-1/2 text-gray-500 hover:text-primary transition hidden lg:block">
+                <span class="material-icons-round text-3xl">chevron_left</span>
+            </button>
+            <button @click="active = (active + 1) % testimonials" class="absolute top-1/2 -right-12 -translate-y-1/2 text-gray-500 hover:text-primary transition hidden lg:block">
+                <span class="material-icons-round text-3xl">chevron_right</span>
+            </button>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Advantages Section -->
+<section id="advantages" class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <span class="text-primary text-sm font-semibold uppercase tracking-wider">Почему мы</span>
+            <h2 class="text-3xl sm:text-4xl font-bold text-white mt-3">Наши преимущества</h2>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {% if advantages %}
+                {% for advantage in advantages %}
+                <div class="bg-dark rounded-2xl p-6 border border-white/5 hover:border-primary/30 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition">
+                        <span class="material-icons-round text-primary text-2xl">{{ advantage.icon|default:"star" }}</span>
+                    </div>
+                    <h3 class="text-white font-semibold mb-2">{{ advantage.title }}</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">{{ advantage.description }}</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="bg-dark rounded-2xl p-6 border border-white/5 hover:border-primary/30 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4"><span class="material-icons-round text-primary text-2xl">school</span></div>
+                    <h3 class="text-white font-semibold mb-2">Экспертное обучение</h3>
+                    <p class="text-gray-500 text-sm">Курсы разработаны практикующими специалистами отрасли</p>
+                </div>
+                <div class="bg-dark rounded-2xl p-6 border border-white/5 hover:border-primary/30 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4"><span class="material-icons-round text-primary text-2xl">devices</span></div>
+                    <h3 class="text-white font-semibold mb-2">Удобная платформа</h3>
+                    <p class="text-gray-500 text-sm">Учитесь с любого устройства в удобное для вас время</p>
+                </div>
+                <div class="bg-dark rounded-2xl p-6 border border-white/5 hover:border-primary/30 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4"><span class="material-icons-round text-primary text-2xl">workspace_premium</span></div>
+                    <h3 class="text-white font-semibold mb-2">Сертификация</h3>
+                    <p class="text-gray-500 text-sm">Получите подтверждение вашей квалификации</p>
+                </div>
+                <div class="bg-dark rounded-2xl p-6 border border-white/5 hover:border-primary/30 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4"><span class="material-icons-round text-primary text-2xl">groups</span></div>
+                    <h3 class="text-white font-semibold mb-2">Сообщество</h3>
+                    <p class="text-gray-500 text-sm">Общайтесь с коллегами и преподавателями</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-dark/50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">Готовы начать обучение?</h2>
+        <p class="text-gray-400 text-lg mb-8">Присоединяйтесь к платформе TCC HUB и откройте новые возможности для карьерного роста</p>
+        <a href="/register/" class="inline-flex items-center gap-2 px-10 py-4 bg-primary text-dark font-bold rounded-xl hover:bg-primary-hover transition text-lg">
+            Зарегистрироваться бесплатно
+            <span class="material-icons-round">arrow_forward</span>
+        </a>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,252 @@
+{% extends "layouts/site.html" %}
+{% block title %}{{ report.title }} — TCC HUB{% endblock %}
+
+{% block page_css %}
+<style>
+.rd-hero{position:relative;padding:140px 24px 70px;background:#080e1a;color:#fff;overflow:hidden}
+.rd-hero::before{content:"";position:absolute;inset:0;{% if report.cover_image %}background:url('{{ report.cover_image.url }}') center/cover;opacity:.18;{% endif %}}
+.rd-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,14,26,.7) 0%,rgba(8,14,26,.95) 100%),radial-gradient(ellipse 900px 500px at 70% 30%,rgba(198,164,109,.12),transparent 70%);pointer-events:none}
+.rd-hero-wrap{max-width:1280px;margin:0 auto;position:relative;z-index:2}
+.rd-back{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:.05em;text-transform:uppercase;text-decoration:none;margin-bottom:32px;transition:all .3s}
+.rd-back:hover{color:var(--gold-light);gap:12px}
+.rd-eyebrow{display:inline-flex;align-items:center;gap:14px;font-size:11px;font-weight:800;color:var(--gold-light);letter-spacing:.22em;text-transform:uppercase;margin-bottom:24px}
+.rd-eyebrow .bar{width:32px;height:2px;background:var(--gold-light)}
+.rd-tpl{display:inline-block;background:rgba(198,164,109,.18);border:1px solid rgba(198,164,109,.35);color:var(--gold-light);padding:7px 16px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:18px}
+.rd-title{font-size:clamp(34px,5vw,62px);font-weight:900;line-height:1.05;letter-spacing:-.025em;margin:0 0 18px;max-width:900px}
+.rd-sub{font-size:17px;line-height:1.6;color:rgba(255,255,255,.6);max-width:720px;margin:0 0 32px}
+.rd-meta{display:flex;gap:24px;font-size:12px;color:rgba(255,255,255,.5);font-weight:600;flex-wrap:wrap;padding-top:24px;border-top:1px solid rgba(255,255,255,.1)}
+.rd-meta b{color:#fff;font-weight:800;display:block;font-size:14px;margin-top:2px}
+.rd-corridors{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+.rd-corridor{padding:6px 14px;border-radius:16px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;backdrop-filter:blur(8px)}
+
+/* MAIN */
+.rd-main{max-width:1280px;margin:0 auto;padding:60px 24px 100px;display:grid;grid-template-columns:1fr 340px;gap:40px;align-items:start}
+
+.rd-content{min-width:0}
+.rd-summary{background:linear-gradient(135deg,rgba(198,164,109,.06),rgba(198,164,109,.02));border:1px solid rgba(198,164,109,.2);border-left:4px solid var(--gold);border-radius:0 18px 18px 0;padding:32px 36px;margin-bottom:36px;position:relative}
+.rd-summary::before{content:"";position:absolute;top:24px;right:24px;width:48px;height:48px;border-radius:12px;background:rgba(198,164,109,.1);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23C6A46D' stroke-width='2'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/%3E%3Cpolyline points='14 2 14 8 20 8'/%3E%3C/svg%3E");background-position:center;background-repeat:no-repeat}
+.rd-summary h2{font-size:11px;font-weight:800;color:var(--gold-dark);letter-spacing:.16em;text-transform:uppercase;margin:0 0 14px;display:inline-flex;align-items:center;gap:10px}
+.rd-summary h2::before{content:"";width:18px;height:2px;background:var(--gold)}
+.rd-summary p{font-size:15px;line-height:1.75;color:var(--text-mid);margin:0;max-width:90%}
+
+.rd-section{background:#fff;border:1px solid var(--border-light);border-radius:20px;padding:36px;margin-bottom:24px;transition:all .3s}
+.rd-section:hover{border-color:rgba(198,164,109,.2);box-shadow:0 12px 30px rgba(27,42,74,.05)}
+.rd-section h2{font-size:22px;font-weight:900;color:var(--navy);letter-spacing:-.015em;margin:0 0 20px;display:flex;align-items:center;gap:14px}
+.rd-section h2::before{content:"";width:6px;height:24px;background:var(--gold);border-radius:3px}
+.rd-section .body{font-size:15px;line-height:1.75;color:var(--text-mid)}
+.rd-section .body p{margin:0 0 14px}
+
+.rd-findings{display:grid;gap:14px;margin-top:18px}
+.rd-finding{display:flex;align-items:flex-start;gap:18px;background:var(--bg-alt);border:1px solid var(--border-light);border-radius:14px;padding:20px 22px;transition:all .3s}
+.rd-finding:hover{border-color:rgba(198,164,109,.25);transform:translateX(4px)}
+.rd-finding-num{flex-shrink:0;width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;letter-spacing:-.02em;box-shadow:0 6px 14px rgba(198,164,109,.3)}
+.rd-finding p{font-size:14px;color:var(--text-mid);line-height:1.6;margin:0;flex:1}
+
+.rd-recs{display:grid;gap:12px;margin-top:18px}
+.rd-rec{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.15);border-radius:12px;font-size:14px;color:var(--text-mid);line-height:1.6}
+.rd-rec-icon{flex-shrink:0;width:28px;height:28px;border-radius:8px;background:#22c55e;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900}
+
+.rd-gate{position:relative;background:#fff;border:2px dashed rgba(198,164,109,.4);border-radius:20px;padding:60px 40px;text-align:center;margin-bottom:24px}
+.rd-gate-icon{width:72px;height:72px;border-radius:50%;background:rgba(198,164,109,.1);color:var(--gold);display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px}
+.rd-gate h3{font-size:22px;font-weight:900;color:var(--navy);letter-spacing:-.01em;margin:0 0 10px}
+.rd-gate p{font-size:14px;color:var(--text-light);line-height:1.65;margin:0 auto 24px;max-width:520px}
+
+.rd-pdf{display:inline-flex;align-items:center;gap:12px;padding:16px 32px;background:linear-gradient(135deg,var(--navy),#0F1D35);color:#fff;border-radius:30px;font-size:13px;font-weight:800;text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:all .3s;box-shadow:0 10px 30px rgba(27,42,74,.18);margin-top:14px}
+.rd-pdf:hover{transform:translateY(-3px);box-shadow:0 14px 36px rgba(27,42,74,.28)}
+
+/* SIDEBAR */
+.rd-side{position:sticky;top:110px;display:flex;flex-direction:column;gap:18px}
+.rd-buy{background:linear-gradient(135deg,var(--navy),#0F1D35);color:#fff;border-radius:22px;padding:32px;position:relative;overflow:hidden;box-shadow:0 24px 60px rgba(8,14,26,.18)}
+.rd-buy::before{content:"";position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(198,164,109,.18),transparent 70%)}
+.rd-buy-lab{font-size:10px;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;position:relative}
+.rd-buy-price{font-size:48px;font-weight:900;color:#fff;line-height:1;letter-spacing:-.025em;position:relative;font-feature-settings:"tnum"}
+.rd-buy-price.free{color:#22c55e}
+.rd-buy-price small{font-size:.4em;color:rgba(255,255,255,.45);font-weight:600;margin-left:6px}
+.rd-buy-cta{display:block;width:100%;margin-top:24px;padding:16px;background:var(--gold);color:#fff;border:none;border-radius:14px;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-align:center;text-decoration:none;transition:all .3s;font-family:inherit;position:relative}
+.rd-buy-cta:hover{background:var(--gold-light);transform:translateY(-2px);box-shadow:0 12px 30px rgba(198,164,109,.4)}
+.rd-buy-success{text-align:center;padding:20px 0;position:relative}
+.rd-buy-success-icon{width:64px;height:64px;border-radius:50%;background:rgba(34,197,94,.15);color:#22c55e;display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px}
+.rd-buy-success p{font-size:14px;font-weight:800;color:#22c55e;margin:0}
+
+.rd-info{background:#fff;border:1px solid var(--border-light);border-radius:18px;padding:24px}
+.rd-info h3{font-size:11px;font-weight:800;color:var(--gold-dark);letter-spacing:.14em;text-transform:uppercase;margin:0 0 16px;display:inline-flex;align-items:center;gap:10px}
+.rd-info h3::before{content:"";width:18px;height:2px;background:var(--gold)}
+.rd-info-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:11px 0;border-bottom:1px solid var(--border-light);font-size:12px}
+.rd-info-row:last-child{border:none}
+.rd-info-row .k{color:var(--text-light);font-weight:600}
+.rd-info-row .v{color:var(--navy);font-weight:800;text-align:right}
+.rd-info-tags{margin-top:18px}
+.rd-info-tags h4{font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:.1em;text-transform:uppercase;margin:0 0 10px}
+.rd-tag-list{display:flex;flex-wrap:wrap;gap:6px}
+.rd-tag-list span{padding:5px 12px;border-radius:12px;font-size:10px;font-weight:800;letter-spacing:.04em;background:var(--bg-alt);color:var(--text-mid)}
+
+@media(max-width:1024px){
+  .rd-main{grid-template-columns:1fr;padding:50px 20px 80px}
+  .rd-side{position:static}
+}
+@media(max-width:640px){
+  .rd-hero{padding:120px 20px 50px}
+  .rd-section{padding:24px}
+  .rd-summary{padding:24px}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="rd-hero">
+  <div class="rd-hero-wrap">
+    <a href="{% url 'reports_catalog' %}" class="rd-back">← Все отчёты</a>
+    <div class="rd-eyebrow"><span class="bar"></span>Аналитический отчёт</div>
+    <div class="rd-tpl">{{ report.template.name }}</div>
+    <h1 class="rd-title">{{ report.title }}</h1>
+    {% if report.subtitle %}<p class="rd-sub">{{ report.subtitle }}</p>{% endif %}
+    <div class="rd-meta">
+      <span>Автор<b>{{ report.created_by.get_full_name|default:"TCC" }}</b></span>
+      <span>Опубликован<b>{{ report.published_at|date:"d.m.Y" }}</b></span>
+      <span>Секций<b>{{ report.sections.count }}</b></span>
+      <span>Просмотры<b>{{ report.views_count }}</b></span>
+    </div>
+    {% if report.corridors.exists %}
+    <div class="rd-corridors">
+      {% for c in report.corridors.all %}
+      <span class="rd-corridor" style="background:{{ c.color }}25;color:{{ c.color }};border:1px solid {{ c.color }}50">{{ c.code }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- MAIN -->
+<section class="rd-main">
+  <div class="rd-content">
+
+    {% if report.executive_summary %}
+    <div class="rd-summary">
+      <h2>Executive Summary</h2>
+      <p>{{ report.executive_summary }}</p>
+    </div>
+    {% endif %}
+
+    {% if report.key_findings %}
+    <div class="rd-section">
+      <h2>Ключевые выводы</h2>
+      <div class="rd-findings">
+        {% for finding in report.key_findings %}
+        <div class="rd-finding">
+          <div class="rd-finding-num">{{ forloop.counter|stringformat:"02d" }}</div>
+          <p>{{ finding }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if report.preview_text %}
+    <div class="rd-section">
+      <h2>Превью отчёта</h2>
+      <div class="body"><p>{{ report.preview_text }}</p></div>
+    </div>
+    {% endif %}
+
+    {% if has_access %}
+      {% for section in report.sections.all %}
+      <div class="rd-section">
+        <h2>{{ section.title|default:section.get_section_type_display }}</h2>
+        <div class="body">{{ section.content|safe|default:"—" }}</div>
+      </div>
+      {% endfor %}
+
+      {% if report.recommendations %}
+      <div class="rd-section">
+        <h2>Рекомендации</h2>
+        <div class="rd-recs">
+          {% for rec in report.recommendations %}
+          <div class="rd-rec">
+            <div class="rd-rec-icon">✓</div>
+            <div>{{ rec }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if report.pdf_file %}
+      <a href="{{ report.pdf_file.url }}" download class="rd-pdf">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Скачать PDF
+      </a>
+      {% endif %}
+    {% else %}
+      <div class="rd-gate">
+        <div class="rd-gate-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3>Полный отчёт доступен после приобретения</h3>
+        <p>Детальный анализ рисков, сценарии маршрутов, санкционный скрининг и практические рекомендации для операторов логистических маршрутов Евразии. Данные основаны на реальных источниках и AI-аннотации.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="rd-side">
+    <div class="rd-buy">
+      {% if has_access %}
+      <div class="rd-buy-success">
+        <div class="rd-buy-success-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <p>Доступ получен</p>
+      </div>
+      {% else %}
+      <div class="rd-buy-lab">Стоимость отчёта</div>
+      {% if report.price_usd == 0 %}
+      <div class="rd-buy-price free">Бесплатно</div>
+      {% else %}
+      <div class="rd-buy-price">${{ report.price_usd }}<small>USD</small></div>
+      {% endif %}
+
+      {% if request.user.is_authenticated %}
+      <form method="post" action="{% url 'buy_report' report.slug %}">
+        {% csrf_token %}
+        <button type="submit" class="rd-buy-cta">
+          {% if report.price_usd == 0 %}Получить бесплатно{% else %}Приобрести отчёт{% endif %}
+        </button>
+      </form>
+      {% else %}
+      <a href="{% url 'login' %}?next={{ request.path }}" class="rd-buy-cta">Войти для покупки</a>
+      {% endif %}
+      {% endif %}
+    </div>
+
+    <div class="rd-info">
+      <h3>Информация</h3>
+      <div class="rd-info-row"><span class="k">Тип</span><span class="v">{{ report.template.name }}</span></div>
+      <div class="rd-info-row"><span class="k">Опубликован</span><span class="v">{{ report.published_at|date:"d.m.Y" }}</span></div>
+      {% if report.valid_until %}<div class="rd-info-row"><span class="k">Актуален до</span><span class="v">{{ report.valid_until|date:"d.m.Y" }}</span></div>{% endif %}
+      <div class="rd-info-row"><span class="k">Секций</span><span class="v">{{ report.sections.count }}</span></div>
+      <div class="rd-info-row"><span class="k">Просмотры</span><span class="v">{{ report.views_count }}</span></div>
+
+      {% if report.corridors.exists %}
+      <div class="rd-info-tags">
+        <h4>Коридоры</h4>
+        <div class="rd-tag-list">
+          {% for c in report.corridors.all %}
+          <span style="background:{{ c.color }}15;color:{{ c.color }};border:1px solid {{ c.color }}30">{{ c.code }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if report.countries.exists %}
+      <div class="rd-info-tags">
+        <h4>Страны</h4>
+        <div class="rd-tag-list">
+          {% for c in report.countries.all %}<span>{{ c.iso2 }} {{ c.name_ru }}</span>{% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </aside>
+</section>
+{% endblock %}

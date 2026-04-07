@@ -1,0 +1,292 @@
+{% extends "layouts/site.html" %}
+{% block title %}Карта коридоров — TCC HUB{% endblock %}
+
+{% block page_css %}
+<style>
+.map-container{position:relative;background:#0a1628;border-radius:16px;overflow:hidden;margin-bottom:30px}
+.map-svg{width:100%;height:auto;display:block}
+.map-svg .land{fill:#1a2a4a;stroke:#2a3a5a;stroke-width:.5}
+.map-svg .corridor-line{fill:none;stroke-width:2;stroke-linecap:round;opacity:.8}
+.map-svg .corridor-line:hover{stroke-width:3.5;opacity:1}
+.map-svg .node-circle{cursor:pointer;transition:r .2s}
+.map-svg .node-circle:hover{r:6}
+.node-tooltip{position:absolute;background:rgba(15,23,42,.95);backdrop-filter:blur(12px);color:#fff;padding:14px 18px;border-radius:12px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:10;border:1px solid rgba(198,164,109,.3);max-width:280px}
+.node-tooltip.visible{opacity:1}
+.node-tooltip h4{font-size:13px;font-weight:700;margin-bottom:4px;color:#C6A46D}
+.node-tooltip p{color:rgba(255,255,255,.7);line-height:1.5}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,.7)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.status-operational{background:#22c55e}
+.status-limited{background:#f59e0b}
+.status-suspended{background:#ef4444}
+.status-closed{background:#6b7280}
+.corridor-toggle{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.7);cursor:pointer;transition:all .3s}
+.corridor-toggle.active{color:#fff;border-color:currentColor}
+.score-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}
+.score-bar-fill{height:100%;border-radius:3px;transition:width .5s}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section style="padding:100px 40px 40px;background:linear-gradient(135deg,#0a1628 0%,#1B2A4A 100%)">
+    <div style="max-width:1200px;margin:0 auto">
+        <div style="margin-bottom:30px">
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#C6A46D;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:14px">
+                <span style="width:24px;height:2px;background:#C6A46D;border-radius:1px"></span>
+                Live Map
+            </span>
+            <h1 style="font-size:clamp(24px,3.5vw,36px);color:#fff;font-weight:800;margin-bottom:12px">Карта торговых коридоров</h1>
+            <p style="font-size:14px;color:rgba(255,255,255,.5);max-width:600px;line-height:1.6">
+                Интерактивная карта узлов и маршрутов Евразии. Наведите на узел для деталей.
+            </p>
+        </div>
+
+        <!-- Corridor Toggles -->
+        <div id="corridorToggles" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px"></div>
+
+        <!-- Map -->
+        <div class="map-container">
+            <div id="mapTooltip" class="node-tooltip"></div>
+            <svg id="corridorMap" class="map-svg" viewBox="0 0 960 500"></svg>
+        </div>
+
+        <!-- Legend -->
+        <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:40px">
+            <div class="legend-item"><span class="legend-dot status-operational"></span> Работает</div>
+            <div class="legend-item"><span class="legend-dot status-limited"></span> Ограничено</div>
+            <div class="legend-item"><span class="legend-dot status-suspended"></span> Приостановлен</div>
+            <div class="legend-item"><span class="legend-dot status-closed"></span> Закрыт</div>
+        </div>
+
+        <!-- Corridor Score Cards -->
+        <div id="scoreCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px"></div>
+    </div>
+</section>
+{% endblock %}
+
+{% block page_js %}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://d3js.org/topojson.v3.min.js"></script>
+<script>
+(function(){
+    const STATUS_COLORS = {operational:"#22c55e",limited:"#f59e0b",suspended:"#ef4444",closed:"#6b7280"};
+    const STATUS_RU = {operational:"Работает",limited:"Ограничено",suspended:"Приостановлен",closed:"Закрыт"};
+    const NODE_TYPE_RU = {port_sea:"Морской порт",port_dry:"Сухой порт",border:"Погранпереход",terminal:"Терминал",railway:"Ж/д станция",airport:"Аэропорт",hub:"Логистический хаб"};
+
+    const svg = d3.select("#corridorMap");
+    const tooltip = document.getElementById("mapTooltip");
+    const width = 960, height = 500;
+
+    // Projection centered on Central Asia / Eurasia
+    const projection = d3.geoNaturalEarth1()
+        .center([65, 42])
+        .scale(350)
+        .translate([width/2, height/2]);
+
+    const path = d3.geoPath().projection(projection);
+
+    let corridors = [];
+    let corridorNodes = {};
+    let activeCorridors = new Set();
+    let scores = {};
+
+    // Load world map
+    d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(function(world){
+        svg.append("g").selectAll("path")
+            .data(topojson.feature(world, world.objects.countries).features)
+            .enter().append("path")
+            .attr("class","land")
+            .attr("d", path);
+
+        // Load corridors list
+        return fetch("/api/v1/tcc/corridors/").then(r=>r.json());
+    }).then(function(data){
+        corridors = data.results || data;
+
+        // Load each corridor's detail to get nodes
+        var promises = corridors.map(function(c){
+            return fetch("/api/v1/tcc/corridors/" + c.id + "/").then(r=>r.json()).then(function(detail){
+                corridorNodes[c.id] = (detail.corridor_nodes || []).map(function(cn){
+                    return {order: cn.order, node: cn.node, segment_mode: cn.segment_mode};
+                });
+            });
+        });
+        return Promise.all(promises);
+    }).then(function(){
+        // Load latest scores
+        return fetch("/api/v1/tcc/intelligence/route-scores/?ordering=-calculated_at").then(r=>r.json());
+    }).then(function(data){
+        var scoreList = data.results || data;
+        scoreList.forEach(function(s){
+            if(!scores[s.corridor]) scores[s.corridor] = s;
+        });
+
+        buildToggles();
+        corridors.forEach(function(c){ activeCorridors.add(c.id); });
+        drawCorridors();
+        buildScoreCards();
+    }).catch(function(err){
+        console.warn("Map data load error:", err);
+        loadFallbackData();
+    });
+
+    function loadFallbackData(){
+        fetch("/api/v1/tcc/nodes/").then(r=>r.json()).then(function(data){
+            const nodes = data.results || data;
+            nodes.forEach(function(n){
+                if(n.lat && n.lng){
+                    const pos = projection([parseFloat(n.lng), parseFloat(n.lat)]);
+                    if(pos){
+                        svg.append("circle")
+                            .attr("class","node-circle")
+                            .attr("cx", pos[0]).attr("cy", pos[1]).attr("r", 4)
+                            .attr("fill", STATUS_COLORS[n.status]||"#C6A46D")
+                            .on("mouseover", function(e){showTooltip(e,n)})
+                            .on("mouseout", hideTooltip);
+                    }
+                }
+            });
+        });
+    }
+
+    function buildToggles(){
+        const container = document.getElementById("corridorToggles");
+        corridors.forEach(function(c){
+            const btn = document.createElement("button");
+            btn.className = "corridor-toggle active";
+            btn.style.color = c.color;
+            btn.style.borderColor = c.color;
+            btn.textContent = c.code;
+            btn.onclick = function(){
+                if(activeCorridors.has(c.id)){
+                    activeCorridors.delete(c.id);
+                    btn.classList.remove("active");
+                    btn.style.color = "rgba(255,255,255,.4)";
+                    btn.style.borderColor = "rgba(255,255,255,.15)";
+                } else {
+                    activeCorridors.add(c.id);
+                    btn.classList.add("active");
+                    btn.style.color = c.color;
+                    btn.style.borderColor = c.color;
+                }
+                drawCorridors();
+            };
+            container.appendChild(btn);
+        });
+    }
+
+    function drawCorridors(){
+        svg.selectAll(".corridor-group").remove();
+
+        corridors.forEach(function(c){
+            if(!activeCorridors.has(c.id)) return;
+            const nodes = corridorNodes[c.id] || [];
+            if(!nodes.length) return;
+
+            const g = svg.append("g").attr("class","corridor-group");
+            const sortedNodes = nodes.sort(function(a,b){return a.order-b.order});
+            const points = [];
+
+            sortedNodes.forEach(function(cn){
+                const n = cn.node || cn;
+                const lat = parseFloat(n.lat);
+                const lng = parseFloat(n.lng);
+                if(!isNaN(lat) && !isNaN(lng)){
+                    points.push({pos: projection([lng, lat]), node: n, cn: cn});
+                }
+            });
+
+            // Draw line
+            if(points.length > 1){
+                const lineGen = d3.line().x(function(d){return d.pos[0]}).y(function(d){return d.pos[1]}).curve(d3.curveCatmullRom.alpha(0.5));
+                g.append("path")
+                    .attr("class","corridor-line")
+                    .attr("d", lineGen(points))
+                    .attr("stroke", c.color);
+            }
+
+            // Draw nodes
+            points.forEach(function(p){
+                g.append("circle")
+                    .attr("class","node-circle")
+                    .attr("cx", p.pos[0]).attr("cy", p.pos[1]).attr("r", 4)
+                    .attr("fill", STATUS_COLORS[p.node.status||"operational"]||"#C6A46D")
+                    .attr("stroke", c.color).attr("stroke-width", 1.5)
+                    .on("mouseover", function(e){showTooltip(e, p.node, c)})
+                    .on("mouseout", hideTooltip);
+            });
+        });
+    }
+
+    function showTooltip(event, node, corridor){
+        const name = node.name || node.name_en || "Узел";
+        const type = NODE_TYPE_RU[node.node_type] || node.node_type || "";
+        const status = STATUS_RU[node.status] || node.status || "";
+        const statusColor = STATUS_COLORS[node.status] || "#C6A46D";
+        let html = '<h4>' + name + '</h4>';
+        html += '<p>' + type + '</p>';
+        html += '<p style="margin-top:4px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+statusColor+';margin-right:4px;vertical-align:middle"></span>' + status + '</p>';
+        if(corridor) html += '<p style="margin-top:4px;color:'+corridor.color+'">'+corridor.code+' — '+corridor.name+'</p>';
+        if(node.operator) html += '<p style="margin-top:4px">Оператор: '+node.operator+'</p>';
+        tooltip.innerHTML = html;
+        tooltip.classList.add("visible");
+
+        const rect = document.getElementById("corridorMap").getBoundingClientRect();
+        const x = event.clientX - rect.left + 15;
+        const y = event.clientY - rect.top - 10;
+        tooltip.style.left = x + "px";
+        tooltip.style.top = y + "px";
+    }
+
+    function hideTooltip(){
+        tooltip.classList.remove("visible");
+    }
+
+    function buildScoreCards(){
+        const container = document.getElementById("scoreCards");
+        corridors.forEach(function(c){
+            const s = scores[c.id];
+            const total = s ? (s.score_total * 100).toFixed(0) : "—";
+            const level = s ? s.risk_level : "—";
+            const levelColor = {low:"#22c55e",medium:"#f59e0b",high:"#ef4444",critical:"#dc2626"}[level] || "#6b7280";
+
+            const card = document.createElement("div");
+            card.style.cssText = "background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px";
+            card.innerHTML = `
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                    <div>
+                        <span style="padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700;background:${c.color}25;color:${c.color}">${c.code}</span>
+                    </div>
+                    <span style="font-size:11px;font-weight:700;color:${levelColor};text-transform:uppercase">${level}</span>
+                </div>
+                <h3 style="font-size:14px;font-weight:700;color:#fff;margin-bottom:8px">${c.name}</h3>
+                <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:12px">
+                    <span style="font-size:28px;font-weight:800;color:${levelColor}">${total}</span>
+                    <span style="font-size:12px;color:rgba(255,255,255,.4)">/100 risk score</span>
+                </div>
+                ${s ? `
+                <div style="display:grid;gap:6px;font-size:11px;color:rgba(255,255,255,.5)">
+                    ${scoreRow("Санкции", s.score_sanctions)}
+                    ${scoreRow("Геополитика", s.score_geopolitical)}
+                    ${scoreRow("Инфраструктура", s.score_infrastructure)}
+                    ${scoreRow("Регулирование", s.score_regulatory)}
+                    ${scoreRow("Финансы", s.score_financial)}
+                </div>` : '<p style="font-size:12px;color:rgba(255,255,255,.3)">Скор не рассчитан</p>'}
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function scoreRow(label, val){
+        const pct = (val * 100).toFixed(0);
+        const color = val > 0.7 ? "#ef4444" : val > 0.4 ? "#f59e0b" : "#22c55e";
+        return `<div style="display:flex;align-items:center;gap:8px">
+            <span style="width:90px">${label}</span>
+            <div class="score-bar" style="flex:1"><div class="score-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+            <span style="width:30px;text-align:right;color:${color};font-weight:600">${pct}</span>
+        </div>`;
+    }
+})();
+</script>
+{% endblock %}

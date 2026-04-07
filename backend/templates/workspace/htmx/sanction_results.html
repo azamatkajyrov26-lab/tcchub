@@ -1,0 +1,30 @@
+{% if entries %}
+<div class="text-xs">
+    <p class="font-semibold text-navy mb-2">Найдено: {{ entries|length }}</p>
+    <table class="w-full">
+        <thead>
+            <tr class="text-left">
+                <th class="pb-1.5 text-text-light font-medium">Имя</th>
+                <th class="pb-1.5 text-text-light font-medium">Тип</th>
+                <th class="pb-1.5 text-text-light font-medium">Источник</th>
+                <th class="pb-1.5 text-text-light font-medium">Программа</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in entries %}
+            <tr class="border-t" style="border-color:rgba(27,42,74,0.06)">
+                <td class="py-1.5 text-navy font-medium">{{ e.name_primary|truncatechars:30 }}</td>
+                <td class="py-1.5">{{ e.get_entity_type_display }}</td>
+                <td class="py-1.5">{{ e.source.code }}</td>
+                <td class="py-1.5 text-text-light">{{ e.program|truncatechars:20 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% elif query %}
+<p class="text-xs text-green-600 font-medium">
+    <span class="material-icons-round text-sm align-middle">check_circle</span>
+    По запросу «{{ query }}» совпадений в санкционных списках не найдено.
+</p>
+{% endif %}

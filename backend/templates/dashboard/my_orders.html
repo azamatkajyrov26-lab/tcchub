@@ -1,0 +1,56 @@
+{% extends "layouts/dashboard.html" %}
+{% block title %}Мои заказы — TCC HUB{% endblock %}
+{% block page_title %}Мои заказы{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <p class="text-gray-500 text-sm">История ваших заказов</p>
+</div>
+
+{% if orders %}
+<div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+            <tr>
+                <th class="px-5 py-3 text-left">№</th>
+                <th class="px-5 py-3 text-left">Продукт</th>
+                <th class="px-5 py-3 text-left">Статус</th>
+                <th class="px-5 py-3 text-right">Сумма</th>
+                <th class="px-5 py-3 text-left">Дата</th>
+                <th class="px-5 py-3 text-left">Оплачен</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+            {% for order in orders %}
+            <tr class="hover:bg-gray-50/50 transition">
+                <td class="px-5 py-4 font-mono text-gray-400">#{{ order.id }}</td>
+                <td class="px-5 py-4 font-medium text-[#1B2A4A]">{{ order.product.name }}</td>
+                <td class="px-5 py-4">
+                    <span class="px-2 py-0.5 rounded-full text-xs font-bold
+                        {% if order.status == 'paid' %}bg-green-50 text-green-600
+                        {% elif order.status == 'pending' %}bg-yellow-50 text-yellow-600
+                        {% elif order.status == 'cancelled' %}bg-red-50 text-red-600
+                        {% else %}bg-gray-50 text-gray-600{% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </td>
+                <td class="px-5 py-4 text-right font-bold">${{ order.amount_usd }}</td>
+                <td class="px-5 py-4 text-gray-500">{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                <td class="px-5 py-4 text-gray-500">
+                    {% if order.paid_at %}{{ order.paid_at|date:"d.m.Y H:i" }}{% else %}—{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="text-center py-20">
+    <div class="text-4xl mb-4">🧾</div>
+    <p class="text-gray-500 font-medium mb-2">Заказов пока нет</p>
+    <a href="{% url 'reports_catalog' %}" class="inline-block mt-2 px-6 py-2 bg-[#C6A46D] text-white rounded-xl text-sm font-bold hover:bg-[#b8944f] transition">
+        Перейти в каталог
+    </a>
+</div>
+{% endif %}
+{% endblock %}

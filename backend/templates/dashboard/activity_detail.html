@@ -1,0 +1,881 @@
+{% extends "layouts/player.html" %}
+{% block title %}{{ activity.title }} — {{ course.title }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ===== Custom Video Player ===== */
+    .video-wrap { position: relative; background: #000; }
+    .video-wrap video { width: 100%; display: block; cursor: pointer; }
+    .video-wrap iframe { width: 100%; display: block; aspect-ratio: 16/9; border: none; }
+
+    /* Custom controls overlay */
+    .player-controls {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,.85));
+        padding: 32px 16px 10px;
+        opacity: 1; transition: opacity .25s;
+    }
+    .video-wrap.playing:not(:hover):not(.controls-visible) .player-controls { opacity: 0; }
+
+    /* Progress bar */
+    .progress-bar-wrap {
+        position: relative; height: 4px; background: rgba(255,255,255,.2);
+        border-radius: 2px; cursor: pointer; margin-bottom: 8px;
+        transition: height .15s;
+    }
+    .progress-bar-wrap:hover { height: 6px; }
+    .progress-bar-wrap:hover .progress-thumb { opacity: 1; }
+    .progress-filled { height: 100%; background: #C6A46D; border-radius: 2px; position: relative; }
+    .progress-buffered { position: absolute; top: 0; left: 0; height: 100%; background: rgba(255,255,255,.15); border-radius: 2px; }
+    .progress-thumb {
+        position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+        width: 12px; height: 12px; border-radius: 50%; background: #C6A46D;
+        opacity: 0; transition: opacity .15s;
+    }
+    /* Timestamp markers on progress bar */
+    .ts-marker {
+        position: absolute; top: -1px; width: 3px; height: calc(100% + 2px);
+        background: rgba(255,255,255,.5); border-radius: 1px; z-index: 2;
+    }
+
+    /* Speed menu */
+    .speed-menu {
+        position: absolute; bottom: 100%; right: 0; margin-bottom: 8px;
+        background: #1B1F2E; border-radius: 8px; padding: 4px 0;
+        min-width: 100px; box-shadow: 0 4px 20px rgba(0,0,0,.5);
+    }
+    .speed-option {
+        display: block; width: 100%; padding: 6px 16px;
+        color: rgba(255,255,255,.7); font-size: 13px; text-align: left;
+        transition: all .15s; cursor: pointer; border: none; background: none;
+    }
+    .speed-option:hover { color: #fff; background: rgba(255,255,255,.08); }
+    .speed-option.active { color: #C6A46D; font-weight: 600; }
+
+    /* Big play overlay */
+    .play-overlay {
+        position: absolute; inset: 0; display: flex; align-items: center;
+        justify-content: center; background: rgba(0,0,0,.3);
+        opacity: 0; transition: opacity .2s; pointer-events: none;
+    }
+    .video-wrap.paused .play-overlay { opacity: 1; pointer-events: auto; cursor: pointer; }
+
+    /* Timestamp tab */
+    .timestamp-item { cursor: pointer; }
+    .timestamp-item:hover { background: rgba(198,164,109,.08); }
+    .timestamp-item.playing { background: rgba(198,164,109,.12); border-left: 3px solid #C6A46D; }
+
+    /* Tab underline */
+    .tab-btn { position: relative; }
+    .tab-btn.active::after {
+        content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+        height: 2px; background: #C6A46D; border-radius: 1px;
+    }
+
+    /* Hide default video controls */
+    video::-webkit-media-controls { display: none !important; }
+    video::-webkit-media-controls-enclosure { display: none !important; }
+
+    /* Scrollbar */
+    .content-below::-webkit-scrollbar { width: 4px; }
+    .content-below::-webkit-scrollbar-thumb { background: rgba(27,42,74,.15); border-radius: 2px; }
+
+    /* Keyboard shortcut toast */
+    .kbd-toast {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+        background: rgba(0,0,0,.7); color: #fff; padding: 8px 20px;
+        border-radius: 8px; font-size: 18px; font-weight: 700;
+        pointer-events: none; opacity: 0; transition: opacity .2s;
+    }
+    .kbd-toast.show { opacity: 1; }
+
+    /* Responsive */
+    @media(max-width:640px){
+        .player-controls { padding: 20px 10px 8px; }
+        .kbd-toast { font-size: 14px; padding: 6px 14px; }
+    }
+</style>
+{% endblock %}
+
+{% block player_content %}
+<div x-data="videoPlayer()" x-init="init()" @keydown.window="onKeydown($event)" class="flex flex-col h-full">
+
+    <!-- VIDEO AREA with custom controls -->
+    <div class="video-wrap shrink-0" id="video-wrap"
+         :class="{ 'paused': paused, 'playing': !paused, 'controls-visible': controlsVisible }"
+         @mousemove="showControls()" @mouseleave="hideControlsDelay()">
+
+        {% if is_video_type and resource %}
+            {% if resource.file %}
+                <video id="html-video" preload="metadata" class="w-full aspect-video"
+                       @click="togglePlay()" @dblclick="toggleFullscreen()"
+                       @timeupdate="onTimeUpdate($event)"
+                       @loadedmetadata="onLoaded($event)"
+                       @ended="onEnded()"
+                       @progress="onProgress($event)"
+                       @play="paused = false" @pause="paused = true"
+                       @waiting="buffering = true" @canplay="buffering = false"
+                       playsinline>
+                    <source src="{{ resource.file.url }}" type="video/mp4">
+                </video>
+            {% elif resource.external_url %}
+                {% with url=resource.external_url %}
+                    {% if 'youtube.com' in url or 'youtu.be' in url %}
+                        <div id="yt-player-wrap">
+                            <div id="yt-player" class="w-full aspect-video"></div>
+                            <div id="yt-error-fallback" class="hidden w-full aspect-video bg-gradient-to-br from-[#1B1F2E] to-[#2a2f42] flex items-center justify-center">
+                                <div class="text-center px-6">
+                                    <span class="material-icons-round text-5xl text-white/30 mb-4 block">play_circle</span>
+                                    <p class="text-white/70 text-sm mb-4">Видео недоступно</p>
+                                    <a href="{{ url }}" target="_blank" rel="noopener"
+                                       class="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition">Смотреть на YouTube</a>
+                                </div>
+                            </div>
+                        </div>
+                        <script>
+                            var YT_VIDEO_ID = "{% if 'watch?v=' in url %}{{ url|cut:'https://www.youtube.com/watch?v=' }}{% elif 'youtu.be/' in url %}{{ url|cut:'https://youtu.be/' }}{% endif %}";
+                            var YT_START_TIME = {{ video_progress.current_time|default:"0" }};
+                        </script>
+                    {% else %}
+                        <video id="html-video" preload="metadata" class="w-full aspect-video"
+                               @click="togglePlay()" @dblclick="toggleFullscreen()"
+                               @timeupdate="onTimeUpdate($event)" @loadedmetadata="onLoaded($event)"
+                               @ended="onEnded()" @play="paused = false" @pause="paused = true">
+                            <source src="{{ url }}">
+                        </video>
+                    {% endif %}
+                {% endwith %}
+            {% endif %}
+        {% else %}
+            <div class="bg-gradient-to-br from-navy to-navy-light flex items-center justify-center py-16 px-6">
+                <div class="text-center">
+                    <span class="material-icons-round text-5xl text-white/40 mb-3 block">
+                        {% if activity.activity_type == 'quiz' %}quiz{% elif activity.activity_type == 'assignment' %}assignment{% else %}school{% endif %}
+                    </span>
+                    <h2 class="text-white font-bold text-lg">{{ activity.title }}</h2>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Big play button overlay -->
+        <div class="play-overlay" @click="togglePlay()">
+            <div class="w-20 h-20 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
+                <span class="material-icons-round text-white text-5xl">play_arrow</span>
+            </div>
+        </div>
+
+        <!-- Keyboard shortcut toast (e.g. "2x", "+10s") -->
+        <div class="kbd-toast" :class="{ 'show': toastVisible }" x-text="toastText"></div>
+
+        <!-- Buffering spinner -->
+        <div x-show="buffering" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div class="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+        </div>
+
+        <!-- CUSTOM CONTROLS BAR -->
+        {% if resource.file %}
+        <div class="player-controls" @click.stop>
+            <!-- Progress bar -->
+            <div class="progress-bar-wrap" @click="seekToPos($event)" @mousemove="previewTime($event)" @mouseleave="previewPos = null"
+                 id="progress-bar">
+                <div class="progress-buffered" :style="'width:' + bufferedPct + '%'"></div>
+                <div class="progress-filled" :style="'width:' + progressPct + '%'">
+                    <div class="progress-thumb"></div>
+                </div>
+                <!-- Timestamp markers -->
+                {% for ts in timestamps %}
+                <div class="ts-marker" style="left: calc({{ ts.time_seconds }} / var(--duration) * 100%)"
+                     x-show="duration > 0"
+                     :style="'left:' + ({{ ts.time_seconds }} / duration * 100) + '%'"
+                     title="{{ ts.title }}"></div>
+                {% endfor %}
+                <!-- Preview tooltip -->
+                <div x-show="previewPos !== null" x-cloak
+                     class="absolute -top-8 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap"
+                     :style="'left:' + (previewPos || 0) + '%'"
+                     x-text="previewTimeText"></div>
+            </div>
+
+            <!-- Controls row -->
+            <div class="flex items-center gap-2">
+                <!-- Play/Pause -->
+                <button @click="togglePlay()" class="text-white hover:text-[#C6A46D] transition p-1.5">
+                    <span class="material-icons-round text-2xl" x-text="paused ? 'play_arrow' : 'pause'"></span>
+                </button>
+
+                <!-- Rewind 10s -->
+                <button @click="skip(-10)" class="text-white/70 hover:text-white transition p-1.5" title="−10 сек">
+                    <span class="material-icons-round text-xl">replay_10</span>
+                </button>
+                <!-- Forward 10s -->
+                <button @click="skip(10)" class="text-white/70 hover:text-white transition p-1.5" title="+10 сек">
+                    <span class="material-icons-round text-xl">forward_10</span>
+                </button>
+
+                <!-- Volume -->
+                <div class="flex items-center gap-1 group" x-data="{ volOpen: false }" @mouseenter="volOpen = true" @mouseleave="volOpen = false">
+                    <button @click="toggleMute()" class="text-white/70 hover:text-white transition p-1.5">
+                        <span class="material-icons-round text-xl" x-text="muted ? 'volume_off' : (volume < .5 ? 'volume_down' : 'volume_up')"></span>
+                    </button>
+                    <div x-show="volOpen" x-transition class="w-16 flex items-center">
+                        <input type="range" min="0" max="1" step="0.05" :value="volume"
+                               @input="setVolume($event.target.value)"
+                               class="w-full h-1 accent-[#C6A46D] cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Time display -->
+                <span class="text-white/60 text-sm font-mono tabular-nums ml-1 select-none"
+                      x-text="formatTime(currentTime) + ' / ' + formatTime(duration)"></span>
+
+                <!-- Spacer -->
+                <div class="flex-1"></div>
+
+                <!-- Speed control -->
+                <div class="relative" x-data="{ speedOpen: false }">
+                    <button @click="speedOpen = !speedOpen"
+                            class="text-white/70 hover:text-white transition px-2.5 py-1 text-sm font-semibold rounded"
+                            :class="speed !== 1 ? 'text-[#C6A46D] bg-white/5' : ''">
+                        <span x-text="speed + 'x'"></span>
+                    </button>
+                    <div x-show="speedOpen" x-cloak @click.outside="speedOpen = false" class="speed-menu">
+                        <template x-for="s in [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]">
+                            <button class="speed-option"
+                                    :class="{ 'active': speed === s }"
+                                    @click="setSpeed(s); speedOpen = false"
+                                    x-text="s + 'x'"></button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Picture-in-Picture -->
+                <button @click="togglePiP()" class="text-white/70 hover:text-white transition p-1.5 hidden sm:block" title="Картинка в картинке">
+                    <span class="material-icons-round text-xl">picture_in_picture_alt</span>
+                </button>
+
+                <!-- Fullscreen -->
+                <button @click="toggleFullscreen()" class="text-white/70 hover:text-white transition p-1.5" title="Полный экран">
+                    <span class="material-icons-round text-xl" x-text="isFullscreen ? 'fullscreen_exit' : 'fullscreen'"></span>
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- BELOW VIDEO: Title + Tabs + Rich Content -->
+    <div class="flex-1 bg-white overflow-y-auto content-below">
+
+        <!-- Title bar + meta + completion -->
+        <div class="flex items-start justify-between gap-4 px-6 py-5 border-b border-border">
+            <div class="min-w-0 flex-1">
+                <h1 class="text-navy font-bold text-lg leading-tight">{{ activity.title }}</h1>
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-text-light text-xs">
+                    <span class="flex items-center gap-1">
+                        <span class="material-icons-round text-sm text-primary">play_circle</span>
+                        Урок {{ lesson_index }} из {{ total_lessons }}
+                    </span>
+                    <span class="flex items-center gap-1">
+                        <span class="material-icons-round text-sm">school</span>
+                        {{ section.title }}
+                    </span>
+                    {% if activity.due_date %}
+                    <span class="flex items-center gap-1 text-yellow-600">
+                        <span class="material-icons-round text-sm">schedule</span>
+                        Срок: {{ activity.due_date|date:"d.m.Y" }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div id="completion-btn" class="shrink-0 mt-1">
+                {% if is_completed %}
+                <span class="inline-flex items-center gap-1.5 px-4 py-2 bg-green-50 text-green-600 text-sm font-semibold rounded-lg border border-green-200">
+                    <span class="material-icons-round text-lg">check_circle</span>
+                    Завершено
+                </span>
+                {% else %}
+                <button hx-post="{% url 'complete_activity' slug=course.slug activity_id=activity.id %}"
+                        hx-target="#completion-btn" hx-swap="innerHTML"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-hover transition">
+                    <span class="material-icons-round text-lg">check</span>
+                    Завершить
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div x-data="{ tab: tccState.get('activityTab', '{% if timestamps %}timestamps{% else %}overview{% endif %}') }"
+             x-init="$watch('tab', v => tccState.set('activityTab', v))"
+        >
+            <div class="flex items-center gap-1 px-6 border-b border-border overflow-x-auto">
+                <button @click="tab = 'overview'"
+                        class="tab-btn px-4 py-3 text-sm font-semibold transition whitespace-nowrap"
+                        :class="tab === 'overview' ? 'text-navy active' : 'text-text-light hover:text-text-mid'">
+                    Обзор
+                </button>
+
+                {% if timestamps %}
+                <button @click="tab = 'timestamps'"
+                        class="tab-btn px-4 py-3 text-sm font-semibold transition whitespace-nowrap"
+                        :class="tab === 'timestamps' ? 'text-navy active' : 'text-text-light hover:text-text-mid'">
+                    <span class="flex items-center gap-1">
+                        <span class="material-icons-round text-base">bookmark</span>
+                        Таймкоды <span class="ml-1 text-xs text-text-light">({{ timestamps|length }})</span>
+                    </span>
+                </button>
+                {% endif %}
+
+                {% if section_materials or folder_files %}
+                <button @click="tab = 'materials'"
+                        class="tab-btn px-4 py-3 text-sm font-semibold transition whitespace-nowrap"
+                        :class="tab === 'materials' ? 'text-navy active' : 'text-text-light hover:text-text-mid'">
+                    <span class="flex items-center gap-1">
+                        <span class="material-icons-round text-base">folder_open</span>
+                        Материалы
+                    </span>
+                </button>
+                {% endif %}
+
+                {% if quiz or section_quizzes %}
+                <button @click="tab = 'quiz'"
+                        class="tab-btn px-4 py-3 text-sm font-semibold transition whitespace-nowrap"
+                        :class="tab === 'quiz' ? 'text-navy active' : 'text-text-light hover:text-text-mid'">
+                    <span class="flex items-center gap-1">
+                        <span class="material-icons-round text-base">quiz</span>
+                        Тест
+                    </span>
+                </button>
+                {% endif %}
+
+                {% if assignment or section_assignments %}
+                <button @click="tab = 'assignment'"
+                        class="tab-btn px-4 py-3 text-sm font-semibold transition whitespace-nowrap"
+                        :class="tab === 'assignment' ? 'text-navy active' : 'text-text-light hover:text-text-mid'">
+                    <span class="flex items-center gap-1">
+                        <span class="material-icons-round text-base">assignment</span>
+                        Задание
+                    </span>
+                </button>
+                {% endif %}
+            </div>
+
+            <!-- ===== Tab: Overview ===== -->
+            <div x-show="tab === 'overview'" class="px-6 py-6 space-y-6">
+                <!-- Module description -->
+                {% if activity.description %}
+                <div>
+                    <h3 class="text-navy font-bold text-sm mb-2 flex items-center gap-1.5">
+                        <span class="material-icons-round text-base text-primary">description</span>
+                        Об этом уроке
+                    </h3>
+                    <div class="text-text-mid leading-relaxed text-sm">
+                        {{ activity.description|linebreaksbr }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Section info -->
+                <div class="bg-surface rounded-xl p-5 border border-border">
+                    <h3 class="text-navy font-bold text-sm mb-3 flex items-center gap-1.5">
+                        <span class="material-icons-round text-base text-primary">menu_book</span>
+                        {{ section.title }}
+                    </h3>
+                    {% if section.description %}
+                    <p class="text-text-mid text-sm leading-relaxed mb-4">{{ section.description|linebreaksbr }}</p>
+                    {% endif %}
+                    <!-- What's in this module -->
+                    <div class="flex flex-wrap gap-3 text-xs">
+                        {% if section_materials %}
+                        <span class="flex items-center gap-1 px-3 py-1.5 bg-white rounded-lg border border-border text-text-mid">
+                            <span class="material-icons-round text-sm text-primary">folder_open</span>
+                            {{ section_materials|length }} материал{{ section_materials|length|pluralize:",,ов" }}
+                        </span>
+                        {% endif %}
+                        {% if section_quizzes %}
+                        <span class="flex items-center gap-1 px-3 py-1.5 bg-white rounded-lg border border-border text-text-mid">
+                            <span class="material-icons-round text-sm text-navy">quiz</span>
+                            {{ section_quizzes|length }} тест{{ section_quizzes|length|pluralize:",,ов" }}
+                        </span>
+                        {% endif %}
+                        {% if section_assignments %}
+                        <span class="flex items-center gap-1 px-3 py-1.5 bg-white rounded-lg border border-border text-text-mid">
+                            <span class="material-icons-round text-sm text-navy">assignment</span>
+                            {{ section_assignments|length }} задани{{ section_assignments|length|pluralize:"е,я,й" }}
+                        </span>
+                        {% endif %}
+                        {% if timestamps %}
+                        <span class="flex items-center gap-1 px-3 py-1.5 bg-white rounded-lg border border-border text-text-mid">
+                            <span class="material-icons-round text-sm text-primary">bookmark</span>
+                            {{ timestamps|length }} таймкод{{ timestamps|length|pluralize:",,ов" }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Course info -->
+                <div class="bg-surface rounded-xl p-5 border border-border">
+                    <h3 class="text-navy font-bold text-sm mb-2 flex items-center gap-1.5">
+                        <span class="material-icons-round text-base text-primary">school</span>
+                        О курсе
+                    </h3>
+                    <p class="text-navy font-semibold text-sm">{{ course.title }}</p>
+                    {% if course.description %}
+                    <p class="text-text-mid text-sm leading-relaxed mt-2">{{ course.description|truncatewords:60 }}</p>
+                    {% endif %}
+                    <div class="flex flex-wrap gap-3 mt-3 text-xs">
+                        <span class="flex items-center gap-1 text-text-light">
+                            <span class="material-icons-round text-sm">play_circle</span>
+                            {{ total_lessons }} видеолекций
+                        </span>
+                        {% if enrollment %}
+                        <span class="flex items-center gap-1 text-text-light">
+                            <span class="material-icons-round text-sm">trending_up</span>
+                            Прогресс: {{ enrollment.progress|floatformat:0 }}%
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Keyboard shortcuts -->
+                <details class="group">
+                    <summary class="flex items-center gap-2 cursor-pointer text-text-light text-xs hover:text-text-mid transition select-none">
+                        <span class="material-icons-round text-sm">keyboard</span>
+                        Горячие клавиши
+                        <span class="material-icons-round text-sm group-open:rotate-180 transition-transform">expand_more</span>
+                    </summary>
+                    <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                        <div class="flex items-center gap-2">
+                            <kbd class="px-2 py-0.5 bg-surface border border-border rounded text-navy font-mono text-[11px]">Пробел</kbd>
+                            <span class="text-text-light">Пауза/Играть</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <kbd class="px-2 py-0.5 bg-surface border border-border rounded text-navy font-mono text-[11px]">F</kbd>
+                            <span class="text-text-light">Полный экран</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <kbd class="px-2 py-0.5 bg-surface border border-border rounded text-navy font-mono text-[11px]">&larr; / &rarr;</kbd>
+                            <span class="text-text-light">-10с / +10с</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <kbd class="px-2 py-0.5 bg-surface border border-border rounded text-navy font-mono text-[11px]">M</kbd>
+                            <span class="text-text-light">Без звука</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <kbd class="px-2 py-0.5 bg-surface border border-border rounded text-navy font-mono text-[11px]">&lt; / &gt;</kbd>
+                            <span class="text-text-light">Скорость -/+</span>
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <!-- ===== Tab: Timestamps ===== -->
+            {% if timestamps %}
+            <div x-show="tab === 'timestamps'" x-cloak class="py-2">
+                <div class="divide-y divide-border/50">
+                    {% for ts in timestamps %}
+                    <button @click="seekTo({{ ts.time_seconds }})"
+                            class="timestamp-item w-full flex items-center gap-4 px-6 py-3.5 text-left transition"
+                            :class="{ 'playing': currentTime >= {{ ts.time_seconds }} {% if not forloop.last %}&& currentTime < {{ forloop.next.time_seconds|default:999999 }}{% endif %} }"
+                            data-time="{{ ts.time_seconds }}">
+                        <span class="text-primary font-mono text-sm font-semibold shrink-0 w-14 text-right tabular-nums"
+                              x-text="formatTime({{ ts.time_seconds }})"></span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-navy text-sm font-medium leading-snug">{{ ts.title }}</p>
+                            {% if ts.description %}
+                            <p class="text-text-light text-xs mt-0.5 line-clamp-2">{{ ts.description }}</p>
+                            {% endif %}
+                        </div>
+                        <span class="material-icons-round text-text-light/40 text-lg shrink-0">play_arrow</span>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ===== Tab: Materials ===== -->
+            {% if section_materials or folder_files %}
+            <div x-show="tab === 'materials'" x-cloak class="px-6 py-5">
+                <div class="space-y-3">
+                    {% for ff in folder_files %}
+                    <div class="flex items-center gap-3 p-4 bg-surface rounded-xl border border-border hover:border-primary/20 transition">
+                        <div class="w-11 h-11 rounded-xl bg-navy/5 flex items-center justify-center shrink-0">
+                            <span class="material-icons-round text-navy/50 text-xl">insert_drive_file</span>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-navy text-sm font-semibold truncate">{{ ff.original_name }}</p>
+                        </div>
+                        <a href="{{ ff.file.url }}" download
+                           class="flex items-center gap-1.5 px-4 py-2 bg-navy/5 text-navy text-sm font-medium rounded-lg hover:bg-navy/10 transition shrink-0">
+                            <span class="material-icons-round text-sm">download</span>
+                            Скачать
+                        </a>
+                    </div>
+                    {% endfor %}
+
+                    {% for mat in section_materials %}
+                    <div class="flex items-center gap-3 p-4 bg-surface rounded-xl border border-border hover:border-primary/20 transition">
+                        <div class="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <span class="material-icons-round text-primary text-xl">
+                                {% if mat.activity.activity_type == 'document' %}description
+                                {% elif mat.activity.activity_type == 'resource' %}attach_file
+                                {% elif mat.activity.activity_type == 'url' %}link
+                                {% else %}insert_drive_file{% endif %}
+                            </span>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-navy text-sm font-semibold truncate">{{ mat.activity.title }}</p>
+                            {% if mat.activity.description %}
+                            <p class="text-text-light text-xs truncate mt-0.5">{{ mat.activity.description|truncatewords:12 }}</p>
+                            {% endif %}
+                        </div>
+                        {% if mat.resource and mat.resource.file %}
+                        <a href="{{ mat.resource.file.url }}" download
+                           class="flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover transition shrink-0">
+                            <span class="material-icons-round text-sm">download</span>
+                            Скачать
+                        </a>
+                        {% elif mat.resource and mat.resource.external_url %}
+                        <a href="{{ mat.resource.external_url }}" target="_blank" rel="noopener"
+                           class="flex items-center gap-1.5 px-3 py-2 bg-primary/10 text-primary text-sm font-medium rounded-lg hover:bg-primary/20 transition shrink-0">
+                            <span class="material-icons-round text-sm">open_in_new</span>
+                            Открыть
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ===== Tab: Quiz ===== -->
+            {% if quiz or section_quizzes %}
+            <div x-show="tab === 'quiz'" x-cloak class="px-6 py-5 space-y-4">
+                {% if quiz %}
+                <a href="{% url 'quiz_start' quiz_id=quiz.id %}"
+                   class="flex items-center gap-4 p-5 bg-surface rounded-2xl border border-border hover:border-primary/20 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-navy/10 flex items-center justify-center shrink-0">
+                        <span class="material-icons-round text-navy text-2xl">quiz</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-navy font-bold group-hover:text-primary transition">Тест к уроку</p>
+                        <p class="text-text-light text-xs mt-0.5">
+                            {% if quiz.time_limit %}{{ quiz.time_limit }} мин · {% endif %}
+                            {% if quiz.passing_grade %}Проходной {{ quiz.passing_grade|floatformat:0 }}% · {% endif %}
+                            {{ quiz.questions.count }} вопросов
+                        </p>
+                    </div>
+                    <span class="material-icons-round text-primary text-xl shrink-0">arrow_forward</span>
+                </a>
+                {% endif %}
+                {% for sq in section_quizzes %}
+                <a href="{% url 'activity_detail' slug=course.slug activity_id=sq.activity.id %}"
+                   class="flex items-center gap-4 p-4 bg-surface rounded-xl border border-border hover:border-primary/20 transition group">
+                    <div class="w-10 h-10 rounded-lg bg-navy/10 flex items-center justify-center shrink-0">
+                        <span class="material-icons-round text-navy text-lg">quiz</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-navy text-sm font-semibold group-hover:text-primary transition truncate">{{ sq.activity.title }}</p>
+                    </div>
+                    {% if sq.activity.id in completed_ids %}
+                    <span class="material-icons-round text-green-500 text-lg shrink-0">check_circle</span>
+                    {% else %}
+                    <span class="material-icons-round text-text-light text-lg shrink-0 group-hover:text-primary transition">arrow_forward</span>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- ===== Tab: Assignment ===== -->
+            {% if assignment or section_assignments %}
+            <div x-show="tab === 'assignment'" x-cloak class="px-6 py-5 space-y-4">
+                {% if assignment %}
+                <a href="{% url 'assignment_detail' assignment_id=assignment.id %}"
+                   class="flex items-center gap-4 p-5 bg-surface rounded-2xl border border-border hover:border-primary/20 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-navy/10 flex items-center justify-center shrink-0">
+                        <span class="material-icons-round text-navy text-2xl">assignment</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-navy font-bold group-hover:text-primary transition">Задание к уроку</p>
+                        <p class="text-text-light text-xs mt-0.5">
+                            {% if assignment.max_score %}Макс. балл: {{ assignment.max_score|floatformat:0 }}{% endif %}
+                        </p>
+                    </div>
+                    <span class="material-icons-round text-primary text-xl shrink-0">arrow_forward</span>
+                </a>
+                {% endif %}
+                {% for sa in section_assignments %}
+                <a href="{% url 'activity_detail' slug=course.slug activity_id=sa.activity.id %}"
+                   class="flex items-center gap-4 p-4 bg-surface rounded-xl border border-border hover:border-primary/20 transition group">
+                    <div class="w-10 h-10 rounded-lg bg-navy/10 flex items-center justify-center shrink-0">
+                        <span class="material-icons-round text-navy text-lg">assignment</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-navy text-sm font-semibold group-hover:text-primary transition truncate">{{ sa.activity.title }}</p>
+                    </div>
+                    {% if sa.activity.id in completed_ids %}
+                    <span class="material-icons-round text-green-500 text-lg shrink-0">check_circle</span>
+                    {% else %}
+                    <span class="material-icons-round text-text-light text-lg shrink-0 group-hover:text-primary transition">arrow_forward</span>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Mobile bottom nav -->
+<div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border px-4 py-2 flex items-center justify-between z-40">
+    {% if prev_activity %}
+    <a href="{% url 'activity_detail' slug=course.slug activity_id=prev_activity.id %}"
+       class="flex items-center gap-1 text-text-mid text-sm font-medium hover:text-navy transition">
+        <span class="material-icons-round text-lg">chevron_left</span>
+        Пред.
+    </a>
+    {% else %}<span></span>{% endif %}
+    <span class="text-text-light text-xs">{{ lesson_index }}/{{ total_lessons }}</span>
+    {% if next_activity %}
+    <a href="{% url 'activity_detail' slug=course.slug activity_id=next_activity.id %}"
+       class="flex items-center gap-1 text-primary text-sm font-semibold hover:text-primary-hover transition">
+        След.
+        <span class="material-icons-round text-lg">chevron_right</span>
+    </a>
+    {% else %}<span></span>{% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- YouTube IFrame API (only loads if needed) -->
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+var ytPlayer = null;
+function onYouTubeIframeAPIReady() {
+    if (typeof YT_VIDEO_ID === 'undefined' || !YT_VIDEO_ID) return;
+    ytPlayer = new YT.Player('yt-player', {
+        videoId: YT_VIDEO_ID,
+        playerVars: { rel: 0, modestbranding: 1, start: YT_START_TIME || 0 },
+        events: {
+            onReady: function() {
+                setInterval(function() {
+                    if (ytPlayer && ytPlayer.getCurrentTime) {
+                        saveVideoProgress(Math.floor(ytPlayer.getCurrentTime()), Math.floor(ytPlayer.getDuration()||0));
+                    }
+                }, 10000);
+            },
+            onStateChange: function(e) {
+                if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
+                    saveVideoProgress(Math.floor(ytPlayer.getCurrentTime()), Math.floor(ytPlayer.getDuration()||0));
+                }
+            },
+            onError: function() {
+                var fb = document.getElementById('yt-error-fallback');
+                var iframe = document.querySelector('#yt-player-wrap iframe');
+                if (iframe) iframe.style.display = 'none';
+                if (fb) { fb.classList.remove('hidden'); fb.classList.add('flex'); }
+            }
+        }
+    });
+}
+
+function saveVideoProgress(ct, dur) {
+    fetch("{% url 'save_video_progress' slug=course.slug activity_id=activity.id %}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': '{{ csrf_token }}' },
+        body: 'current_time=' + ct + '&duration=' + dur
+    });
+}
+
+function videoPlayer() {
+    const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+    return {
+        currentTime: {{ video_progress.current_time|default:"0" }},
+        duration: {{ video_progress.duration|default:"0" }},
+        paused: true,
+        buffering: false,
+        muted: false,
+        volume: 1,
+        speed: 1,
+        isFullscreen: false,
+        progressPct: 0,
+        bufferedPct: 0,
+        previewPos: null,
+        previewTimeText: '',
+        controlsVisible: true,
+        controlsTimer: null,
+        saveTimer: null,
+        toastText: '',
+        toastVisible: false,
+        toastTimer: null,
+
+        init() {
+            // Auto-hide controls after 3s
+            this.hideControlsDelay();
+        },
+
+        getVideo() { return document.getElementById('html-video'); },
+
+        // ===== Playback =====
+        togglePlay() {
+            const v = this.getVideo();
+            if (!v) { if (ytPlayer && ytPlayer.getPlayerState) { ytPlayer.getPlayerState() === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); } return; }
+            v.paused ? v.play() : v.pause();
+        },
+
+        skip(secs) {
+            const v = this.getVideo();
+            if (v) { v.currentTime = Math.max(0, Math.min(v.duration, v.currentTime + secs)); }
+            if (ytPlayer && ytPlayer.seekTo) { ytPlayer.seekTo(Math.max(0, ytPlayer.getCurrentTime() + secs), true); }
+            this.showToast((secs > 0 ? '+' : '') + secs + 'с');
+        },
+
+        seekTo(seconds) {
+            const v = this.getVideo();
+            if (v) { v.currentTime = seconds; v.play(); }
+            if (ytPlayer && ytPlayer.seekTo) { ytPlayer.seekTo(seconds, true); }
+        },
+
+        seekToPos(e) {
+            const v = this.getVideo();
+            if (!v) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            v.currentTime = pct * v.duration;
+        },
+
+        previewTime(e) {
+            const v = this.getVideo();
+            if (!v || !v.duration) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            this.previewPos = pct * 100;
+            this.previewTimeText = this.formatTime(Math.floor(pct * v.duration));
+        },
+
+        // ===== Speed =====
+        setSpeed(s) {
+            this.speed = s;
+            const v = this.getVideo();
+            if (v) v.playbackRate = s;
+            this.showToast(s + 'x');
+        },
+        cycleSpeed(dir) {
+            let idx = SPEEDS.indexOf(this.speed);
+            idx = Math.max(0, Math.min(SPEEDS.length - 1, idx + dir));
+            this.setSpeed(SPEEDS[idx]);
+        },
+
+        // ===== Volume =====
+        setVolume(val) {
+            this.volume = parseFloat(val);
+            this.muted = this.volume === 0;
+            const v = this.getVideo();
+            if (v) { v.volume = this.volume; v.muted = this.muted; }
+        },
+        toggleMute() {
+            this.muted = !this.muted;
+            const v = this.getVideo();
+            if (v) v.muted = this.muted;
+            this.showToast(this.muted ? 'Без звука' : 'Звук вкл.');
+        },
+
+        // ===== Fullscreen =====
+        toggleFullscreen() {
+            const wrap = document.getElementById('video-wrap');
+            if (!document.fullscreenElement) {
+                (wrap || document.documentElement).requestFullscreen();
+                this.isFullscreen = true;
+            } else {
+                document.exitFullscreen();
+                this.isFullscreen = false;
+            }
+        },
+
+        // ===== PiP =====
+        togglePiP() {
+            const v = this.getVideo();
+            if (!v) return;
+            if (document.pictureInPictureElement) { document.exitPictureInPicture(); }
+            else { v.requestPictureInPicture(); }
+        },
+
+        // ===== Controls visibility =====
+        showControls() { this.controlsVisible = true; clearTimeout(this.controlsTimer); },
+        hideControlsDelay() {
+            clearTimeout(this.controlsTimer);
+            this.controlsTimer = setTimeout(() => { if (!this.paused) this.controlsVisible = false; }, 3000);
+        },
+
+        // ===== Toast =====
+        showToast(text) {
+            this.toastText = text;
+            this.toastVisible = true;
+            clearTimeout(this.toastTimer);
+            this.toastTimer = setTimeout(() => { this.toastVisible = false; }, 800);
+        },
+
+        // ===== Events =====
+        onTimeUpdate(e) {
+            this.currentTime = Math.floor(e.target.currentTime);
+            this.duration = Math.floor(e.target.duration || 0);
+            this.progressPct = this.duration > 0 ? (e.target.currentTime / e.target.duration * 100) : 0;
+
+            if (!this.saveTimer) {
+                this.saveTimer = setTimeout(() => { this.saveProgress(); this.saveTimer = null; }, 10000);
+            }
+        },
+
+        onProgress(e) {
+            const v = e.target;
+            if (v.buffered.length > 0) {
+                this.bufferedPct = (v.buffered.end(v.buffered.length - 1) / v.duration * 100);
+            }
+        },
+
+        onLoaded(e) {
+            this.duration = Math.floor(e.target.duration || 0);
+            this.paused = e.target.paused;
+            // Resume from saved position
+            if (this.currentTime > 0 && e.target.currentTime < 5) {
+                e.target.currentTime = this.currentTime;
+            }
+        },
+
+        onEnded() { this.paused = true; this.saveProgress(); },
+
+        saveProgress() { saveVideoProgress(this.currentTime, this.duration); },
+
+        // ===== Keyboard shortcuts =====
+        onKeydown(e) {
+            // Don't capture when typing in inputs
+            if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+
+            const v = this.getVideo();
+            switch (e.code) {
+                case 'Space': e.preventDefault(); this.togglePlay(); break;
+                case 'ArrowLeft': e.preventDefault(); this.skip(-10); break;
+                case 'ArrowRight': e.preventDefault(); this.skip(10); break;
+                case 'ArrowUp': e.preventDefault(); this.setVolume(Math.min(1, this.volume + 0.1)); break;
+                case 'ArrowDown': e.preventDefault(); this.setVolume(Math.max(0, this.volume - 0.1)); break;
+                case 'KeyF': e.preventDefault(); this.toggleFullscreen(); break;
+                case 'KeyM': e.preventDefault(); this.toggleMute(); break;
+                case 'Comma': if (e.shiftKey) { e.preventDefault(); this.cycleSpeed(-1); } break; // <
+                case 'Period': if (e.shiftKey) { e.preventDefault(); this.cycleSpeed(1); } break;  // >
+                case 'Home': if (v) { e.preventDefault(); v.currentTime = 0; } break;
+                case 'End': if (v) { e.preventDefault(); v.currentTime = v.duration; } break;
+            }
+        },
+
+        formatTime(seconds) {
+            if (!seconds || seconds < 0) return '00:00';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            if (h > 0) return String(h) + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+            return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+        }
+    };
+}
+</script>
+{% endblock %}

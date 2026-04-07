@@ -1,0 +1,481 @@
+{% extends "layouts/site.html" %}
+{% load static %}
+
+{% block title %}О платформе — TransCaspian Cargo{% endblock %}
+
+{% block page_css %}
+<style>
+/* Editorial hero */
+.about-hero{position:relative;padding:140px 32px 80px;background:#080e1a;color:#fff;overflow:hidden;text-align:center}
+.about-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 900px 500px at 50% 30%,rgba(198,164,109,.12),transparent 70%)}
+.about-hero::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:60px 60px;-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%)}
+.about-hero-inner{position:relative;z-index:2;max-width:1000px;margin:0 auto}
+.about-eyebrow{display:inline-flex;align-items:center;gap:14px;font-size:11px;color:var(--gold-light);font-weight:800;letter-spacing:.22em;text-transform:uppercase;margin-bottom:24px}
+.about-eyebrow::before{content:"";width:32px;height:2px;background:var(--gold-light)}
+.about-hero h1{font-size:clamp(38px,5.8vw,72px);font-weight:900;line-height:1.04;letter-spacing:-.03em;margin:0 0 22px;color:#fff}
+.about-hero h1 .gold{font-style:italic;font-weight:300;color:var(--gold-light)}
+.about-hero p{font-size:16px;color:rgba(255,255,255,.55);max-width:660px;margin:0 auto;line-height:1.7;font-weight:500}
+.about-section{background:#FAFBFD}
+.about-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:48px;align-items:stretch}
+.about-text p{color:var(--text-mid);font-size:15px;line-height:1.8;margin-bottom:20px}
+.about-values{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:32px}
+.about-value{background:var(--bg-card);border:1px solid var(--border-light);border-radius:12px;padding:20px;transition:all .3s}
+.about-value:hover{border-color:rgba(198,164,109,.2);box-shadow:0 4px 16px rgba(0,0,0,.04)}
+.about-value h4{font-size:13px;font-weight:700;color:var(--gold);margin-bottom:6px}
+.about-value p{font-size:12px;color:var(--text-light);line-height:1.6}
+.founder-card{background:var(--bg-card);border:1px solid var(--border-light);border-radius:16px;padding:36px 28px;display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center;height:100%}
+.founder-avatar{width:120px;height:120px;border-radius:50%;overflow:hidden;border:3px solid rgba(198,164,109,.2);margin-bottom:20px;flex-shrink:0}
+.founder-avatar img{width:100%;height:100%;object-fit:cover;object-position:center 15%}
+.founder-name{font-size:20px;font-weight:700;margin-bottom:6px}
+.founder-role{font-size:12px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:20px}
+.founder-quote{font-size:14px;color:var(--text-mid);line-height:1.8;font-style:italic;position:relative;padding:20px 0 0}
+.founder-quote::before{content:'\201C';font-size:56px;color:rgba(198,164,109,.2);position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-family:Georgia,serif}
+.ecosystem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:32px}
+.eco-item{text-align:center;padding:20px 12px;background:rgba(198,164,109,.04);border:1px solid var(--border-light);border-radius:12px;transition:all .3s}
+.eco-item:hover{background:rgba(198,164,109,.08);border-color:rgba(198,164,109,.2)}
+.eco-item svg{width:28px;height:28px;color:var(--gold);margin-bottom:8px}
+.eco-item span{font-size:11px;font-weight:600;color:var(--text-mid);display:block}
+.experts-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:48px}
+.expert-card{text-align:center;padding:28px 20px;background:var(--bg-card);border:1px solid var(--border-light);border-radius:16px;transition:all .4s}
+.expert-card:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(0,0,0,.08);border-color:rgba(198,164,109,.2)}
+.expert-card .avatar{width:120px;height:120px;border-radius:50%;margin:0 auto 16px;overflow:hidden;border:3px solid rgba(198,164,109,.15);transition:all .4s;position:relative}
+.expert-card:hover .avatar{border-color:var(--gold);box-shadow:0 0 0 4px rgba(198,164,109,.1)}
+.expert-card .avatar img{width:100%;height:100%;object-fit:cover;object-position:center top;transition:transform .4s}
+.expert-card:hover .avatar img{transform:scale(1.05)}
+.expert-card .avatar-initials{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(198,164,109,.12),rgba(27,42,74,.08));color:var(--gold);font-size:32px;font-weight:800;letter-spacing:.02em}
+.expert-card h4{font-size:14px;font-weight:700;margin-bottom:4px;color:var(--text)}
+.expert-card .expert-role{font-size:11px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.expert-card p{font-size:12px;color:var(--text-light);line-height:1.6}
+/* Circle Timeline */
+.tl-circle{width:88px;height:88px;border-radius:50%;border:2px solid var(--border);background:var(--bg-card);display:flex;align-items:center;justify-content:center;transition:all .4s;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.04)}
+.tl-circle::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid transparent;transition:all .4s}
+.tl-node:hover .tl-circle{border-color:rgba(198,164,109,.4);box-shadow:0 8px 32px rgba(198,164,109,.12);transform:translateY(-4px)}
+.tl-node:hover .tl-circle::after{border-color:rgba(198,164,109,.15)}
+.tl-circle-active{background:var(--gold);border-color:var(--gold)}
+.tl-circle-active::after{border-color:rgba(198,164,109,.25)!important}
+.tl-year{font-size:20px;font-weight:900;color:var(--text-light);margin-top:14px;transition:color .3s}
+.tl-node:hover .tl-year{color:var(--gold)}
+.tl-label{font-size:11px;color:var(--text-light);text-align:center;line-height:1.5;margin-top:6px;transition:color .3s}
+.tl-node:hover .tl-label{color:var(--text-mid)}
+.tl-node{position:relative}
+.tl-popup{position:absolute;bottom:calc(100% + 16px);left:50%;transform:translateX(-50%) translateY(8px) scale(.95);width:240px;background:var(--navy);border:1px solid rgba(198,164,109,.2);border-radius:16px;padding:20px;box-shadow:0 16px 48px rgba(0,0,0,.2);opacity:0;visibility:hidden;transition:all .3s ease;z-index:50;pointer-events:none}
+.tl-popup::after{content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%) rotate(45deg);width:12px;height:12px;background:var(--navy);border-right:1px solid rgba(198,164,109,.2);border-bottom:1px solid rgba(198,164,109,.2)}
+.tl-node:hover .tl-popup,.tl-node.tl-clicked .tl-popup{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0) scale(1);pointer-events:auto}
+.tl-popup-year{font-size:32px;font-weight:900;color:var(--gold-light);line-height:1;margin-bottom:8px}
+.tl-popup-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:8px;line-height:1.3}
+.tl-popup-desc{font-size:12px;color:rgba(255,255,255,.5);line-height:1.6}
+.tl-popup-line{width:32px;height:2px;background:var(--gold);border-radius:1px;margin-bottom:10px}
+/* Ecosystem Hub Orbit */
+@keyframes orbitSpin{0%{transform:translate(-50%,-50%) rotate(0deg)}100%{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes orbitCounterSpin{0%{transform:rotate(0deg)}100%{transform:rotate(-360deg)}}
+.eco-hub{position:relative;width:100%;max-width:600px;aspect-ratio:1;margin:0 auto}
+.eco-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,var(--navy),#0F1D35);border:2px solid rgba(198,164,109,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;box-shadow:0 0 60px rgba(198,164,109,.08)}
+.eco-center span{font-size:11px;color:var(--gold-light);font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.eco-center strong{font-size:20px;color:#fff;font-weight:800;margin-top:4px}
+.eco-orbit{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:1px dashed rgba(198,164,109,.1)}
+.eco-orbit-1{width:320px;height:320px}
+.eco-orbit-2{width:480px;height:480px}
+.eco-sat{position:absolute;transform:translate(-50%,-50%);text-align:center;transition:all .4s;cursor:default;z-index:5}
+.eco-sat-icon{width:64px;height:64px;border-radius:50%;background:var(--bg-card);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;transition:all .4s;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.eco-sat:hover .eco-sat-icon{border-color:var(--gold);box-shadow:0 0 0 6px rgba(198,164,109,.08),0 8px 32px rgba(198,164,109,.12);transform:scale(1.1)}
+.eco-sat h4{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap}
+.eco-sat p{font-size:10px;color:var(--text-light);max-width:130px;line-height:1.4;margin-top:2px}
+.eco-lines{position:absolute;inset:0;z-index:1;pointer-events:none}
+.eco-line{stroke:rgba(198,164,109,.1);stroke-width:1.5;fill:none;transition:all .6s}
+.eco-line-glow{stroke:var(--gold);stroke-width:2.5;fill:none;opacity:0;transition:all .6s;filter:drop-shadow(0 0 6px rgba(198,164,109,.4))}
+.eco-dot-flow{fill:var(--gold-light);opacity:0}
+.eco-sat.eco-active .eco-sat-icon{border-color:var(--gold);box-shadow:0 0 0 8px rgba(198,164,109,.12),0 0 30px rgba(198,164,109,.15);transform:scale(1.12)}
+.eco-hub.eco-animating .eco-line-glow.eco-line-on{opacity:1}
+.eco-hub.eco-animating .eco-dot-flow.eco-dot-on{opacity:1}
+@media(max-width:1024px){
+  .about-grid{grid-template-columns:1fr;gap:32px}
+  .ecosystem-grid,.experts-grid{grid-template-columns:repeat(2,1fr)}
+  .tl-circle{width:72px;height:72px}.tl-year{font-size:16px}
+  .eco-hub{max-width:480px}.eco-orbit-1{width:260px;height:260px}.eco-orbit-2{width:400px;height:400px}.eco-center{width:110px;height:110px}.eco-center strong{font-size:16px}.eco-sat-icon{width:52px;height:52px}
+}
+@media(max-width:640px){
+  .about-values{grid-template-columns:1fr}
+  .ecosystem-grid{grid-template-columns:1fr 1fr}
+  .experts-grid{grid-template-columns:1fr}
+  .tl-circle{width:60px;height:60px}.tl-circle svg{width:22px;height:22px}.tl-label{font-size:10px}.tl-detail{font-size:10px;max-width:140px}
+  .founder-card{padding:24px 16px}
+  .eco-hub{max-width:340px}.eco-orbit-1{width:200px;height:200px}.eco-orbit-2{width:300px;height:300px}.eco-center{width:90px;height:90px}.eco-center span{font-size:9px}.eco-center strong{font-size:14px}.eco-sat-icon{width:44px;height:44px}.eco-sat-icon svg{width:18px;height:18px}.eco-sat h4{font-size:10px}.eco-sat p{display:none}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- PAGE HERO -->
+<div class="about-hero">
+  <div class="about-hero-inner">
+    <div class="about-eyebrow">О платформе</div>
+    <h1>TransCaspian<br><span class="gold">Cargo</span></h1>
+    <p>Экосистема стратегических решений для бизнеса, инвесторов, институтов развития и государственных структур — на пересечении логистики, аналитики и образования</p>
+  </div>
+</div>
+
+<!-- 1. О КОМПАНИИ — История создания -->
+<section class="section about-section">
+  <div style="max-width:1240px;margin:0 auto">
+    <div class="about-grid">
+      <div class="reveal-left">
+        <div class="about-text">
+          <div class="section-label">О компании</div>
+          <h2 class="section-title" style="font-size:clamp(20px,3vw,32px)">История создания <span class="gold">TransCaspian Cargo</span></h2>
+          <p>TCC — это экосистема стратегических решений для бизнеса, инвесторов, институтов развития и государственных структур. TCC работает там, где пересекаются логистика, аналитика, стратегия, экспертиза, образование и международное сотрудничество.</p>
+          <p>TCC помогает выстраивать не точечные ответы, а системную логику. Не отдельные действия, а целостную архитектуру. Не временные меры, а основу для устойчивого развития. Компания работает одновременно с настоящими задачами бизнеса и с будущим самой отрасли.</p>
+          <p>TCC — это архитектор решений для логистики Евразии, а не просто поставщик услуги.</p>
+        </div>
+      </div>
+      <div class="reveal-right">
+        <div class="founder-card">
+          <div class="founder-avatar"><img src="https://optim.tildacdn.pro/tild3035-6432-4333-b236-383634636339/-/resize/385x/-/format/webp/man.png.webp" alt="Рустем Бисалиев"></div>
+          <div class="founder-name">Рустем Бисалиев</div>
+          <div class="founder-role">Основатель и Генеральный Директор</div>
+          <div class="founder-quote">
+            Логистика сегодня — это не вторичная сервисная функция. Это часть архитектуры любого серьёзного проекта. От неё зависят выполнение контрактов, контроль бюджета, доверие инвесторов и сама способность проекта состояться.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Horizontal circle timeline (Vanity Fair style) -->
+    <div class="reveal" style="margin-top:64px;position:relative;padding:0 40px">
+      <!-- Connecting line -->
+      <div style="position:absolute;top:44px;left:80px;right:80px;height:2px;background:linear-gradient(90deg,transparent,var(--border),var(--gold),var(--border),transparent);z-index:0"></div>
+
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1">
+        <!-- 2015 -->
+        <div class="tl-node" style="display:flex;flex-direction:column;align-items:center;flex:1;cursor:pointer" onclick="tlToggle(this)">
+          <div class="tl-popup">
+            <div class="tl-popup-year">2015</div>
+            <div class="tl-popup-line"></div>
+            <div class="tl-popup-title">Основание TransCaspian Cargo</div>
+            <div class="tl-popup-desc">Создание компании в Атырау как центра экспертизы в сфере логистики Прикаспийского региона</div>
+          </div>
+          <div class="tl-circle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M3 21h18M3 7v14M21 7v14M6 7V4h12v3M10 11h4M10 15h4"/></svg>
+          </div>
+          <div class="tl-year">2015</div>
+          <div class="tl-label">Основание TCC<br>в Атырау</div>
+        </div>
+
+        <!-- 2020 -->
+        <div class="tl-node" style="display:flex;flex-direction:column;align-items:center;flex:1;cursor:pointer" onclick="tlToggle(this)">
+          <div class="tl-popup">
+            <div class="tl-popup-year">2020</div>
+            <div class="tl-popup-line"></div>
+            <div class="tl-popup-title">Запуск образовательных программ</div>
+            <div class="tl-popup-desc">Старт авторских курсов по управлению цепями поставок и транспортной логистике</div>
+          </div>
+          <div class="tl-circle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </div>
+          <div class="tl-year">2020</div>
+          <div class="tl-label">Запуск курсов<br>по логистике</div>
+        </div>
+
+        <!-- 2024 -->
+        <div class="tl-node" style="display:flex;flex-direction:column;align-items:center;flex:1;cursor:pointer" onclick="tlToggle(this)">
+          <div class="tl-popup">
+            <div class="tl-popup-year">2024</div>
+            <div class="tl-popup-line"></div>
+            <div class="tl-popup-title">200+ выпускников программ</div>
+            <div class="tl-popup-desc">Более 200 специалистов прошли обучение по программам TCC в области SCM и логистики</div>
+          </div>
+          <div class="tl-circle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="tl-year">2024</div>
+          <div class="tl-label">200+ выпускников<br>программ</div>
+        </div>
+
+        <!-- 2025 -->
+        <div class="tl-node" style="display:flex;flex-direction:column;align-items:center;flex:1;cursor:pointer" onclick="tlToggle(this)">
+          <div class="tl-popup">
+            <div class="tl-popup-year">2025</div>
+            <div class="tl-popup-line"></div>
+            <div class="tl-popup-title">Запуск TCC HUB</div>
+            <div class="tl-popup-desc">Открытие единой интеллектуальной платформы: аналитика, образование, консалтинг и международные партнёрства</div>
+          </div>
+          <div class="tl-circle tl-circle-active">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="tl-year" style="color:var(--gold)">2025</div>
+          <div class="tl-label" style="color:var(--text)">Запуск<br>TCC HUB</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- 2. МИССИЯ -->
+<div class="section-divider"></div>
+<div class="section">
+  <div style="max-width:1240px;margin:0 auto">
+    <div class="reveal" style="max-width:860px;margin:0 auto;border:2px solid rgba(198,164,109,.2);border-radius:20px;padding:48px 56px;position:relative;background:linear-gradient(135deg,rgba(198,164,109,.02),rgba(27,42,74,.02));box-shadow:0 8px 40px rgba(0,0,0,.03)">
+      <div style="position:absolute;top:-1px;left:48px;right:48px;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);border-radius:0 0 2px 2px"></div>
+      <div style="text-align:center">
+        <div class="section-label" style="justify-content:center">Миссия</div>
+        <h2 class="section-title" style="font-size:clamp(22px,3vw,36px);max-width:700px;margin-left:auto;margin-right:auto">Формирование устойчивой <span class="gold">логистической инфраструктуры</span> Евразии</h2>
+        <div style="width:48px;height:2px;background:var(--gold);border-radius:1px;margin:24px auto"></div>
+        <p style="color:var(--text-mid);font-size:15px;line-height:1.9;max-width:680px;margin:0 auto">Повышать качество стратегического управления в логистике и инфраструктуре, снижать риски, усиливать устойчивость проектов и укреплять капитал компаний через более зрелые цепи поставок, сильные управленческие решения и развитие профессиональной среды.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. ВИДЕНИЕ -->
+<div class="section-divider"></div>
+<div style="background:linear-gradient(160deg,#080e1a 0%,#0F1D35 40%,#1B2A4A 100%);padding:100px 24px;position:relative;overflow:hidden">
+  <!-- Ambient glow -->
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(198,164,109,.06),transparent 70%);pointer-events:none"></div>
+  <div style="position:absolute;inset:0;opacity:.02;background:radial-gradient(circle at 20% 30%,rgba(255,255,255,.15),transparent 40%),radial-gradient(circle at 80% 70%,rgba(198,164,109,.1),transparent 40%);pointer-events:none"></div>
+
+  <div style="max-width:1240px;margin:0 auto;position:relative;z-index:2">
+    <div class="reveal" style="text-align:center;margin-bottom:56px">
+      <div style="display:inline-flex;align-items:center;gap:8px;font-size:11px;color:var(--gold-light);font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:20px">
+        <span style="display:inline-block;width:28px;height:2px;background:linear-gradient(90deg,transparent,var(--gold-light));border-radius:1px"></span>
+        Видение
+        <span style="display:inline-block;width:28px;height:2px;background:linear-gradient(90deg,var(--gold-light),transparent);border-radius:1px"></span>
+      </div>
+      <h2 style="font-size:clamp(26px,4vw,44px);font-weight:800;color:#fff;line-height:1.15;max-width:800px;margin:0 auto 20px">Ключевая интеллектуальная и практическая платформа Евразии <span style="color:var(--gold-light)">в области логистики</span></h2>
+      <p style="font-size:16px;color:rgba(255,255,255,.5);line-height:1.8;max-width:680px;margin:0 auto">TCC стремится стать одной из ключевых интеллектуальных и практических платформ Евразии в области логистики, supply chain management, транспортных коридоров и профессионального развития отрасли.</p>
+    </div>
+
+    <!-- Vision pillars — horizontal cards with left accent -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1000px;margin:0 auto">
+      <div class="reveal-scale" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:36px 28px;position:relative;overflow:hidden;transition:all .4s;border-left:3px solid var(--gold-light)" onmouseover="this.style.background='rgba(255,255,255,.06)';this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 40px rgba(198,164,109,.08)'" onmouseout="this.style.background='rgba(255,255,255,.03)';this.style.transform='translateY(0)';this.style.boxShadow='none'">
+        <div style="font-size:48px;font-weight:900;color:var(--gold-light);opacity:.15;position:absolute;top:12px;right:16px;line-height:1">01</div>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--gold-light)" stroke-width="1.5" style="margin-bottom:16px"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+        <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">Знания</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.45);line-height:1.7">Физическая + интеллектуальная инфраструктура. Дороги, порты и маршруты подкрепляются знанием, компетенциями и стратегическим мышлением.</div>
+      </div>
+      <div class="reveal-scale" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:36px 28px;position:relative;overflow:hidden;transition:all .4s;border-left:3px solid var(--gold-light)" onmouseover="this.style.background='rgba(255,255,255,.06)';this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 40px rgba(198,164,109,.08)'" onmouseout="this.style.background='rgba(255,255,255,.03)';this.style.transform='translateY(0)';this.style.boxShadow='none'">
+        <div style="font-size:48px;font-weight:900;color:var(--gold-light);opacity:.15;position:absolute;top:12px;right:16px;line-height:1">02</div>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--gold-light)" stroke-width="1.5" style="margin-bottom:16px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">Решения</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.45);line-height:1.7">Новая управленческая культура. Логистика как стратегическая дисциплина, где бизнес, образование и государство работают в синергии.</div>
+      </div>
+      <div class="reveal-scale" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:36px 28px;position:relative;overflow:hidden;transition:all .4s;border-left:3px solid var(--gold-light)" onmouseover="this.style.background='rgba(255,255,255,.06)';this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 40px rgba(198,164,109,.08)'" onmouseout="this.style.background='rgba(255,255,255,.03)';this.style.transform='translateY(0)';this.style.boxShadow='none'">
+        <div style="font-size:48px;font-weight:900;color:var(--gold-light);opacity:.15;position:absolute;top:12px;right:16px;line-height:1">03</div>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--gold-light)" stroke-width="1.5" style="margin-bottom:16px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">Партнёрства</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.45);line-height:1.7">Способность к восстановлению. Не случайность, а итог продуманной архитектуры решений, аналитики и партнёрств.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. ЭКОСИСТЕМА TCC — Hub Orbit -->
+<div class="section" style="padding-bottom:60px">
+  <div style="max-width:1240px;margin:0 auto">
+    <div class="reveal" style="text-align:center;margin-bottom:24px">
+      <div class="section-label" style="justify-content:center">Экосистема TCC</div>
+      <h2 class="section-title">Ключевые направления <span class="gold">платформы</span></h2>
+      <p class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center">Каждое направление усиливает остальные, формируя единую экосистему, где знания превращаются в инструменты, инструменты — в решения, а решения — в устойчивые результаты.</p>
+    </div>
+
+    <div class="eco-hub reveal-scale" id="ecoHub">
+      <!-- Orbits -->
+      <div class="eco-orbit eco-orbit-1"></div>
+      <div class="eco-orbit eco-orbit-2"></div>
+
+      <!-- SVG connector lines from center to each satellite -->
+      <svg class="eco-lines" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet">
+        <!-- Static lines (dim) -->
+        <line class="eco-line" x1="300" y1="300" x2="300" y2="36" data-sat="0"/>
+        <line class="eco-line" x1="300" y1="300" x2="576" y2="300" data-sat="1"/>
+        <line class="eco-line" x1="300" y1="300" x2="300" y2="564" data-sat="2"/>
+        <line class="eco-line" x1="300" y1="300" x2="24" y2="300" data-sat="3"/>
+        <!-- Glow lines (appear on activation) -->
+        <line class="eco-line-glow" x1="300" y1="300" x2="300" y2="36" data-sat="0"/>
+        <line class="eco-line-glow" x1="300" y1="300" x2="576" y2="300" data-sat="1"/>
+        <line class="eco-line-glow" x1="300" y1="300" x2="300" y2="564" data-sat="2"/>
+        <line class="eco-line-glow" x1="300" y1="300" x2="24" y2="300" data-sat="3"/>
+        <!-- Animated dots traveling along lines -->
+        <circle class="eco-dot-flow" r="4" data-sat="0">
+          <animate attributeName="cx" values="300;300" dur="1s" repeatCount="1"/>
+          <animate attributeName="cy" values="300;36" dur="1s" repeatCount="1"/>
+        </circle>
+        <circle class="eco-dot-flow" r="4" data-sat="1">
+          <animate attributeName="cx" values="300;576" dur="1s" repeatCount="1"/>
+          <animate attributeName="cy" values="300;300" dur="1s" repeatCount="1"/>
+        </circle>
+        <circle class="eco-dot-flow" r="4" data-sat="2">
+          <animate attributeName="cx" values="300;300" dur="1s" repeatCount="1"/>
+          <animate attributeName="cy" values="300;564" dur="1s" repeatCount="1"/>
+        </circle>
+        <circle class="eco-dot-flow" r="4" data-sat="3">
+          <animate attributeName="cx" values="300;24" dur="1s" repeatCount="1"/>
+          <animate attributeName="cy" values="300;300" dur="1s" repeatCount="1"/>
+        </circle>
+      </svg>
+
+      <!-- Center -->
+      <div class="eco-center" id="ecoCenter" style="cursor:pointer">
+        <span>TCC</span>
+        <strong>HUB</strong>
+      </div>
+
+      <!-- Satellite: Архитектура (top) -->
+      <div class="eco-sat" data-idx="0" style="top:6%;left:50%">
+        <div class="eco-sat-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+        </div>
+        <h4>Архитектура цепей поставок</h4>
+        <p>ТМТМ, BRI и INSTC</p>
+      </div>
+
+      <!-- Satellite: Аналитика (right) -->
+      <div class="eco-sat" data-idx="1" style="top:50%;left:96%">
+        <div class="eco-sat-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h4>SCM-аналитика</h4>
+        <p>Рынки, риски, сценарии</p>
+      </div>
+
+      <!-- Satellite: Компетенции (bottom) -->
+      <div class="eco-sat" data-idx="2" style="top:94%;left:50%">
+        <div class="eco-sat-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <h4>Компетенции и лидерство</h4>
+        <p>Курсы, мастермайнды</p>
+      </div>
+
+      <!-- Satellite: Партнёрства (left) -->
+      <div class="eco-sat" data-idx="3" style="top:50%;left:4%">
+        <div class="eco-sat-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h4>Партнёрства и рынки</h4>
+        <p>Форумы, торговые миссии</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. КОМАНДА — Эксперты и партнёры -->
+<div class="section-divider"></div>
+<div class="section">
+  <div style="max-width:1240px;margin:0 auto">
+    <div class="reveal" style="text-align:center;margin-bottom:48px">
+      <div class="section-label" style="justify-content:center">Команда</div>
+      <h2 class="section-title">Эксперты и <span class="gold">партнёры</span></h2>
+      <p class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center">Практики с многолетним опытом в логистике, транспорте и цепях поставок</p>
+    </div>
+    <div class="experts-grid">
+      <div class="expert-card reveal-scale">
+        <div class="avatar"><img src="https://optim.tildacdn.pro/tild3035-6432-4333-b236-383634636339/-/resize/385x/-/format/webp/man.png.webp" alt="Рустем Бисалиев"></div>
+        <h4>Рустем Бисалиев</h4>
+        <div class="expert-role">Основатель и CEO</div>
+        <p>Эксперт в стратегическом управлении цепями поставок</p>
+      </div>
+      <div class="expert-card reveal-scale">
+        <div class="avatar"><div class="avatar-initials">АТ</div></div>
+        <h4>Айслу Тайсаринова</h4>
+        <div class="expert-role">Логистика и транспорт</div>
+        <p>Эксперт по логистике и транспортному планированию. Опыт 23+ лет</p>
+      </div>
+      <div class="expert-card reveal-scale">
+        <div class="avatar"><div class="avatar-initials">РХ</div></div>
+        <h4>Рустам Хуснутдинов</h4>
+        <div class="expert-role">Проектная логистика</div>
+        <p>Эксперт по проектной логистике и снабжению. Опыт 25+ лет</p>
+      </div>
+      <div class="expert-card reveal-scale">
+        <div class="avatar"><div class="avatar-initials">ОС</div></div>
+        <h4>Оксана Сорокина</h4>
+        <div class="expert-role">Международная логистика</div>
+        <p>Эксперт в международной логистике и авиационных перевозках. Опыт 22+ лет</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA BANNER -->
+<div class="cta-banner">
+  <h2>Присоединяйтесь к экосистеме TCC</h2>
+  <p>Станьте частью платформы отраслевой экспертизы в логистике Евразии</p>
+  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">СВЯЗАТЬСЯ С НАМИ</button>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+// Ecosystem hub — sequential line animation on click/hover
+(function(){
+  const hub = document.getElementById('ecoHub');
+  const center = document.getElementById('ecoCenter');
+  if(!hub || !center) return;
+
+  let animating = false;
+
+  function activateSequence(){
+    if(animating) return;
+    animating = true;
+    hub.classList.add('eco-animating');
+
+    const sats = hub.querySelectorAll('.eco-sat');
+    const glowLines = hub.querySelectorAll('.eco-line-glow');
+    const dots = hub.querySelectorAll('.eco-dot-flow');
+
+    // Reset all
+    sats.forEach(s => s.classList.remove('eco-active'));
+    glowLines.forEach(l => l.classList.remove('eco-line-on'));
+    dots.forEach(d => d.classList.remove('eco-dot-on'));
+
+    // Activate one by one with delay
+    sats.forEach((sat, i) => {
+      setTimeout(() => {
+        // Light up glow line
+        glowLines[i].classList.add('eco-line-on');
+        dots[i].classList.add('eco-dot-on');
+
+        // Activate satellite
+        setTimeout(() => {
+          sat.classList.add('eco-active');
+        }, 300);
+      }, i * 500);
+    });
+
+    // Reset after full sequence
+    setTimeout(() => {
+      animating = false;
+    }, sats.length * 500 + 800);
+  }
+
+  // Click on center hub
+  center.addEventListener('click', activateSequence);
+
+  // Hover on center hub
+  center.addEventListener('mouseenter', activateSequence);
+
+  // Also trigger on scroll into view
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        setTimeout(activateSequence, 600);
+        obs.unobserve(e.target);
+      }
+    });
+  }, {threshold: .5});
+  obs.observe(hub);
+})();
+
+// Timeline popup toggle (click)
+function tlToggle(node){
+  const wasActive = node.classList.contains('tl-clicked');
+  document.querySelectorAll('.tl-node.tl-clicked').forEach(n=>n.classList.remove('tl-clicked'));
+  if(!wasActive) node.classList.add('tl-clicked');
+}
+// Close popup on outside click
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.tl-node')) document.querySelectorAll('.tl-node.tl-clicked').forEach(n=>n.classList.remove('tl-clicked'));
+});
+</script>
+{% endblock %}

@@ -1,0 +1,194 @@
+{% extends "layouts/site.html" %}
+{% load static %}
+
+{% block title %}Решения для бизнеса — TransCaspian Cargo{% endblock %}
+
+{% block page_css %}
+<style>
+.solutions-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+.solution-card{background:var(--bg-card);border:1px solid var(--border-light);border-radius:16px;padding:32px;display:flex;gap:20px;transition:all .4s}
+.solution-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,.06);border-color:rgba(198,164,109,.2)}
+.solution-card.full-width{grid-column:span 2}
+.solution-icon{width:56px;height:56px;border-radius:14px;background:rgba(198,164,109,.06);border:1px solid rgba(198,164,109,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--gold);transition:all .4s}
+.solution-card:hover .solution-icon{background:var(--gold);color:#fff;box-shadow:0 4px 16px rgba(198,164,109,.3)}
+.solution-card h3{font-size:15px;font-weight:700;margin-bottom:8px}
+.solution-card p{font-size:13px;color:var(--text-light);line-height:1.6}
+.solution-card ul{list-style:none;margin-top:10px}
+.solution-card li{font-size:12px;color:var(--text-light);padding:4px 0;display:flex;align-items:center;gap:6px}
+.solution-card li::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.process-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:48px}
+.process-step{text-align:center;padding:32px 20px;background:var(--bg-card);border:1px solid var(--border-light);border-radius:16px;position:relative}
+.process-step::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:40px;height:3px;background:var(--gold);border-radius:0 0 3px 3px}
+.process-num{font-size:36px;font-weight:900;color:rgba(198,164,109,.15);margin-bottom:8px}
+.process-step h4{font-size:14px;font-weight:700;margin-bottom:8px;color:var(--text)}
+.process-step p{font-size:12px;color:var(--text-light);line-height:1.6}
+@media(max-width:1024px){
+  .solutions-grid{grid-template-columns:1fr 1fr}
+  .solution-card.full-width{grid-column:span 2}
+  .process-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:640px){
+  .solutions-grid,.process-grid{grid-template-columns:1fr}
+  .solution-card.full-width{grid-column:span 1}
+  .solution-card{flex-direction:column;padding:24px}
+  .btn-white{width:100%;text-align:center;display:block}
+  .process-step{padding:24px 16px}
+}
+@media(max-width:480px){
+  .solution-card{padding:20px 16px}
+  .solution-card h3{font-size:14px}
+  .solution-card p{font-size:12px}
+  .solution-card li{font-size:11px}
+  .solution-icon{width:48px;height:48px;border-radius:12px}
+  .process-step{padding:20px 14px}
+  .process-num{font-size:28px}
+  .process-step h4{font-size:13px}
+  .process-step p{font-size:11px}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="section-label" style="justify-content:center">Решения для бизнеса</div>
+  <h2 class="section-title">Практическая работа <span class="gold">платформы TCC</span></h2>
+  <p class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center">Сопровождаем бизнес на всех этапах развития — от аудита текущих процессов до построения масштабируемых логистических и операционных моделей.</p>
+</div>
+
+<!-- 5 НАПРАВЛЕНИЙ ПО ТЗ -->
+<section class="section">
+  <div class="reveal" style="text-align:center;margin-bottom:48px">
+    <div class="section-label" style="justify-content:center">Основные направления</div>
+    <h2 class="section-title">Пять направлений <span class="gold">практической работы</span></h2>
+  </div>
+
+  <div class="solutions-grid">
+
+    <!-- 1. Стратегические сессии для компаний -->
+    <div class="solution-card reveal-scale">
+      <div class="solution-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div>
+        <h3>Стратегические сессии для компаний</h3>
+        <p>Индивидуальные и групповые стратегические сессии, направленные на формирование долгосрочных решений в области логистики и цепей поставок.</p>
+        <ul>
+          <li>Глубокая диагностика текущих логистических процессов</li>
+          <li>Формирование стратегических приоритетов и дорожных карт</li>
+          <li>Разработка KPI и метрик эффективности</li>
+          <li>Сценарное планирование с учётом геоэкономических факторов</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2. Анализ цепей поставок -->
+    <div class="solution-card reveal-scale">
+      <div class="solution-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+      </div>
+      <div>
+        <h3>Анализ цепей поставок</h3>
+        <p>Комплексный анализ supply chain-систем компании: от поставщиков до конечного потребителя. Выявление узких мест, оптимизация процессов, повышение эффективности.</p>
+        <ul>
+          <li>Аудит текущей цепи поставок и её ключевых звеньев</li>
+          <li>Оценка стоимости, сроков и надёжности каждого этапа</li>
+          <li>Бенчмаркинг с лучшими практиками отрасли</li>
+          <li>Рекомендации по оптимизации и снижению затрат</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 3. Выявление логистических рисков -->
+    <div class="solution-card reveal-scale">
+      <div class="solution-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div>
+        <h3>Выявление логистических рисков</h3>
+        <p>Системная оценка рисков в логистических цепочках: санкционные ограничения, геополитические факторы, инфраструктурные узкие места и зависимость от контрагентов.</p>
+        <ul>
+          <li>Карта рисков по каждому звену цепи поставок</li>
+          <li>Оценка санкционных и регуляторных рисков</li>
+          <li>Анализ зависимости от ключевых маршрутов и поставщиков</li>
+          <li>Разработка планов митигации и резервных сценариев</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 4. Поиск альтернативных маршрутов -->
+    <div class="solution-card reveal-scale">
+      <div class="solution-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+      <div>
+        <h3>Поиск альтернативных маршрутов</h3>
+        <p>Проектирование и оценка альтернативных транспортных маршрутов в условиях перестройки глобальной логистики. Средний коридор, коридор Север-Юг, мультимодальные схемы.</p>
+        <ul>
+          <li>Сравнительный анализ маршрутов по стоимости, срокам и рискам</li>
+          <li>Оценка инфраструктурной готовности коридоров</li>
+          <li>Проектирование мультимодальных логистических схем</li>
+          <li>Моделирование сценариев перемаршрутизации</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 5. Выход на новые рынки -->
+    <div class="solution-card full-width reveal-scale">
+      <div class="solution-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div>
+        <h3>Выход на новые рынки</h3>
+        <p>Сопровождение компаний при выходе на новые рынки Центральной Азии, Каспийского региона, Китая и Европы. От анализа рынка до установления деловых связей и логистической инфраструктуры.</p>
+        <ul>
+          <li>Анализ целевого рынка: ёмкость, конкуренция, барьеры входа</li>
+          <li>Оценка логистической инфраструктуры и доступных маршрутов</li>
+          <li>Консалтинг по регуляторным требованиям и таможенным процедурам</li>
+          <li>Организация B2B-встреч и поиск партнёров на целевом рынке</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROCESS -->
+<div class="section-divider"></div>
+<section class="section">
+  <div class="reveal" style="text-align:center;margin-bottom:16px">
+    <div class="section-label" style="justify-content:center">Процесс работы</div>
+    <h2 class="section-title">Как мы <span class="gold">работаем</span></h2>
+    <p class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center">Четыре этапа от первичной диагностики до внедрения решений</p>
+  </div>
+  <div class="process-grid">
+    <div class="process-step reveal-scale">
+      <div class="process-num">01</div>
+      <h4>Диагностика</h4>
+      <p>Глубокий анализ текущих процессов, выявление узких мест и точек роста</p>
+    </div>
+    <div class="process-step reveal-scale">
+      <div class="process-num">02</div>
+      <h4>Анализ</h4>
+      <p>Исследование рынка, конкурентов, маршрутов и геополитических факторов</p>
+    </div>
+    <div class="process-step reveal-scale">
+      <div class="process-num">03</div>
+      <h4>Стратегия</h4>
+      <p>Разработка пошагового плана действий с KPI и временными рамками</p>
+    </div>
+    <div class="process-step reveal-scale">
+      <div class="process-num">04</div>
+      <h4>Внедрение</h4>
+      <p>Сопровождение реализации стратегии и корректировка по результатам</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-banner">
+  <h2>Запросить консультацию</h2>
+  <p>Получите бесплатную диагностику ваших логистических процессов от экспертов TCC</p>
+  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">СВЯЗАТЬСЯ С ЭКСПЕРТОМ</button>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% for rf in alerts %}
+<div class="py-2 {% if not forloop.last %}border-b{% endif %}" style="border-color:rgba(27,42,74,0.06)">
+    <div class="flex items-center gap-1.5">
+        <span class="material-icons-round text-xs
+            {% if rf.impact_score >= 7 %}text-red-500
+            {% elif rf.impact_score >= 4 %}text-amber-500
+            {% else %}text-gray-400{% endif %}">warning</span>
+        <span class="text-xs font-medium text-navy">{{ rf.title|truncatechars:35 }}</span>
+    </div>
+    <p class="text-[10px] text-text-light mt-0.5 pl-5">
+        {{ rf.get_risk_category_display }} · Импакт: {{ rf.impact_score|floatformat:1 }}
+    </p>
+</div>
+{% empty %}
+<p class="text-xs text-text-light">Нет новых алертов</p>
+{% endfor %}

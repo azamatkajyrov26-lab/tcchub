@@ -1,0 +1,138 @@
+{% extends "layouts/site.html" %}
+{% block title %}Аналитические отчёты — TCC HUB{% endblock %}
+
+{% block page_css %}
+<style>
+.rep-hero{position:relative;padding:140px 24px 80px;background:#080e1a;color:#fff;overflow:hidden}
+.rep-hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 900px 500px at 50% 20%,rgba(198,164,109,.10),transparent 70%),radial-gradient(ellipse 600px 400px at 85% 90%,rgba(100,180,255,.05),transparent 70%);pointer-events:none}
+.rep-hero::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%)}
+.rep-hero-wrap{max-width:1280px;margin:0 auto;position:relative;z-index:2}
+.rep-eyebrow{display:inline-flex;align-items:center;gap:14px;font-size:11px;font-weight:800;color:var(--gold-light);letter-spacing:.22em;text-transform:uppercase;margin-bottom:24px}
+.rep-eyebrow .bar{width:32px;height:2px;background:var(--gold-light)}
+.rep-title{font-size:clamp(38px,6vw,72px);font-weight:900;line-height:1.02;letter-spacing:-.03em;margin:0 0 24px;max-width:900px}
+.rep-title em{font-style:italic;font-weight:300;color:var(--gold-light)}
+.rep-lead{font-size:17px;line-height:1.7;color:rgba(255,255,255,.55);max-width:600px;margin:0}
+
+.rep-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06);border-radius:18px;overflow:hidden;margin-top:60px}
+.rep-kpi{background:#080e1a;padding:28px 24px}
+.rep-kpi-num{font-size:clamp(28px,3.2vw,42px);font-weight:900;color:var(--gold-light);line-height:1;letter-spacing:-.025em}
+.rep-kpi-lab{margin-top:10px;font-size:11px;color:rgba(255,255,255,.5);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+
+.rep-toolbar{max-width:1280px;margin:0 auto;padding:48px 24px 0;display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.rep-chips{display:flex;gap:8px;flex-wrap:wrap}
+.rep-chip{padding:9px 18px;border-radius:24px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;transition:all .25s;border:1px solid var(--border-light);background:#fff;color:var(--text-mid)}
+.rep-chip:hover{border-color:var(--gold);color:var(--gold)}
+.rep-chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.rep-count-info{font-size:12px;color:var(--text-light);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.rep-count-info b{color:var(--navy);font-weight:800;font-size:14px}
+
+.rep-grid-wrap{max-width:1280px;margin:0 auto;padding:36px 24px 100px}
+.rep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px}
+
+.rep-card{position:relative;background:#fff;border-radius:18px;border:1px solid var(--border-light);overflow:hidden;display:flex;flex-direction:column;transition:all .35s cubic-bezier(.2,.9,.3,1.2);text-decoration:none}
+.rep-card:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(27,42,74,.10);border-color:rgba(198,164,109,.25)}
+.rep-card-cover{position:relative;height:180px;overflow:hidden}
+.rep-card-cover .img{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .6s}
+.rep-card:hover .rep-card-cover .img{transform:scale(1.06)}
+.rep-card-cover .grad{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.55) 100%)}
+.rep-card-tpl{position:absolute;top:14px;left:14px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);padding:6px 12px;border-radius:14px;font-size:10px;font-weight:800;color:#fff;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(255,255,255,.12)}
+.rep-card-price{position:absolute;top:14px;right:14px;background:#fff;padding:6px 14px;border-radius:14px;font-size:12px;font-weight:800;color:var(--navy);box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.rep-card-price.free{background:#22c55e;color:#fff}
+.rep-card-corridor-strip{position:absolute;left:0;right:0;bottom:0;display:flex;gap:0}
+.rep-card-corridor-strip span{flex:1;height:4px}
+.rep-card-body{padding:22px;flex:1;display:flex;flex-direction:column;gap:12px}
+.rep-card-title{font-size:16px;font-weight:800;color:var(--navy);line-height:1.35;letter-spacing:-.01em;margin:0}
+.rep-card-sub{font-size:13px;color:var(--text-mid);line-height:1.55;margin:0}
+.rep-card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.rep-card-tag{padding:3px 10px;border-radius:10px;font-size:10px;font-weight:800;letter-spacing:.04em}
+.rep-card-meta{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid var(--border-light);font-size:11px;color:var(--text-light);font-weight:600}
+.rep-card-meta-r{display:flex;align-items:center;gap:14px}
+.rep-card-meta-r span{display:inline-flex;align-items:center;gap:5px}
+
+.rep-empty{grid-column:1/-1;text-align:center;padding:80px 24px;background:var(--bg-alt);border-radius:24px;border:1px dashed var(--border-light)}
+.rep-empty-icon{width:72px;height:72px;border-radius:50%;background:rgba(198,164,109,.08);color:var(--gold);display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px}
+.rep-empty h3{font-size:20px;font-weight:800;color:var(--navy);margin-bottom:8px}
+.rep-empty p{font-size:14px;color:var(--text-light)}
+
+@media(max-width:900px){.rep-kpis{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.rep-toolbar{padding:36px 20px 0}.rep-grid-wrap{padding:24px 20px 80px}}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="rep-hero">
+  <div class="rep-hero-wrap">
+    <div class="rep-eyebrow"><span class="bar"></span>Аналитика TCC</div>
+    <h1 class="rep-title">Аналитические отчёты<br><em>торговых коридоров</em></h1>
+    <p class="rep-lead">Экспертный анализ цепей поставок Евразии: риск-скоры, санкционный скрининг, сценарии развития коридоров и матрицы решений для бизнеса.</p>
+
+    <div class="rep-kpis">
+      <div class="rep-kpi"><div class="rep-kpi-num">{{ reports|length }}</div><div class="rep-kpi-lab">Отчётов в каталоге</div></div>
+      <div class="rep-kpi"><div class="rep-kpi-num">{{ templates|length }}</div><div class="rep-kpi-lab">Типов аналитики</div></div>
+      <div class="rep-kpi"><div class="rep-kpi-num">11</div><div class="rep-kpi-lab">Коридоров покрыто</div></div>
+      <div class="rep-kpi"><div class="rep-kpi-num">10<span style="font-size:.4em;color:rgba(255,255,255,.45);font-weight:600;margin-left:4px">+</span></div><div class="rep-kpi-lab">Стран в анализе</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLBAR -->
+<section class="rep-toolbar">
+  <div class="rep-chips">
+    <a href="{% url 'reports_catalog' %}" class="rep-chip {% if not current_template %}active{% endif %}">Все категории</a>
+    {% for tpl in templates %}
+    <a href="{% url 'reports_catalog' %}?template={{ tpl.pk }}" class="rep-chip {% if current_template == tpl.pk %}active{% endif %}">{{ tpl.name }}</a>
+    {% endfor %}
+  </div>
+  <div class="rep-count-info"><b>{{ reports|length }}</b> {% if current_template %}отчётов в категории{% else %}отчётов опубликовано{% endif %}</div>
+</section>
+
+<!-- GRID -->
+<section class="rep-grid-wrap">
+  <div class="rep-grid">
+    {% for report in reports %}
+    <a href="{% url 'report_detail' report.slug %}" class="rep-card reveal">
+      <div class="rep-card-cover">
+        {% if report.cover_image %}
+        <div class="img" style="background-image:url('{{ report.cover_image.url }}')"></div>
+        {% else %}
+        <div class="img" style="background:linear-gradient(135deg,{{ report.corridors.first.color|default:'#1B2A4A' }},#080e1a)"></div>
+        {% endif %}
+        <div class="grad"></div>
+        <div class="rep-card-tpl">{{ report.template.name }}</div>
+        {% if report.price_usd == 0 or report.is_free_preview %}
+        <div class="rep-card-price free">Бесплатно</div>
+        {% else %}
+        <div class="rep-card-price">${{ report.price_usd }}</div>
+        {% endif %}
+        <div class="rep-card-corridor-strip">
+          {% for corridor in report.corridors.all %}<span style="background:{{ corridor.color }}"></span>{% endfor %}
+        </div>
+      </div>
+      <div class="rep-card-body">
+        <h3 class="rep-card-title">{{ report.title }}</h3>
+        {% if report.subtitle %}<p class="rep-card-sub">{{ report.subtitle }}</p>{% endif %}
+        <div class="rep-card-tags">
+          {% for corridor in report.corridors.all %}
+          <span class="rep-card-tag" style="background:{{ corridor.color }}15;color:{{ corridor.color }};border:1px solid {{ corridor.color }}30">{{ corridor.code }}</span>
+          {% endfor %}
+        </div>
+        <div class="rep-card-meta">
+          <span>{{ report.created_by.get_full_name|default:"TCC" }}</span>
+          <div class="rep-card-meta-r">
+            <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>{{ report.published_at|date:"d.m.Y" }}</span>
+            <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>{{ report.views_count }}</span>
+          </div>
+        </div>
+      </div>
+    </a>
+    {% empty %}
+    <div class="rep-empty">
+      <div class="rep-empty-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <h3>Отчёты готовятся к публикации</h3>
+      <p>Следите за обновлениями каталога — новые отчёты появятся в ближайшее время.</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

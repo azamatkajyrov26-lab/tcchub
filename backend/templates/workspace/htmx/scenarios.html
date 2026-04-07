@@ -1,0 +1,33 @@
+<table class="w-full text-xs">
+    <thead>
+        <tr class="text-left">
+            <th class="pb-2 text-text-light font-medium">Коридор</th>
+            <th class="pb-2 text-text-light font-medium">План</th>
+            <th class="pb-2 text-text-light font-medium">Транзит</th>
+            <th class="pb-2 text-text-light font-medium">Надёжн.</th>
+            <th class="pb-2 text-text-light font-medium">Риск</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sc in scenarios %}
+        <tr class="border-t" style="border-color:rgba(27,42,74,0.06)">
+            <td class="py-1.5 text-navy font-medium">{{ sc.corridor.code }}</td>
+            <td class="py-1.5">
+                <span class="font-bold">{{ sc.plan_code }}</span>
+                {% if sc.is_recommended %}<span class="text-green-500 ml-1">★</span>{% endif %}
+            </td>
+            <td class="py-1.5">{{ sc.transit_days_min }}–{{ sc.transit_days_max }}д</td>
+            <td class="py-1.5">{{ sc.reliability_score|floatformat:2 }}</td>
+            <td class="py-1.5
+                {% if sc.risk_score >= 0.6 %}text-red-500
+                {% elif sc.risk_score >= 0.3 %}text-amber-500
+                {% else %}text-green-500{% endif %} font-semibold">
+                {{ sc.risk_score|floatformat:2 }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% if not scenarios %}
+<p class="text-xs text-text-light">Нет сценариев</p>
+{% endif %}

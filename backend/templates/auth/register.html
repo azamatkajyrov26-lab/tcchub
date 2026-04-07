@@ -1,0 +1,58 @@
+{% extends "layouts/auth.html" %}
+{% block title %}Регистрация — TCC HUB{% endblock %}
+
+{% block content %}
+<h2 class="text-xl font-bold text-navy mb-6">Создать аккаунт</h2>
+<form method="post" action="{% url 'register' %}" class="space-y-4">
+    {% csrf_token %}
+    {% if form_errors %}
+    <div class="px-4 py-3 rounded-xl text-sm bg-red-50 text-red-600 border border-red-200 font-medium">
+        {{ form_errors }}
+    </div>
+    {% endif %}
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label for="first_name" class="block text-sm text-text-mid mb-1.5 font-medium">Имя</label>
+            <input type="text" name="first_name" id="first_name" required value="{{ first_name|default:'' }}"
+                   class="w-full px-4 py-3 bg-surface border border-border rounded-xl text-navy placeholder-text-light focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"
+                   placeholder="Имя">
+        </div>
+        <div>
+            <label for="last_name" class="block text-sm text-text-mid mb-1.5 font-medium">Фамилия</label>
+            <input type="text" name="last_name" id="last_name" required value="{{ last_name|default:'' }}"
+                   class="w-full px-4 py-3 bg-surface border border-border rounded-xl text-navy placeholder-text-light focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"
+                   placeholder="Фамилия">
+        </div>
+    </div>
+    <div>
+        <label for="email" class="block text-sm text-text-mid mb-1.5 font-medium">Email</label>
+        <input type="email" name="email" id="email" required value="{{ email|default:'' }}"
+               class="w-full px-4 py-3 bg-surface border border-border rounded-xl text-navy placeholder-text-light focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"
+               placeholder="your@email.com">
+    </div>
+    <div>
+        <label for="username" class="block text-sm text-text-mid mb-1.5 font-medium">Имя пользователя</label>
+        <input type="text" name="username" id="username" required value="{{ username|default:'' }}"
+               class="w-full px-4 py-3 bg-surface border border-border rounded-xl text-navy placeholder-text-light focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"
+               placeholder="username">
+    </div>
+    <div>
+        <label for="password" class="block text-sm text-text-mid mb-1.5 font-medium">Пароль</label>
+        <input type="password" name="password" id="password" required
+               class="w-full px-4 py-3 bg-surface border border-border rounded-xl text-navy placeholder-text-light focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"
+               placeholder="Минимум 8 символов">
+    </div>
+    <div>
+        <label for="password_confirm" class="block text-sm text-text-mid mb-1.5 font-medium">Подтверждение пароля</label>
+        <input type="password" name="password_confirm" id="password_confirm" required
+               class="w-full px-4 py-3 bg-surface border border-border rounded-xl text-navy placeholder-text-light focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"
+               placeholder="Повторите пароль">
+    </div>
+    <button type="submit" class="w-full py-3 bg-navy text-white font-bold rounded-xl hover:bg-navy-light transition shadow-sm">
+        Зарегистрироваться
+    </button>
+</form>
+<div class="mt-6 text-center text-sm text-text-light">
+    Уже есть аккаунт? <a href="{% url 'login' %}" class="text-primary font-semibold hover:underline">Войти</a>
+</div>
+{% endblock %}

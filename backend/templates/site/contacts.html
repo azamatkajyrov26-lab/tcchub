@@ -1,0 +1,209 @@
+{% extends "layouts/site.html" %}
+{% load static %}
+
+{% block title %}Контакты — TransCaspian Cargo{% endblock %}
+
+{% block page_css %}
+<style>
+.ct-section{position:relative;padding:140px 24px 100px;background:#080e1a;color:#fff;overflow:hidden;min-height:100vh}
+.ct-section::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 800px 600px at 20% 30%,rgba(198,164,109,.10),transparent 70%),radial-gradient(ellipse 700px 500px at 80% 70%,rgba(100,180,255,.05),transparent 70%);pointer-events:none}
+.ct-section::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%);-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%)}
+.ct-wrap{max-width:1280px;margin:0 auto;position:relative;z-index:2}
+.ct-head{text-align:center;margin-bottom:64px}
+.ct-eyebrow{display:inline-flex;align-items:center;gap:14px;font-size:11px;font-weight:800;color:var(--gold-light);letter-spacing:.22em;text-transform:uppercase;margin-bottom:24px}
+.ct-eyebrow .bar{width:32px;height:2px;background:var(--gold-light)}
+.ct-title{font-size:clamp(38px,5.5vw,64px);font-weight:900;line-height:1.04;letter-spacing:-.025em;margin:0 0 22px}
+.ct-title em{font-style:italic;font-weight:300;color:var(--gold-light)}
+.ct-lead{font-size:17px;line-height:1.7;color:rgba(255,255,255,.55);max-width:600px;margin:0 auto}
+
+.ct-status-pill{display:inline-flex;align-items:center;gap:10px;padding:10px 20px;border-radius:30px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);margin-top:24px}
+.ct-status-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.2);animation:pulseDot 2s infinite}
+@keyframes pulseDot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.2);opacity:.7}}
+.ct-status-pill span{font-size:12px;color:#bdf5d5;font-weight:700;letter-spacing:.05em}
+
+.ct-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+
+.ct-info-col{display:flex;flex-direction:column;gap:18px}
+.ct-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:30px;transition:all .35s;backdrop-filter:blur(8px)}
+.ct-card:hover{background:rgba(255,255,255,.05);border-color:rgba(198,164,109,.2);transform:translateY(-2px)}
+.ct-card-head{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.ct-card-icon{width:44px;height:44px;border-radius:12px;background:rgba(198,164,109,.1);border:1px solid rgba(198,164,109,.2);color:var(--gold-light);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ct-card-label{font-size:10px;color:var(--gold-light);font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.ct-card-value{font-size:18px;color:#fff;font-weight:700;line-height:1.4;letter-spacing:-.005em}
+.ct-card-value a{color:#fff;border-bottom:1px solid rgba(198,164,109,.3);transition:border-color .3s}
+.ct-card-value a:hover{border-color:var(--gold-light)}
+.ct-card-sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:6px;line-height:1.6}
+
+.ct-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ct-info-grid .ct-card{padding:22px}
+.ct-info-grid .ct-card-value{font-size:14px}
+
+.ct-socials{display:flex;gap:10px;margin-top:6px}
+.ct-socials a{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.55);transition:all .3s}
+.ct-socials a:hover{color:var(--navy);background:var(--gold-light);border-color:var(--gold-light);transform:translateY(-3px) scale(1.05)}
+
+.ct-form{background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.10);border-radius:24px;padding:40px;backdrop-filter:blur(12px);position:relative;overflow:hidden}
+.ct-form::before{content:"";position:absolute;top:0;left:24px;right:24px;height:1px;background:linear-gradient(90deg,transparent,rgba(198,164,109,.5),transparent)}
+.ct-form-eyebrow{font-size:11px;color:var(--gold-light);font-weight:800;letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px}
+.ct-form-title{font-size:24px;font-weight:800;color:#fff;line-height:1.2;letter-spacing:-.015em;margin-bottom:8px}
+.ct-form-desc{font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:28px}
+
+.ct-form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.ct-field{position:relative}
+.ct-field label{position:absolute;top:14px;left:18px;font-size:11px;color:rgba(255,255,255,.35);font-weight:600;letter-spacing:.05em;text-transform:uppercase;pointer-events:none;transition:all .3s}
+.ct-field input,.ct-field textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:32px 18px 14px;color:#fff;font-size:14px;font-family:inherit;outline:none;transition:all .3s}
+.ct-field textarea{resize:none;min-height:120px;padding-top:32px}
+.ct-field input:focus,.ct-field textarea:focus{border-color:rgba(198,164,109,.5);background:rgba(255,255,255,.06)}
+.ct-field input:focus + label,.ct-field input:not(:placeholder-shown) + label,
+.ct-field textarea:focus + label,.ct-field textarea:not(:placeholder-shown) + label{top:8px;font-size:9px;color:var(--gold-light)}
+
+.ct-submit{width:100%;background:linear-gradient(135deg,var(--gold),#b08e54);color:#fff;padding:18px;border-radius:14px;font-weight:800;font-size:13px;border:none;cursor:pointer;font-family:inherit;letter-spacing:.08em;text-transform:uppercase;margin-top:16px;transition:all .3s;box-shadow:0 8px 28px rgba(198,164,109,.25);display:flex;align-items:center;justify-content:center;gap:10px}
+.ct-submit:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(198,164,109,.4)}
+
+.ct-form .success-msg{display:none;text-align:center;padding:48px 24px}
+.ct-form .success-msg svg{color:var(--gold-light);margin-bottom:18px}
+.ct-form .success-msg .ttl{font-size:20px;font-weight:800;color:#fff;margin-bottom:8px}
+.ct-form .success-msg .sub{font-size:13px;color:rgba(255,255,255,.5)}
+.ct-form.sent .ct-form-eyebrow,.ct-form.sent .ct-form-title,.ct-form.sent .ct-form-desc,
+.ct-form.sent .ct-form-row,.ct-form.sent .ct-field,.ct-form.sent .ct-submit{display:none}
+.ct-form.sent .success-msg{display:block}
+
+.ct-map{margin-top:32px;border-radius:24px;overflow:hidden;border:1px solid rgba(255,255,255,.08);position:relative}
+.ct-map iframe{width:100%;height:300px;border:none;filter:invert(.92) grayscale(.6) hue-rotate(180deg) brightness(.9)}
+.ct-map-overlay{position:absolute;top:18px;left:18px;background:rgba(8,14,26,.85);backdrop-filter:blur(10px);border:1px solid rgba(198,164,109,.2);border-radius:14px;padding:14px 18px;color:#fff;max-width:280px}
+.ct-map-overlay .ttl{font-size:11px;color:var(--gold-light);font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.ct-map-overlay .addr{font-size:12px;color:rgba(255,255,255,.7);line-height:1.5}
+
+@media(max-width:1024px){.ct-grid{grid-template-columns:1fr}}
+@media(max-width:640px){
+  .ct-section{padding:110px 16px 60px}
+  .ct-form{padding:28px 22px}
+  .ct-info-grid{grid-template-columns:1fr}
+  .ct-form-row{grid-template-columns:1fr}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="ct-section">
+  <div class="ct-wrap">
+    <div class="ct-head">
+      <div class="ct-eyebrow"><span class="bar"></span>Связь с TCC<span class="bar"></span></div>
+      <h1 class="ct-title">Поговорим<br>о вашем <em>проекте</em></h1>
+      <p class="ct-lead">Получите бесплатную консультацию от экспертов TCC по управлению цепями поставок, логистике Евразии и стратегическому развитию.</p>
+      <div class="ct-status-pill"><span class="ct-status-dot"></span><span>ОТВЕЧАЕМ В ТЕЧЕНИЕ 2 ЧАСОВ · ПН–ПТ 09:00–18:00</span></div>
+    </div>
+
+    <div class="ct-grid">
+      <!-- LEFT: contact info -->
+      <div class="ct-info-col reveal-left">
+        <!-- Office big card -->
+        <div class="ct-card">
+          <div class="ct-card-head">
+            <div class="ct-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            <span class="ct-card-label">Главный офис</span>
+          </div>
+          <div class="ct-card-value">г. Атырау, БЦ «Адал»</div>
+          <div class="ct-card-sub">пр. Студенческий 52 · Казахстан</div>
+        </div>
+
+        <!-- Phone + Email side by side -->
+        <div class="ct-info-grid">
+          <div class="ct-card">
+            <div class="ct-card-head">
+              <div class="ct-card-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+              <span class="ct-card-label">Телефон</span>
+            </div>
+            <div class="ct-card-value"><a href="tel:+77710544898">+7 771 054 4898</a></div>
+          </div>
+          <div class="ct-card">
+            <div class="ct-card-head">
+              <div class="ct-card-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="2 3 12 13 22 3"/></svg></div>
+              <span class="ct-card-label">Email</span>
+            </div>
+            <div class="ct-card-value"><a href="mailto:info@tc-cargo.kz">info@tc-cargo.kz</a></div>
+          </div>
+        </div>
+
+        <!-- Schedule + Socials -->
+        <div class="ct-card">
+          <div class="ct-card-head">
+            <div class="ct-card-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <span class="ct-card-label">Соцсети и режим работы</span>
+          </div>
+          <div class="ct-card-sub" style="margin-bottom:14px">Понедельник — Пятница · 09:00 — 18:00 (UTC+5)</div>
+          <div class="ct-socials">
+            <a href="https://wa.link/wrcagw" target="_blank" rel="noopener" title="WhatsApp"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.11.547 4.093 1.504 5.818L0 24l6.335-1.632A11.955 11.955 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.82a9.796 9.796 0 0 1-5.09-1.418l-.365-.217-3.781.975.999-3.648-.238-.379A9.798 9.798 0 0 1 2.18 12c0-5.414 4.406-9.82 9.82-9.82 5.414 0 9.82 4.406 9.82 9.82 0 5.414-4.406 9.82-9.82 9.82z"/></svg></a>
+            <a href="https://www.linkedin.com/company/tccargo/" target="_blank" rel="noopener" title="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+            <a href="https://www.instagram.com/transcaspian_cargo" target="_blank" rel="noopener" title="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg></a>
+            <a href="https://www.youtube.com/@TCCHUB-25" target="_blank" rel="noopener" title="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+          </div>
+        </div>
+
+        <!-- Map -->
+        <div class="ct-map">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2894.5!2d51.925!3d47.117!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x41a47d6b14e2f5a1%3A0x4a5e1d2f3b4c5e6f!2z0L_RgC4g0KHRgtGD0LTQtdC90YfQtdGB0LrQuNC5IDUyLCDQkNGC0YvRgNCw0YMsINCa0LDQt9Cw0YXRgdGC0LDQvQ!5e0!3m2!1sru!2skz!4v1700000000000!5m2!1sru!2skz" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+          <div class="ct-map-overlay">
+            <div class="ttl">— Главный офис</div>
+            <div class="addr">пр. Студенческий 52, БЦ Адал, Атырау, Казахстан</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: form -->
+      <div class="ct-form reveal-right" id="contactForm">
+        <div class="ct-form-eyebrow">— Заполните форму</div>
+        <h2 class="ct-form-title">Расскажите о задаче</h2>
+        <p class="ct-form-desc">Опишите вашу задачу — мы свяжемся в ближайшее время и предложим варианты решения от наших экспертов.</p>
+
+        <div class="ct-field">
+          <input type="text" id="cfName" placeholder=" " required>
+          <label for="cfName">Ваше имя *</label>
+        </div>
+        <div class="ct-form-row">
+          <div class="ct-field">
+            <input type="tel" id="cfPhone" placeholder=" ">
+            <label for="cfPhone">Телефон</label>
+          </div>
+          <div class="ct-field">
+            <input type="email" id="cfEmail" placeholder=" ">
+            <label for="cfEmail">Email</label>
+          </div>
+        </div>
+        <div class="ct-field">
+          <textarea id="cfMessage" placeholder=" "></textarea>
+          <label for="cfMessage">Опишите задачу</label>
+        </div>
+        <button type="button" class="ct-submit" onclick="submitContact()">
+          Получить консультацию
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+
+        <div class="success-msg">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+          <div class="ttl">Заявка отправлена</div>
+          <div class="sub">Мы свяжемся с вами в ближайшее время</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block page_js %}
+<script>
+function submitContact(){
+  var name=document.getElementById('cfName').value.trim();
+  var phone=document.getElementById('cfPhone').value.trim();
+  var email=document.getElementById('cfEmail').value.trim();
+  var msg=document.getElementById('cfMessage').value.trim();
+  if(!name){var f=document.getElementById('cfName');f.style.borderColor='rgba(231,76,60,.6)';f.focus();return;}
+  var text='Заявка с сайта TCC\n\nИмя: '+name;
+  if(phone) text+='\nТелефон: '+phone;
+  if(email) text+='\nEmail: '+email;
+  if(msg) text+='\nСообщение: '+msg;
+  document.getElementById('contactForm').classList.add('sent');
+  window.open('https://wa.me/77710544898?text='+encodeURIComponent(text),'_blank');
+}
+</script>
+{% endblock %}

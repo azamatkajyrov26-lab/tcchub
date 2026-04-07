@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div x-data="{ sidebarOpen: tccState.get('playerSidebar', true), profileOpen: false }"
+     x-init="$watch('sidebarOpen', v => tccState.set('playerSidebar', v))"
+     class="min-h-screen bg-[#1B1F2E] flex flex-col">
+
+    <!-- Compact Top Bar (dark, like Udemy player) -->
+    <nav class="h-12 bg-[#1B1F2E] border-b border-white/10 flex items-center px-4 z-50 shrink-0">
+        <!-- Left: Back + Course title -->
+        <div class="flex items-center gap-3 min-w-0 flex-1">
+            <a href="{% url 'course_detail' slug=course.slug %}"
+               class="flex items-center gap-1.5 text-white/60 hover:text-white transition shrink-0 text-sm">
+                <span class="material-icons-round text-lg">arrow_back</span>
+                <span class="hidden sm:inline">Назад</span>
+            </a>
+            <div class="w-px h-5 bg-white/10 hidden sm:block"></div>
+            <span class="text-white/80 text-sm font-medium truncate hidden sm:block">{{ course.title }}</span>
+        </div>
+
+        <!-- Center: Progress -->
+        {% if enrollment %}
+        <div class="hidden md:flex items-center gap-3 px-4">
+            <div class="w-32 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div class="h-full bg-primary rounded-full" style="width: {{ enrollment.progress }}%"></div>
+            </div>
+            <span class="text-white/50 text-xs font-medium">{{ enrollment.progress|floatformat:0 }}%</span>
+        </div>
+        {% endif %}
+
+        <!-- Right: Actions -->
+        <div class="flex items-center gap-1">
+            {% if prev_activity %}
+            <a href="{% url 'activity_detail' slug=course.slug activity_id=prev_activity.id %}"
+               class="p-1.5 text-white/50 hover:text-white transition rounded" title="Предыдущий урок">
+                <span class="material-icons-round text-xl">skip_previous</span>
+            </a>
+            {% endif %}
+            {% if next_activity %}
+            <a href="{% url 'activity_detail' slug=course.slug activity_id=next_activity.id %}"
+               class="p-1.5 text-white/50 hover:text-white transition rounded" title="Следующий урок">
+                <span class="material-icons-round text-xl">skip_next</span>
+            </a>
+            {% endif %}
+
+            <div class="w-px h-5 bg-white/10 mx-1"></div>
+
+            <!-- Toggle sidebar -->
+            <button @click="sidebarOpen = !sidebarOpen"
+                    class="p-1.5 text-white/50 hover:text-white transition rounded flex items-center gap-1 text-sm"
+                    :title="sidebarOpen ? 'Скрыть содержание' : 'Показать содержание'">
+                <span class="material-icons-round text-xl">menu</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Area: Player + Sidebar -->
+    <div class="flex-1 flex overflow-hidden">
+        <!-- Content area -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            {% block player_content %}{% endblock %}
+        </div>
+
+        <!-- Sidebar: Course content -->
+        <aside x-show="sidebarOpen"
+               x-transition:enter="transition ease-out duration-200"
+               x-transition:enter-start="translate-x-full opacity-0"
+               x-transition:enter-end="translate-x-0 opacity-100"
+               x-transition:leave="transition ease-in duration-150"
+               x-transition:leave-start="translate-x-0 opacity-100"
+               x-transition:leave-end="translate-x-full opacity-0"
+               class="w-[380px] bg-white border-l border-black/10 flex-col hidden lg:flex overflow-hidden shrink-0"
+               :class="sidebarOpen ? 'lg:flex' : 'hidden'">
+
+            <!-- Sidebar header -->
+            <div class="h-12 flex items-center justify-between px-4 border-b border-border shrink-0 bg-surface">
+                <h3 class="text-navy font-bold text-sm">Содержание курса</h3>
+                <button @click="sidebarOpen = false" class="p-1 text-text-light hover:text-navy transition rounded">
+                    <span class="material-icons-round text-lg">close</span>
+                </button>
+            </div>
+
+            <!-- Sections list -->
+            <div class="flex-1 overflow-y-auto" x-data="{ openSection: {{ activity.section.id }} }">
+                {% for section in sections %}
+                <div class="border-b border-border">
+                    <!-- Section header -->
+                    <button @click="openSection = openSection === {{ section.id }} ? null : {{ section.id }}"
+                            class="w-full flex items-center justify-between px-4 py-3 bg-surface/50 hover:bg-surface transition text-left">
+                        <div class="min-w-0 flex-1">
+                            <h4 class="text-navy text-[13px] font-bold leading-tight">{{ section.title }}</h4>
+                            <span class="text-text-light text-[11px]">{{ section.activities.count }} элементов</span>
+                        </div>
+                        <span class="material-icons-round text-text-light text-lg shrink-0 ml-2 transition-transform duration-200"
+                              :class="openSection === {{ section.id }} ? 'rotate-180' : ''">expand_more</span>
+                    </button>
+
+                    <!-- Activities list — video/folder/lesson types shown prominently -->
+                    <div x-show="openSection === {{ section.id }}" x-collapse x-cloak>
+                        {% for act in section.activities.all %}
+                        {% if act.is_visible %}
+                        {% if act.activity_type == 'video' or act.activity_type == 'folder' or act.activity_type == 'lesson' %}
+                        <!-- Primary lesson (video) -->
+                        <a href="{% url 'activity_detail' slug=course.slug activity_id=act.id %}"
+                           class="flex items-start gap-3 px-4 py-2.5 text-left transition group
+                                  {% if act.id == activity.id %}bg-primary/5 border-l-[3px] border-primary{% else %}hover:bg-surface/80 border-l-[3px] border-transparent{% endif %}">
+                            <div class="mt-0.5 shrink-0">
+                                {% if act.id in completed_ids %}
+                                <span class="material-icons-round text-lg text-green-500">check_circle</span>
+                                {% else %}
+                                <span class="material-icons-round text-lg {% if act.id == activity.id %}text-primary{% else %}text-text-light/60{% endif %}">play_circle</span>
+                                {% endif %}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <span class="text-[13px] leading-snug block
+                                    {% if act.id == activity.id %}text-navy font-semibold{% else %}text-text-mid group-hover:text-navy{% endif %}">
+                                    {{ act.title }}
+                                </span>
+                                <span class="text-[11px] text-text-light mt-0.5 flex items-center gap-1">
+                                    <span class="material-icons-round text-xs">play_circle</span>
+                                    Видеолекция
+                                </span>
+                            </div>
+                        </a>
+                        {% else %}
+                        <!-- Supplementary items (compact) -->
+                        <div class="flex items-center gap-2.5 px-4 pl-11 py-1.5 text-[12px] text-text-light">
+                            <span class="material-icons-round text-xs">
+                                {% if act.activity_type == 'quiz' %}quiz
+                                {% elif act.activity_type == 'assignment' %}assignment
+                                {% elif act.activity_type == 'document' %}description
+                                {% elif act.activity_type == 'resource' %}attach_file
+                                {% else %}circle{% endif %}
+                            </span>
+                            <span class="truncate">{{ act.title }}</span>
+                            {% if act.id in completed_ids %}
+                            <span class="material-icons-round text-green-500 text-xs shrink-0 ml-auto">check</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

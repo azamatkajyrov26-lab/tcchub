@@ -1,0 +1,76 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block page_title %}Новый отчёт{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+    <form method="post" class="space-y-5">
+        {% csrf_token %}
+
+        <div>
+            <label class="block text-sm font-semibold text-navy mb-1.5">Заголовок *</label>
+            <input type="text" name="title" required
+                   class="w-full px-3 py-2.5 rounded-lg border text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                   style="border-color:rgba(27,42,74,0.12)"
+                   placeholder="Анализ маршрута ТМТМ Q1 2026">
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-navy mb-1.5">Подзаголовок</label>
+            <input type="text" name="subtitle"
+                   class="w-full px-3 py-2.5 rounded-lg border text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                   style="border-color:rgba(27,42,74,0.12)"
+                   placeholder="Обзор рисков и рекомендации">
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-navy mb-1.5">Шаблон *</label>
+            <select name="template" required
+                    class="w-full px-3 py-2.5 rounded-lg border text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                    style="border-color:rgba(27,42,74,0.12)">
+                {% for tpl in templates %}
+                <option value="{{ tpl.pk }}">{{ tpl.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-navy mb-1.5">Коридоры</label>
+            <div class="flex flex-wrap gap-2">
+                {% for corridor in corridors %}
+                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm cursor-pointer hover:bg-surface transition"
+                       style="border-color:rgba(27,42,74,0.12)">
+                    <input type="checkbox" name="corridors" value="{{ corridor.pk }}" class="rounded">
+                    <span style="color:{{ corridor.color }}">●</span> {{ corridor.code }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-navy mb-1.5">Страны</label>
+            <div class="flex flex-wrap gap-2">
+                {% for country in countries %}
+                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm cursor-pointer hover:bg-surface transition"
+                       style="border-color:rgba(27,42,74,0.12)">
+                    <input type="checkbox" name="countries" value="{{ country.pk }}" class="rounded">
+                    {{ country.iso2 }} {{ country.name_ru }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="flex gap-3 pt-3">
+            <button type="submit"
+                    class="px-6 py-2.5 bg-navy text-white rounded-lg text-sm font-semibold hover:bg-navy/90 transition">
+                Создать отчёт
+            </button>
+            <a href="{% url 'workspace-reports' %}"
+               class="px-6 py-2.5 border rounded-lg text-sm font-medium text-text-mid hover:bg-surface transition"
+               style="border-color:rgba(27,42,74,0.12)">
+                Отмена
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

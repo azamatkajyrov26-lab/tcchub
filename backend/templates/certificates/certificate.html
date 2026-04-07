@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<style>
+    @page {
+        size: A4 landscape;
+        margin: 0;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Georgia', 'Times New Roman', serif;
+        background: #2B2A29;
+        color: #2B2A29;
+        width: 297mm;
+        height: 210mm;
+    }
+
+    .certificate {
+        width: 297mm;
+        height: 210mm;
+        position: relative;
+        background: #2B2A29;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .certificate-inner {
+        width: 277mm;
+        height: 190mm;
+        background: #FFFFFF;
+        border: 3px solid #D6B37B;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20mm 30mm;
+    }
+
+    .certificate-inner::before {
+        content: '';
+        position: absolute;
+        top: 5mm;
+        left: 5mm;
+        right: 5mm;
+        bottom: 5mm;
+        border: 1px solid #D6B37B;
+        pointer-events: none;
+    }
+
+    .corner {
+        position: absolute;
+        width: 30mm;
+        height: 30mm;
+    }
+
+    .corner-tl {
+        top: 8mm;
+        left: 8mm;
+        border-top: 2px solid #D6B37B;
+        border-left: 2px solid #D6B37B;
+    }
+
+    .corner-tr {
+        top: 8mm;
+        right: 8mm;
+        border-top: 2px solid #D6B37B;
+        border-right: 2px solid #D6B37B;
+    }
+
+    .corner-bl {
+        bottom: 8mm;
+        left: 8mm;
+        border-bottom: 2px solid #D6B37B;
+        border-left: 2px solid #D6B37B;
+    }
+
+    .corner-br {
+        bottom: 8mm;
+        right: 8mm;
+        border-bottom: 2px solid #D6B37B;
+        border-right: 2px solid #D6B37B;
+    }
+
+    .logo-area {
+        margin-bottom: 8mm;
+    }
+
+    .logo-text {
+        font-size: 28pt;
+        font-weight: bold;
+        color: #2B2A29;
+        letter-spacing: 6px;
+    }
+
+    .logo-accent {
+        color: #D6B37B;
+    }
+
+    .subtitle {
+        font-size: 10pt;
+        color: #888;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        margin-top: 2mm;
+    }
+
+    .cert-title {
+        font-size: 22pt;
+        color: #D6B37B;
+        letter-spacing: 8px;
+        text-transform: uppercase;
+        margin: 6mm 0 4mm;
+        font-weight: normal;
+    }
+
+    .divider {
+        width: 80mm;
+        height: 1px;
+        background: #D6B37B;
+        margin: 4mm auto;
+    }
+
+    .preamble {
+        font-size: 11pt;
+        color: #666;
+        margin: 3mm 0;
+    }
+
+    .student-name {
+        font-size: 24pt;
+        color: #2B2A29;
+        font-weight: bold;
+        margin: 4mm 0;
+        font-style: italic;
+    }
+
+    .course-info {
+        font-size: 11pt;
+        color: #666;
+        margin: 3mm 0;
+        line-height: 1.6;
+    }
+
+    .course-name {
+        font-size: 14pt;
+        color: #2B2A29;
+        font-weight: bold;
+        margin: 2mm 0;
+    }
+
+    .completion-date {
+        font-size: 10pt;
+        color: #888;
+        margin-top: 4mm;
+    }
+
+    .signatures {
+        display: flex;
+        justify-content: space-between;
+        width: 200mm;
+        margin-top: 12mm;
+    }
+
+    .signature-block {
+        text-align: center;
+        width: 70mm;
+    }
+
+    .signature-line {
+        border-top: 1px solid #2B2A29;
+        width: 60mm;
+        margin: 0 auto 2mm;
+    }
+
+    .signature-label {
+        font-size: 9pt;
+        color: #888;
+    }
+
+    .cert-number {
+        position: absolute;
+        bottom: 10mm;
+        right: 15mm;
+        font-size: 8pt;
+        color: #aaa;
+    }
+</style>
+</head>
+<body>
+<div class="certificate">
+    <div class="certificate-inner">
+        <div class="corner corner-tl"></div>
+        <div class="corner corner-tr"></div>
+        <div class="corner corner-bl"></div>
+        <div class="corner corner-br"></div>
+
+        <div class="logo-area">
+            <div class="logo-text">TCC <span class="logo-accent">HUB</span></div>
+            <div class="subtitle">Learning Management System</div>
+        </div>
+
+        <div class="cert-title">Сертификат</div>
+
+        <div class="divider"></div>
+
+        <div class="preamble">Настоящим подтверждается, что</div>
+
+        <div class="student-name">{{ student_name }}</div>
+
+        <div class="course-info">успешно завершил(а) курс</div>
+
+        <div class="course-name">{{ course_name }}</div>
+
+        <div class="divider"></div>
+
+        <div class="completion-date">Дата выдачи: {{ completion_date }}</div>
+
+        <div class="signatures">
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                <div class="signature-label">Руководитель</div>
+            </div>
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                <div class="signature-label">Преподаватель</div>
+            </div>
+        </div>
+
+        <div class="cert-number">{{ certificate_number }}</div>
+    </div>
+</div>
+</body>
+</html>

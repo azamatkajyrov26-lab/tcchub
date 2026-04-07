@@ -1,0 +1,275 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block page_title_block %}{% endblock %}
+
+{% block content %}
+<div x-data="reportEditor()" class="min-h-[calc(100vh-6rem)]">
+    <!-- Top Bar -->
+    <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div>
+            <h1 class="text-xl font-bold text-navy">{{ report.title }}</h1>
+            <div class="flex items-center gap-3 mt-1">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
+                    {% if report.status == 'draft' %}bg-gray-100 text-gray-600
+                    {% elif report.status == 'in_review' %}bg-amber-100 text-amber-700
+                    {% elif report.status == 'approved' %}bg-blue-100 text-blue-700
+                    {% elif report.status == 'published' %}bg-green-100 text-green-700
+                    {% else %}bg-gray-100 text-gray-500{% endif %}">
+                    {{ report.get_status_display }}
+                </span>
+                <span class="text-xs text-text-light">{{ report.template.name }}</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            {% if report.status == 'draft' %}
+            <button hx-post="{% url 'workspace-reports-submit-review' report.pk %}"
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                    hx-confirm="Отправить отчёт на проверку?"
+                    class="px-4 py-2 text-sm font-medium rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition">
+                На проверку
+            </button>
+            {% endif %}
+            {% if report.status == 'in_review' %}
+            <button hx-post="{% url 'workspace-reports-approve' report.pk %}"
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                    class="px-4 py-2 text-sm font-medium rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition">
+                Утвердить
+            </button>
+            {% endif %}
+            {% if report.status == 'approved' %}
+            <button hx-post="{% url 'workspace-reports-publish' report.pk %}"
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                    hx-confirm="Опубликовать отчёт?"
+                    class="px-4 py-2 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700 transition">
+                Опубликовать
+            </button>
+            {% endif %}
+            <button hx-post="{% url 'workspace-reports-generate-pdf' report.pk %}"
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                    class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 text-text-mid hover:bg-surface transition">
+                <span class="material-icons-round text-base align-middle mr-1">picture_as_pdf</span>
+                PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- 3-Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+        <!-- Left Sidebar: Sections -->
+        <div class="lg:col-span-3">
+            <div class="bg-white rounded-xl border p-4 sticky top-20" style="border-color:rgba(27,42,74,0.08)">
+                <h3 class="text-sm font-bold text-navy mb-3">Секции</h3>
+
+                <div id="sections-list" class="space-y-1.5 mb-3">
+                    {% for section in sections %}
+                    <button @click="activeSection = {{ section.pk }}"
+                            :class="activeSection === {{ section.pk }} ? 'bg-primary/10 text-primary' : 'text-text-mid hover:bg-surface'"
+                            class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition text-left">
+                        <span class="material-icons-round text-base">
+                            {% if section.section_type == 'text' %}article
+                            {% elif section.section_type == 'risk_table' %}warning
+                            {% elif section.section_type == 'route_score' %}speed
+                            {% elif section.section_type == 'scenario_comparison' %}compare_arrows
+                            {% elif section.section_type == 'map' %}map
+                            {% else %}widgets{% endif %}
+                        </span>
+                        <span class="truncate">{{ section.title|default:section.get_section_type_display }}</span>
+                    </button>
+                    {% endfor %}
+                </div>
+
+                <!-- Add Section -->
+                <div x-data="{ showAdd: false }">
+                    <button @click="showAdd = !showAdd"
+                            class="w-full flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-primary bg-primary/5 hover:bg-primary/10 transition">
+                        <span class="material-icons-round text-base">add</span>
+                        Добавить секцию
+                    </button>
+                    <div x-show="showAdd" x-cloak class="mt-2 space-y-1">
+                        {% for type_code, type_name in section_types %}
+                        <button hx-post="{% url 'add-section' report.pk %}"
+                                hx-vals='{"section_type": "{{ type_code }}", "order": {{ sections.count|add:1 }}}'
+                                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                                hx-target="#editor-area"
+                                hx-swap="innerHTML"
+                                class="w-full text-left px-3 py-1.5 text-xs text-text-mid hover:bg-surface rounded transition">
+                            {{ type_name }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Metadata -->
+                <div class="mt-4 pt-4 border-t space-y-3" style="border-color:rgba(27,42,74,0.08)">
+                    <h3 class="text-sm font-bold text-navy">Метаданные</h3>
+                    <div class="text-xs text-text-light space-y-1">
+                        <p><strong>Коридоры:</strong>
+                            {% for c in report.corridors.all %}{{ c.code }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
+                        </p>
+                        <p><strong>Страны:</strong>
+                            {% for c in report.countries.all %}{{ c.iso2 }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
+                        </p>
+                        <p><strong>Цена:</strong> ${{ report.price_usd }}</p>
+                        <p><strong>Создан:</strong> {{ report.created_at|date:"d.m.Y" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Editor Canvas -->
+        <div class="lg:col-span-6">
+            <div id="editor-area" class="bg-white rounded-xl border p-5 min-h-[600px]" style="border-color:rgba(27,42,74,0.08)">
+                <!-- Executive Summary -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-navy mb-2">Executive Summary</label>
+                    <textarea name="executive_summary"
+                              hx-post="{% url 'save-report-meta' report.pk %}"
+                              hx-trigger="change"
+                              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                              class="w-full min-h-[120px] p-3 rounded-lg border text-sm resize-y focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none"
+                              style="border-color:rgba(27,42,74,0.12)"
+                              placeholder="Краткое описание отчёта...">{{ report.executive_summary }}</textarea>
+                </div>
+
+                <!-- Sections Content -->
+                {% for section in sections %}
+                <div x-show="activeSection === {{ section.pk }} || activeSection === null"
+                     class="mb-6 pb-6 border-b" style="border-color:rgba(27,42,74,0.06)">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-bold text-navy">
+                            {{ section.title|default:section.get_section_type_display }}
+                        </h3>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                            {{ section.get_section_type_display }}
+                        </span>
+                    </div>
+
+                    {% if section.section_type == 'text' %}
+                    <textarea name="content"
+                              hx-post="{% url 'save-section' section.pk %}"
+                              hx-trigger="change"
+                              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                              class="w-full min-h-[200px] p-3 rounded-lg border text-sm resize-y focus:ring-2 focus:ring-primary/30 outline-none"
+                              style="border-color:rgba(27,42,74,0.12)">{{ section.content }}</textarea>
+
+                    {% elif section.section_type == 'risk_table' %}
+                    <div hx-get="{% url 'htmx-risk-factors' %}?corridor_id={% for c in report.corridors.all %}{{ c.pk }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                         hx-trigger="load"
+                         hx-swap="innerHTML">
+                        <p class="text-sm text-text-light">Загрузка таблицы рисков...</p>
+                    </div>
+
+                    {% elif section.section_type == 'route_score' %}
+                    <div hx-get="{% url 'htmx-corridor-scores' %}?corridor_id={% for c in report.corridors.all %}{{ c.pk }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                         hx-trigger="load"
+                         hx-swap="innerHTML">
+                        <p class="text-sm text-text-light">Загрузка скоров...</p>
+                    </div>
+
+                    {% elif section.section_type == 'scenario_comparison' %}
+                    <div hx-get="{% url 'htmx-scenarios' %}?corridor_id={% for c in report.corridors.all %}{{ c.pk }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                         hx-trigger="load"
+                         hx-swap="innerHTML">
+                        <p class="text-sm text-text-light">Загрузка сценариев...</p>
+                    </div>
+
+                    {% elif section.section_type == 'sanction_check' %}
+                    <div>
+                        <form hx-get="{% url 'htmx-sanction-check' %}"
+                              hx-target="#sanction-results-{{ section.pk }}"
+                              class="flex gap-2 mb-3">
+                            <input type="text" name="q" placeholder="Поиск по имени..."
+                                   class="flex-1 px-3 py-2 rounded-lg border text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                                   style="border-color:rgba(27,42,74,0.12)">
+                            <button type="submit" class="px-4 py-2 bg-navy text-white rounded-lg text-sm font-medium hover:bg-navy/90 transition">
+                                Проверить
+                            </button>
+                        </form>
+                        <div id="sanction-results-{{ section.pk }}"></div>
+                    </div>
+
+                    {% elif section.section_type == 'country_profile' %}
+                    <div class="text-sm text-text-light">
+                        Профили стран:
+                        {% for c in report.countries.all %}
+                        <div class="mt-2 p-3 rounded-lg bg-surface">
+                            <strong>{{ c.name_ru }}</strong> ({{ c.iso2 }}) —
+                            Санкционный риск: {{ c.get_sanction_risk_level_display }}
+                            {% if c.imf_gdp_growth %}, GDP: {{ c.imf_gdp_growth }}%{% endif %}
+                            {% if c.wb_stability_index %}, Stability: {{ c.wb_stability_index }}{% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% else %}
+                    <textarea name="content"
+                              hx-post="{% url 'save-section' section.pk %}"
+                              hx-trigger="change"
+                              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                              class="w-full min-h-[150px] p-3 rounded-lg border text-sm resize-y outline-none"
+                              style="border-color:rgba(27,42,74,0.12)"
+                              placeholder="Содержание секции...">{{ section.content }}</textarea>
+                    {% endif %}
+
+                    <!-- Analyst Notes -->
+                    <details class="mt-3">
+                        <summary class="text-xs text-text-light cursor-pointer hover:text-navy">Заметки аналитика</summary>
+                        <textarea name="analyst_notes"
+                                  hx-post="{% url 'save-section' section.pk %}"
+                                  hx-trigger="change"
+                                  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                                  class="w-full mt-2 min-h-[60px] p-2 rounded-lg border text-xs resize-y outline-none"
+                                  style="border-color:rgba(27,42,74,0.08)"
+                                  placeholder="Внутренние заметки (не видны клиенту)...">{{ section.analyst_notes }}</textarea>
+                    </details>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right Sidebar: Data Panel -->
+        <div class="lg:col-span-3">
+            <div class="space-y-4 sticky top-20">
+                <!-- Latest Scores -->
+                <div class="bg-white rounded-xl border p-4" style="border-color:rgba(27,42,74,0.08)">
+                    <h3 class="text-sm font-bold text-navy mb-3">Скоры коридоров</h3>
+                    <div hx-get="{% url 'htmx-corridor-scores' %}"
+                         hx-trigger="load"
+                         hx-swap="innerHTML">
+                        <p class="text-xs text-text-light">Загрузка...</p>
+                    </div>
+                </div>
+
+                <!-- Recent Risk Alerts -->
+                <div class="bg-white rounded-xl border p-4" style="border-color:rgba(27,42,74,0.08)">
+                    <h3 class="text-sm font-bold text-navy mb-3">Риск-алерты</h3>
+                    <div hx-get="{% url 'htmx-recent-alerts' %}"
+                         hx-trigger="load"
+                         hx-swap="innerHTML">
+                        <p class="text-xs text-text-light">Загрузка...</p>
+                    </div>
+                </div>
+
+                <!-- Recent News -->
+                <div class="bg-white rounded-xl border p-4" style="border-color:rgba(27,42,74,0.08)">
+                    <h3 class="text-sm font-bold text-navy mb-3">Последние новости</h3>
+                    <div hx-get="{% url 'htmx-recent-news' %}"
+                         hx-trigger="load"
+                         hx-swap="innerHTML">
+                        <p class="text-xs text-text-light">Загрузка...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function reportEditor() {
+    return {
+        activeSection: null,
+    }
+}
+</script>
+{% endblock %}

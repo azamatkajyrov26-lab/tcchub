@@ -1,0 +1,205 @@
+{% extends "layouts/dashboard.html" %}
+{% block title %}Главная — TCC HUB{% endblock %}
+{% block page_title %}Главная{% endblock %}
+
+{% block page_title_block %}{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<div class="bg-gradient-to-r from-navy to-navy-light rounded-2xl p-6 sm:p-8 mb-8">
+    <h1 class="text-2xl sm:text-3xl font-bold text-white mb-1">
+        Добро пожаловать, {{ request.user.first_name|default:request.user.username }}!
+    </h1>
+    <p class="text-white/70 text-sm sm:text-base">Продолжайте обучение и развивайте новые навыки</p>
+</div>
+
+{% if enrollments %}
+<!-- Continue Learning -->
+<section class="mb-8">
+    <h2 class="text-lg font-bold text-navy mb-4 flex items-center gap-2">
+        <span class="material-icons-round text-primary">play_circle</span>
+        Продолжить обучение
+    </h2>
+
+    {% for enrollment in enrollments %}
+    {% if forloop.first %}
+    <!-- Featured Card (first enrollment) -->
+    <a href="{% url 'course_detail' enrollment.course.slug %}" class="block group mb-6">
+        <div class="bg-white rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <div class="sm:flex">
+                <!-- Cover Image -->
+                <div class="sm:w-80 shrink-0">
+                    {% if enrollment.course.cover_image %}
+                    <img src="{{ enrollment.course.cover_image.url }}" alt="{{ enrollment.course.title }}"
+                         class="w-full h-48 sm:h-full object-cover">
+                    {% else %}
+                    <div class="w-full h-48 sm:h-full bg-gradient-to-br from-navy to-navy-light flex items-center justify-center min-h-[12rem]">
+                        <span class="material-icons-round text-white/30 text-6xl">menu_book</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <!-- Info -->
+                <div class="flex-1 p-5 sm:p-6 flex flex-col justify-center">
+                    <h3 class="text-xl font-bold text-navy group-hover:text-primary transition mb-2 line-clamp-2">
+                        {{ enrollment.course.title }}
+                    </h3>
+                    {% if enrollment.course.short_description %}
+                    <p class="text-text-light text-sm mb-4 line-clamp-2">{{ enrollment.course.short_description }}</p>
+                    {% endif %}
+                    <!-- Progress -->
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between text-sm mb-1.5">
+                            <span class="text-text-mid font-medium">Прогресс</span>
+                            <span class="text-primary font-bold">{{ enrollment.progress|floatformat:0 }}%</span>
+                        </div>
+                        <div class="h-2 bg-surface-alt rounded-full overflow-hidden">
+                            <div class="h-full bg-primary rounded-full transition-all" style="width: {{ enrollment.progress|floatformat:0 }}%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold group-hover:bg-primary-hover transition">
+                            <span class="material-icons-round text-lg">play_arrow</span>
+                            Продолжить
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+    {% endif %}
+    {% endfor %}
+
+    {% if enrollments|length > 1 %}
+    <!-- Remaining enrollment cards (horizontal scroll) -->
+    <div class="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 snap-x">
+        {% for enrollment in enrollments %}
+        {% if not forloop.first %}
+        <a href="{% url 'course_detail' enrollment.course.slug %}" class="group shrink-0 w-64 snap-start">
+            <div class="bg-white rounded-xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-shadow h-full">
+                {% if enrollment.course.cover_image %}
+                <img src="{{ enrollment.course.cover_image.url }}" alt="{{ enrollment.course.title }}"
+                     class="w-full h-32 object-cover">
+                {% else %}
+                <div class="w-full h-32 bg-gradient-to-br from-navy to-navy-light flex items-center justify-center">
+                    <span class="material-icons-round text-white/30 text-4xl">menu_book</span>
+                </div>
+                {% endif %}
+                <div class="p-3.5">
+                    <h4 class="text-sm font-semibold text-navy group-hover:text-primary transition line-clamp-2 mb-2">
+                        {{ enrollment.course.title }}
+                    </h4>
+                    <div class="h-1.5 bg-surface-alt rounded-full overflow-hidden mb-1">
+                        <div class="h-full bg-primary rounded-full" style="width: {{ enrollment.progress|floatformat:0 }}%"></div>
+                    </div>
+                    <p class="text-xs text-text-light">{{ enrollment.progress|floatformat:0 }}% завершено</p>
+                </div>
+            </div>
+        </a>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+{% else %}
+<!-- Empty State -->
+<section class="mb-8">
+    <div class="bg-white rounded-2xl border border-border p-8 sm:p-12 text-center">
+        <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-5">
+            <span class="material-icons-round text-primary text-4xl">school</span>
+        </div>
+        <h2 class="text-xl font-bold text-navy mb-2">Начните свой путь обучения</h2>
+        <p class="text-text-light text-sm max-w-md mx-auto mb-6">
+            Вы ещё не записаны ни на один курс. Откройте каталог и выберите интересующее вас направление.
+        </p>
+        <a href="{% url 'courses' %}"
+           class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-hover transition">
+            <span class="material-icons-round text-lg">explore</span>
+            Каталог курсов
+        </a>
+    </div>
+</section>
+{% endif %}
+
+<!-- Stats Row -->
+<section class="mb-8">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+        <div class="bg-white rounded-xl border border-border p-4 sm:p-5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                    <span class="material-icons-round text-blue-500 text-xl">menu_book</span>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-navy">{{ enrolled_count }}</p>
+                    <p class="text-xs text-text-light font-medium">Курсов</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl border border-border p-4 sm:p-5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+                    <span class="material-icons-round text-green-500 text-xl">check_circle</span>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-navy">{{ completed_count }}</p>
+                    <p class="text-xs text-text-light font-medium">Завершено</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl border border-border p-4 sm:p-5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+                    <span class="material-icons-round text-primary text-xl">workspace_premium</span>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-navy">{{ certificates_count }}</p>
+                    <p class="text-xs text-text-light font-medium">Сертификатов</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl border border-border p-4 sm:p-5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
+                    <span class="material-icons-round text-purple-500 text-xl">military_tech</span>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-navy">{{ badges_count }}</p>
+                    <p class="text-xs text-text-light font-medium">Значков</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Notifications -->
+{% if recent_notifications %}
+<section>
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-navy flex items-center gap-2">
+            <span class="material-icons-round text-primary">notifications</span>
+            Уведомления
+        </h2>
+        <a href="{% url 'notifications' %}" class="text-sm text-primary font-semibold hover:text-primary-hover transition">
+            Все уведомления
+        </a>
+    </div>
+    <div class="bg-white rounded-xl border border-border divide-y divide-border overflow-hidden">
+        {% for notification in recent_notifications %}
+        <div class="flex items-start gap-3 p-4 {% if not notification.is_read %}bg-primary/[0.03]{% endif %}">
+            <div class="w-8 h-8 rounded-lg {% if not notification.is_read %}bg-primary/10{% else %}bg-surface-alt{% endif %} flex items-center justify-center shrink-0 mt-0.5">
+                <span class="material-icons-round text-sm {% if not notification.is_read %}text-primary{% else %}text-text-light{% endif %}">
+                    {% if notification.notification_type %}{{ notification.notification_type.icon|default:"info" }}{% else %}info{% endif %}
+                </span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm text-navy {% if not notification.is_read %}font-semibold{% else %}font-medium{% endif %} line-clamp-1">
+                    {{ notification.title }}
+                </p>
+                <p class="text-xs text-text-light mt-0.5 line-clamp-1">{{ notification.message }}</p>
+            </div>
+            <span class="text-xs text-text-light shrink-0 mt-0.5">{{ notification.created_at|timesince }} назад</span>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

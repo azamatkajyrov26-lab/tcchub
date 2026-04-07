@@ -1,0 +1,162 @@
+{% extends "layouts/dashboard.html" %}
+{% block title %}{{ activity.title }} — {{ course.title }}{% endblock %}
+{% block page_title_block %}{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="flex items-center gap-2 text-sm text-text-light mb-6 flex-wrap">
+    <a href="{% url 'courses' %}" class="hover:text-primary transition">Курсы</a>
+    <span class="material-icons-round text-xs">chevron_right</span>
+    <a href="{% url 'course_detail' slug=course.slug %}" class="hover:text-primary transition">{{ course.title }}</a>
+    <span class="material-icons-round text-xs">chevron_right</span>
+    <span class="text-text-mid font-medium">{{ activity.title }}</span>
+</div>
+
+<div class="max-w-3xl mx-auto">
+    <!-- Activity card -->
+    <div class="bg-white rounded-2xl border border-border overflow-hidden">
+        <!-- Header -->
+        <div class="bg-surface px-4 sm:px-6 py-4 sm:py-5 border-b border-border">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <span class="material-icons-round text-primary text-xl">
+                        {% if activity.activity_type == 'quiz' %}quiz
+                        {% elif activity.activity_type == 'assignment' %}assignment
+                        {% elif activity.activity_type == 'document' %}description
+                        {% elif activity.activity_type == 'resource' %}attach_file
+                        {% elif activity.activity_type == 'url' %}link
+                        {% else %}article{% endif %}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-xs text-text-light font-medium">{{ activity.get_activity_type_display }} · {{ activity.section.title }}</span>
+                    <h1 class="text-xl font-bold text-navy">{{ activity.title }}</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 sm:p-6 space-y-5">
+            <!-- Description -->
+            {% if activity.description %}
+            <div class="prose max-w-none text-text-mid leading-relaxed text-sm">
+                {{ activity.description|linebreaksbr }}
+            </div>
+            {% endif %}
+
+            <!-- Resource file -->
+            {% if resource.file %}
+            <div class="flex items-center gap-3 p-4 bg-surface rounded-xl border border-border">
+                <div class="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <span class="material-icons-round text-primary text-xl">attach_file</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-navy text-sm font-semibold truncate">{{ resource.file.name|cut:"resources/" }}</p>
+                    <p class="text-text-light text-xs">{% if resource.file_size %}{{ resource.file_size|filesizeformat }}{% endif %}</p>
+                </div>
+                <a href="{{ resource.file.url }}" download
+                   class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover transition">
+                    Скачать
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- External URL -->
+            {% if resource.external_url %}
+            <div class="flex items-center gap-3 p-4 bg-surface rounded-xl border border-border">
+                <div class="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <span class="material-icons-round text-primary text-xl">link</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-xs text-text-light">Внешняя ссылка</p>
+                    <a href="{{ resource.external_url }}" target="_blank" rel="noopener"
+                       class="text-primary text-sm font-medium hover:underline truncate block">{{ resource.external_url|truncatechars:60 }}</a>
+                </div>
+                <a href="{{ resource.external_url }}" target="_blank" rel="noopener"
+                   class="px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-lg hover:bg-primary/20 transition">
+                    Открыть
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Folder files -->
+            {% if folder_files %}
+            <div class="space-y-2">
+                <h3 class="text-navy font-semibold text-sm flex items-center gap-2">
+                    <span class="material-icons-round text-lg text-text-light">folder_open</span>
+                    Файлы
+                </h3>
+                {% for ff in folder_files %}
+                <div class="flex items-center gap-3 p-3 bg-surface rounded-xl border border-border">
+                    <span class="material-icons-round text-text-light shrink-0">insert_drive_file</span>
+                    <span class="text-navy text-sm font-medium truncate flex-1">{{ ff.original_name }}</span>
+                    <a href="{{ ff.file.url }}" download class="text-primary text-sm font-medium hover:underline shrink-0">Скачать</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Quiz -->
+            {% if quiz %}
+            <a href="{% url 'quiz_start' quiz_id=quiz.id %}"
+               class="flex items-center gap-3 p-4 bg-navy/5 rounded-xl border border-navy/10 hover:bg-navy/10 transition group">
+                <div class="w-11 h-11 rounded-xl bg-navy/10 flex items-center justify-center shrink-0">
+                    <span class="material-icons-round text-navy text-xl">quiz</span>
+                </div>
+                <div class="flex-1">
+                    <p class="text-navy font-semibold text-sm group-hover:text-primary transition">Начать тест</p>
+                    <p class="text-text-light text-xs">
+                        {% if quiz.time_limit %}{{ quiz.time_limit }} мин{% endif %}
+                        {% if quiz.max_attempts %} · {{ quiz.max_attempts }} попыток{% endif %}
+                    </p>
+                </div>
+                <span class="material-icons-round text-text-light group-hover:text-primary transition">arrow_forward</span>
+            </a>
+            {% endif %}
+
+            <!-- Assignment -->
+            {% if assignment %}
+            <a href="{% url 'assignment_detail' assignment_id=assignment.id %}"
+               class="flex items-center gap-3 p-4 bg-navy/5 rounded-xl border border-navy/10 hover:bg-navy/10 transition group">
+                <div class="w-11 h-11 rounded-xl bg-navy/10 flex items-center justify-center shrink-0">
+                    <span class="material-icons-round text-navy text-xl">assignment</span>
+                </div>
+                <div class="flex-1">
+                    <p class="text-navy font-semibold text-sm group-hover:text-primary transition">Перейти к заданию</p>
+                    <p class="text-text-light text-xs">
+                        {% if assignment.max_score %}Макс. балл: {{ assignment.max_score|floatformat:0 }}{% endif %}
+                    </p>
+                </div>
+                <span class="material-icons-round text-text-light group-hover:text-primary transition">arrow_forward</span>
+            </a>
+            {% endif %}
+
+            <!-- Completion -->
+            <div id="completion-btn" class="pt-2">
+                {% if is_completed %}
+                <span class="inline-flex items-center gap-1.5 px-4 py-2 bg-green-50 text-green-600 text-sm font-semibold rounded-lg border border-green-200">
+                    <span class="material-icons-round text-lg">check_circle</span>
+                    Завершено
+                </span>
+                {% else %}
+                <button hx-post="{% url 'complete_activity' slug=course.slug activity_id=activity.id %}"
+                        hx-target="#completion-btn"
+                        hx-swap="innerHTML"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-hover transition">
+                    <span class="material-icons-round text-lg">check</span>
+                    Отметить выполненным
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Back link -->
+    <div class="mt-5">
+        <a href="{% url 'course_detail' slug=course.slug %}"
+           class="inline-flex items-center gap-1.5 text-text-mid text-sm font-medium hover:text-primary transition">
+            <span class="material-icons-round text-lg">arrow_back</span>
+            Вернуться к курсу
+        </a>
+    </div>
+</div>
+{% endblock %}

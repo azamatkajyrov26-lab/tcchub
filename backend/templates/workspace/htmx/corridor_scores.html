@@ -1,0 +1,17 @@
+{% for score in scores %}
+<div class="flex items-center justify-between py-2 {% if not forloop.last %}border-b{% endif %}" style="border-color:rgba(27,42,74,0.06)">
+    <div>
+        <span class="text-xs font-bold text-navy">{{ score.corridor.code }}</span>
+        <span class="text-[10px] text-text-light ml-1">{{ score.score_total|floatformat:3 }}</span>
+    </div>
+    <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold
+        {% if score.risk_level == 'low' %}bg-green-100 text-green-700
+        {% elif score.risk_level == 'medium' %}bg-amber-100 text-amber-700
+        {% elif score.risk_level == 'high' %}bg-red-100 text-red-700
+        {% else %}bg-red-900 text-white{% endif %}">
+        {{ score.risk_level|upper }}
+    </span>
+</div>
+{% empty %}
+<p class="text-xs text-text-light">Скоры не рассчитаны</p>
+{% endfor %}

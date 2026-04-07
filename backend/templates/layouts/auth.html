@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center bg-surface px-4 py-12" hx-boost="false" style="background:linear-gradient(135deg,#FAFBFD 0%,#F0EDE8 100%)">
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+            <a href="{% url 'landing' %}" class="inline-flex items-center gap-3">
+                <img src="https://optim.tildacdn.pro/tild6637-3765-4438-b135-366537363233/-/resize/176x/-/format/webp/noroot.png.webp" alt="TCC" class="h-10 rounded-lg" style="background:#1B2A4A;padding:6px 12px">
+                <span class="text-2xl font-bold text-navy tracking-tight">HUB</span>
+            </a>
+            <p class="text-text-light mt-3 text-sm font-medium">Образовательная платформа</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-border p-8 shadow-sm">
+            {% if messages %}
+            <div class="mb-4 space-y-2">
+                {% for message in messages %}
+                <div class="px-4 py-3 rounded-xl text-sm font-medium {% if message.tags == 'error' %}bg-red-50 text-red-600 border border-red-200{% elif message.tags == 'success' %}bg-green-50 text-green-600 border border-green-200{% else %}bg-amber-50 text-primary border border-amber-200{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block page_title %}Мои отчёты{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div class="flex items-center gap-3">
+        <span class="text-sm text-text-light">Всего: {{ reports.count }}</span>
+        {% for status_code, status_name in status_choices %}
+        <a href="?status={{ status_code }}"
+           class="text-xs px-2.5 py-1 rounded-full transition
+                  {% if current_status == status_code %}bg-primary/10 text-primary font-semibold{% else %}bg-gray-100 text-text-light hover:bg-gray-200{% endif %}">
+            {{ status_name }}
+        </a>
+        {% endfor %}
+    </div>
+    <a href="{% url 'workspace-report-create' %}"
+       class="inline-flex items-center gap-2 px-4 py-2.5 bg-navy text-white rounded-lg text-sm font-semibold hover:bg-navy/90 transition">
+        <span class="material-icons-round text-base">add</span>
+        Новый отчёт
+    </a>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for report in reports %}
+    <a href="{% url 'workspace-report-edit' report.pk %}"
+       class="group bg-white rounded-xl border p-4 hover:shadow-md transition" style="border-color:rgba(27,42,74,0.08)">
+        <div class="flex items-start justify-between mb-3">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold
+                {% if report.status == 'draft' %}bg-gray-100 text-gray-600
+                {% elif report.status == 'in_review' %}bg-amber-100 text-amber-700
+                {% elif report.status == 'approved' %}bg-blue-100 text-blue-700
+                {% elif report.status == 'published' %}bg-green-100 text-green-700
+                {% else %}bg-gray-100 text-gray-500{% endif %}">
+                {{ report.get_status_display }}
+            </span>
+            <span class="text-[10px] text-text-light">{{ report.created_at|date:"d.m.Y" }}</span>
+        </div>
+        <h3 class="text-sm font-bold text-navy group-hover:text-primary transition line-clamp-2">{{ report.title }}</h3>
+        <p class="text-xs text-text-light mt-1">{{ report.template.name }}</p>
+        <div class="flex items-center gap-3 mt-3 pt-3 border-t text-[10px] text-text-light" style="border-color:rgba(27,42,74,0.06)">
+            <span>{{ report.sections.count }} секций</span>
+            {% if report.price_usd %}<span>${{ report.price_usd }}</span>{% endif %}
+            <span>{{ report.views_count }} просм.</span>
+        </div>
+    </a>
+    {% empty %}
+    <div class="col-span-full text-center py-12">
+        <span class="material-icons-round text-4xl text-text-light mb-2">description</span>
+        <p class="text-text-light">Отчётов пока нет</p>
+        <a href="{% url 'workspace-report-create' %}" class="text-sm text-primary font-semibold mt-2 inline-block">Создать первый</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

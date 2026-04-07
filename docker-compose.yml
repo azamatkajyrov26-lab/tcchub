@@ -1,0 +1,110 @@
+services:
+  # ── PostgreSQL ──────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-tcchub}
+      POSTGRES_USER: ${POSTGRES_USER:-tcchub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tcchub}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis ───────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Django (serves templates + API) ─────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/Dockerfile.backend
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120 --reload
+    restart: unless-stopped
+    volumes:
+      - ./backend:/app
+      - ./docker/entrypoint.sh:/entrypoint.sh:ro
+      - static_data:/app/static
+      - media_data:/app/media
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ── Celery Worker ───────────────────────────────
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: ../docker/Dockerfile.backend
+    restart: unless-stopped
+    entrypoint: []
+    command: celery -A config worker -l info --concurrency=4
+    volumes:
+      - ./backend:/app
+      - media_data:/app/media
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ── Celery Beat ─────────────────────────────────
+  celery_beat:
+    build:
+      context: ./backend
+      dockerfile: ../docker/Dockerfile.backend
+    restart: unless-stopped
+    entrypoint: []
+    command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ── Nginx ───────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_data:/app/static:ro
+      - media_data:/app/media:ro
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_data:
+  media_data:

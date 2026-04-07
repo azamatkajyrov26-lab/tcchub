@@ -1,0 +1,20 @@
+{% for news in items %}
+<div class="py-2 {% if not forloop.last %}border-b{% endif %}" style="border-color:rgba(27,42,74,0.06)">
+    <a href="{{ news.url }}" target="_blank" class="text-xs font-medium text-navy hover:text-primary transition line-clamp-2">
+        {{ news.title|truncatechars:60 }}
+    </a>
+    <div class="flex items-center gap-2 mt-0.5">
+        <span class="text-[10px] text-text-light">{{ news.published_at|date:"d.m H:i" }}</span>
+        {% if news.ai_severity %}
+        <span class="text-[10px] px-1.5 py-0.5 rounded
+            {% if news.ai_severity >= 7 %}bg-red-50 text-red-600
+            {% elif news.ai_severity >= 4 %}bg-amber-50 text-amber-600
+            {% else %}bg-gray-50 text-gray-500{% endif %}">
+            Серьёзность: {{ news.ai_severity }}
+        </span>
+        {% endif %}
+    </div>
+</div>
+{% empty %}
+<p class="text-xs text-text-light">Нет новостей</p>
+{% endfor %}

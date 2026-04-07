@@ -1,0 +1,168 @@
+{% extends "layouts/site.html" %}
+{% load static %}
+
+{% block title %}Партнёры — TransCaspian Cargo{% endblock %}
+
+{% block page_css %}
+<style>
+.prt-hero{position:relative;padding:130px 24px 90px;background:#fff;overflow:hidden;border-bottom:1px solid var(--border-light)}
+.prt-hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle,rgba(198,164,109,.10) 1px,transparent 1px);background-size:36px 36px;mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,#000,transparent);-webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,#000,transparent)}
+.prt-hero-wrap{max-width:1200px;margin:0 auto;position:relative;text-align:center}
+.prt-eyebrow{display:inline-flex;align-items:center;gap:14px;font-size:11px;font-weight:800;color:var(--gold-dark);letter-spacing:.22em;text-transform:uppercase;margin-bottom:24px}
+.prt-eyebrow .bar{width:32px;height:2px;background:var(--gold)}
+.prt-title{font-size:clamp(36px,5.5vw,64px);font-weight:900;color:var(--navy);line-height:1.05;letter-spacing:-.025em;margin:0 0 22px}
+.prt-title em{font-style:italic;font-weight:300;color:var(--gold)}
+.prt-lead{font-size:17px;line-height:1.7;color:var(--text-mid);max-width:680px;margin:0 auto 48px}
+.prt-stats{display:flex;justify-content:center;gap:0;border:1px solid var(--border-light);border-radius:18px;background:var(--bg-alt);max-width:760px;margin:0 auto;overflow:hidden}
+.prt-stat{flex:1;padding:24px 20px;text-align:center;border-right:1px solid var(--border-light)}
+.prt-stat:last-child{border-right:none}
+.prt-stat-num{font-size:36px;font-weight:900;color:var(--gold);line-height:1;letter-spacing:-.025em}
+.prt-stat-lab{margin-top:8px;font-size:11px;color:var(--text-light);font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+
+.prt-section{padding:90px 24px;max-width:1280px;margin:0 auto}
+.prt-cat{margin-bottom:80px}
+.prt-cat:last-child{margin-bottom:0}
+.prt-cat-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:36px;padding-bottom:20px;border-bottom:1px solid var(--border-light);position:relative}
+.prt-cat-head::after{content:"";position:absolute;left:0;bottom:-1px;width:80px;height:3px;background:var(--gold);border-radius:2px}
+.prt-cat-head-l{display:flex;align-items:center;gap:18px}
+.prt-cat-icon{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,rgba(198,164,109,.12),rgba(198,164,109,.04));color:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(198,164,109,.2)}
+.prt-cat-meta{display:flex;flex-direction:column;gap:4px}
+.prt-cat-num{font-size:11px;color:var(--gold-dark);font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+.prt-cat-title{font-size:clamp(22px,2.6vw,32px);font-weight:800;color:var(--navy);letter-spacing:-.015em;margin:0;line-height:1.15}
+.prt-cat-count{font-size:12px;color:var(--text-light);font-weight:600;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.prt-cat-count b{color:var(--gold);font-weight:900;font-size:16px}
+
+.prt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.prt-card{position:relative;background:#fff;border:1px solid var(--border-light);border-radius:20px;padding:36px 28px 28px;display:flex;flex-direction:column;align-items:center;text-align:center;transition:all .4s cubic-bezier(.2,.9,.3,1.2);overflow:hidden;text-decoration:none}
+.prt-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);transform:scaleX(0);transition:transform .5s}
+.prt-card:hover{transform:translateY(-8px);border-color:rgba(198,164,109,.3);box-shadow:0 24px 60px rgba(27,42,74,.08)}
+.prt-card:hover::before{transform:scaleX(1)}
+.prt-logo-frame{width:120px;height:84px;border-radius:12px;background:var(--bg-alt);border:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;margin-bottom:22px;padding:12px;transition:all .35s}
+.prt-card:hover .prt-logo-frame{border-color:rgba(198,164,109,.25);background:#fff}
+.prt-logo-frame img{max-height:100%;max-width:100%;object-fit:contain;filter:grayscale(40%);transition:filter .35s}
+.prt-card:hover .prt-logo-frame img{filter:grayscale(0)}
+.prt-name{font-size:14px;font-weight:800;color:var(--navy);line-height:1.35;letter-spacing:-.005em;margin-bottom:6px}
+.prt-desc{font-size:12px;color:var(--text-light);line-height:1.55;margin-bottom:18px;flex:1}
+.prt-link{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;padding:8px 16px;border-radius:20px;background:rgba(198,164,109,.06);border:1px solid rgba(198,164,109,.2);transition:all .3s}
+.prt-card:hover .prt-link{background:var(--gold);color:#fff;border-color:var(--gold)}
+
+@media(max-width:1024px){.prt-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){
+  .prt-grid{grid-template-columns:1fr}
+  .prt-cat-head{flex-direction:column;align-items:flex-start;gap:14px}
+  .prt-section{padding:60px 20px}
+  .prt-stats{flex-wrap:wrap}
+  .prt-stat{flex:1 1 50%;border-right:none;border-bottom:1px solid var(--border-light)}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="prt-hero">
+  <div class="prt-hero-wrap">
+    <div class="prt-eyebrow"><span class="bar"></span>Сеть партнёров<span class="bar"></span></div>
+    <h1 class="prt-title">Партнёры,<br>которые <em>усиливают</em> экосистему</h1>
+    <p class="prt-lead">Международные организации, университеты и отраслевые объединения, с которыми TCC строит долгосрочные стратегические партнёрства в логистике, образовании и аналитике.</p>
+    <div class="prt-stats">
+      <div class="prt-stat"><div class="prt-stat-num">8</div><div class="prt-stat-lab">партнёров</div></div>
+      <div class="prt-stat"><div class="prt-stat-num">2</div><div class="prt-stat-lab">направления</div></div>
+      <div class="prt-stat"><div class="prt-stat-num">5</div><div class="prt-stat-lab">стран</div></div>
+      <div class="prt-stat"><div class="prt-stat-num">10<span style="font-size:.5em;color:var(--text-light);font-weight:700;margin-left:4px">+</span></div><div class="prt-stat-lab">лет сотрудничества</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="prt-section">
+  <!-- CATEGORY 01 -->
+  <div class="prt-cat reveal">
+    <div class="prt-cat-head">
+      <div class="prt-cat-head-l">
+        <div class="prt-cat-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div class="prt-cat-meta">
+          <div class="prt-cat-num">— 01 / Международные</div>
+          <h2 class="prt-cat-title">Международные организации</h2>
+        </div>
+      </div>
+      <div class="prt-cat-count"><b>3</b> партнёра</div>
+    </div>
+    <div class="prt-grid">
+      <a href="https://www.newsilkroadnetwork.com/" target="_blank" rel="noopener" class="prt-card reveal-scale">
+        <div class="prt-logo-frame"><img src="https://cdn.prod.website-files.com/63d8b07e8e897ea292020f31/63d8c1a749fdb30c3fac59ae_Frame%201.svg" alt="New Silk Road Network"></div>
+        <div class="prt-name">New Silk Road Network</div>
+        <div class="prt-desc">Международная сеть развития Нового Шёлкового пути</div>
+        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
+      </a>
+      <a href="https://petrocouncil.kz/ru" target="_blank" rel="noopener" class="prt-card reveal-scale">
+        <div class="prt-logo-frame"><img src="https://petrocouncil.kz/storage/app/media/logo.png" alt="PetroCouncil"></div>
+        <div class="prt-name">PetroCouncil Kazakhstan</div>
+        <div class="prt-desc">Нефтегазовый Совет Казахстана</div>
+        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
+      </a>
+      <a href="https://euca-alliance.com/" target="_blank" rel="noopener" class="prt-card reveal-scale">
+        <div class="prt-logo-frame"><img src="https://euca-alliance.com/wp-content/uploads/2023/08/Black-2.png" alt="EUCA Alliance"></div>
+        <div class="prt-name">EUCA Alliance</div>
+        <div class="prt-desc">Объединение ведущих логистических компаний Евразии</div>
+        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
+      </a>
+    </div>
+  </div>
+
+  <!-- CATEGORY 02 -->
+  <div class="prt-cat reveal">
+    <div class="prt-cat-head">
+      <div class="prt-cat-head-l">
+        <div class="prt-cat-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <div class="prt-cat-meta">
+          <div class="prt-cat-num">— 02 / Образование</div>
+          <h2 class="prt-cat-title">Образовательные институты</h2>
+        </div>
+      </div>
+      <div class="prt-cat-count"><b>5</b> университетов</div>
+    </div>
+    <div class="prt-grid">
+      <a href="https://aogu.edu.kz/" target="_blank" rel="noopener" class="prt-card reveal-scale">
+        <div class="prt-logo-frame"><img src="https://aogu.edu.kz/local/templates/aogu_main/img/favicon.png" alt="AUNG"></div>
+        <div class="prt-name">Атырауский университет нефти и газа</div>
+        <div class="prt-desc">им. С. Утебаева</div>
+        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
+      </a>
+      <a href="https://dku.kz/ru" target="_blank" rel="noopener" class="prt-card reveal-scale">
+        <div class="prt-logo-frame"><img src="https://dku.kz/storage/app/media/logo.png" alt="DKU"></div>
+        <div class="prt-name">Казахстанско-Немецкий Университет</div>
+        <div class="prt-desc">DKU · Алматы</div>
+        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
+      </a>
+      <a href="https://yu.edu.kz/" target="_blank" rel="noopener" class="prt-card reveal-scale">
+        <div class="prt-logo-frame"><img src="https://yu.edu.kz/wp-content/uploads/2023/08/blue_logo.png" alt="Yasawi University"></div>
+        <div class="prt-name">МКТУ им. Ходжи Ахмеда Ясави</div>
+        <div class="prt-desc">Международный казахско-турецкий университет</div>
+        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
+      </a>
+      <a href="https://apec.edu.kz/" target="_blank" rel="noopener" class="prt-card reveal-scale">
+        <div class="prt-logo-frame"><img src="https://apec.edu.kz/assets/main_logo.png" alt="APEC PetroTechnic"></div>
+        <div class="prt-name">Высший колледж APEC PetroTechnic</div>
+        <div class="prt-desc">Атырау</div>
+        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
+      </a>
+      <a href="https://satbayev.university/en" target="_blank" rel="noopener" class="prt-card reveal-scale">
+        <div class="prt-logo-frame"><img src="https://satbayev.university/files/img/university/logo-nav-blue.svg" alt="Satbayev University"></div>
+        <div class="prt-name">Satbayev University</div>
+        <div class="prt-desc">Казахский национальный исследовательский технический университет</div>
+        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-banner">
+  <h2>Стать партнёром TransCaspian Cargo</h2>
+  <p>Присоединяйтесь к экосистеме отраслевой экспертизы в логистике Евразии</p>
+  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">НАЧАТЬ СОТРУДНИЧЕСТВО</button>
+</div>
+{% endblock %}

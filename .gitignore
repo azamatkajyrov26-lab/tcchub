@@ -1,0 +1,58 @@
+# Secrets / env
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.crt
+secrets/
+credentials*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+*.sqlite3
+*.db
+
+# Django
+backend/media/
+backend/staticfiles/
+backend/static/CACHE/
+*.log
+
+# Node / Next
+node_modules/
+.next/
+dist/
+build/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Claude / tooling
+.claude/
+.claude-flow/
+.swarm/
+.hive-mind/
+memory/
+
+# Backups & local
+backups/
+*.bak
+moodle_content.json
+content_config_template.json
+block.jpg
+block.jpg:Zone.Identifier
+ANALYSIS.md
+
+# Docker volumes
+postgres_data/
+redis_data/

@@ -1,0 +1,169 @@
+{% extends "layouts/dashboard.html" %}
+{% block title %}Календарь — TCC HUB{% endblock %}
+{% block page_title %}Календарь{% endblock %}
+
+{% block content %}
+<div x-data="{
+    currentMonth: {{ current_month }},
+    currentYear: {{ current_year }},
+    selectedDay: null,
+    events: {{ events_json|safe }},
+    get daysInMonth() {
+        return new Date(this.currentYear, this.currentMonth, 0).getDate();
+    },
+    get firstDayOfWeek() {
+        let d = new Date(this.currentYear, this.currentMonth - 1, 1).getDay();
+        return d === 0 ? 6 : d - 1;
+    },
+    get monthName() {
+        const months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+        return months[this.currentMonth - 1];
+    },
+    get today() {
+        const now = new Date();
+        return { day: now.getDate(), month: now.getMonth() + 1, year: now.getFullYear() };
+    },
+    isToday(day) {
+        return day === this.today.day && this.currentMonth === this.today.month && this.currentYear === this.today.year;
+    },
+    prevMonth() {
+        if (this.currentMonth === 1) { this.currentMonth = 12; this.currentYear--; }
+        else { this.currentMonth--; }
+        this.selectedDay = null;
+        this.loadEvents();
+    },
+    nextMonth() {
+        if (this.currentMonth === 12) { this.currentMonth = 1; this.currentYear++; }
+        else { this.currentMonth++; }
+        this.selectedDay = null;
+        this.loadEvents();
+    },
+    goToday() {
+        this.currentMonth = this.today.month;
+        this.currentYear = this.today.year;
+        this.selectedDay = this.today.day;
+        this.loadEvents();
+    },
+    loadEvents() {
+        fetch('/calendar/?month=' + this.currentMonth + '&year=' + this.currentYear, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+            .then(r => r.json())
+            .then(data => { this.events = data.events; });
+    },
+    getEventsForDay(day) {
+        return this.events.filter(e => {
+            let d = new Date(e.start_date);
+            return d.getDate() === day && d.getMonth() + 1 === this.currentMonth && d.getFullYear() === this.currentYear;
+        });
+    },
+    hasEvents(day) {
+        return this.getEventsForDay(day).length > 0;
+    }
+}" class="space-y-5">
+
+    <!-- Calendar Card -->
+    <div class="bg-white rounded-2xl border border-border overflow-hidden shadow-sm">
+        <!-- Header: Month Navigation -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-border">
+            <div class="flex items-center gap-3">
+                <button @click="prevMonth()"
+                        class="w-9 h-9 rounded-xl flex items-center justify-center text-text-mid hover:text-navy hover:bg-surface transition">
+                    <span class="material-icons-round text-xl">chevron_left</span>
+                </button>
+                <h2 class="text-navy font-bold text-lg min-w-[180px] text-center" x-text="monthName + ' ' + currentYear"></h2>
+                <button @click="nextMonth()"
+                        class="w-9 h-9 rounded-xl flex items-center justify-center text-text-mid hover:text-navy hover:bg-surface transition">
+                    <span class="material-icons-round text-xl">chevron_right</span>
+                </button>
+            </div>
+            <button @click="goToday()"
+                    class="px-3.5 py-1.5 text-xs font-semibold text-primary bg-primary/10 rounded-lg hover:bg-primary/15 transition">
+                Сегодня
+            </button>
+        </div>
+
+        <!-- Weekday Headers -->
+        <div class="grid grid-cols-7 border-b border-border bg-surface/30">
+            <template x-for="day in ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']">
+                <div class="text-center py-3 text-text-light text-xs font-semibold uppercase tracking-wider" x-text="day"></div>
+            </template>
+        </div>
+
+        <!-- Days Grid -->
+        <div class="grid grid-cols-7">
+            <!-- Empty cells before first day -->
+            <template x-for="i in firstDayOfWeek">
+                <div class="min-h-[90px] border-b border-r border-border bg-surface/10"></div>
+            </template>
+
+            <!-- Day cells -->
+            <template x-for="day in daysInMonth" :key="day">
+                <div @click="selectedDay = selectedDay === day ? null : day"
+                     :class="{
+                         'bg-primary/5 ring-1 ring-inset ring-primary/20': selectedDay === day,
+                         'hover:bg-surface/50': selectedDay !== day,
+                         'bg-white': !isToday(day) && selectedDay !== day
+                     }"
+                     class="min-h-[70px] sm:min-h-[90px] border-b border-r border-border p-1 sm:p-2 cursor-pointer transition-all duration-150">
+                    <!-- Day Number -->
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm font-medium w-7 h-7 flex items-center justify-center rounded-lg"
+                              :class="{
+                                  'bg-primary text-white font-bold': isToday(day),
+                                  'text-primary font-bold': selectedDay === day && !isToday(day),
+                                  'text-text-mid': selectedDay !== day && !isToday(day)
+                              }" x-text="day"></span>
+                        <span x-show="hasEvents(day)"
+                              class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                    </div>
+                    <!-- Event Previews -->
+                    <div class="space-y-0.5">
+                        <template x-for="event in getEventsForDay(day).slice(0, 2)" :key="event.id">
+                            <div class="text-[11px] leading-tight px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-medium truncate"
+                                 x-text="event.title"></div>
+                        </template>
+                        <template x-if="getEventsForDay(day).length > 2">
+                            <div class="text-[11px] text-text-light font-medium px-1.5"
+                                 x-text="'+' + (getEventsForDay(day).length - 2) + ' ещё'"></div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Selected Day Events Panel -->
+    <div x-show="selectedDay && getEventsForDay(selectedDay).length > 0" x-transition x-cloak>
+        <div class="bg-white rounded-2xl border border-border overflow-hidden shadow-sm">
+            <div class="px-5 py-3.5 border-b border-border bg-surface/30 flex items-center gap-2">
+                <span class="material-icons-round text-primary text-lg">event</span>
+                <h3 class="text-navy font-semibold text-sm" x-text="selectedDay + ' ' + monthName + ' ' + currentYear"></h3>
+            </div>
+            <div class="divide-y divide-border">
+                <template x-for="event in getEventsForDay(selectedDay)" :key="event.id">
+                    <div class="flex items-start gap-3.5 p-4 hover:bg-surface/30 transition">
+                        <div class="w-1 h-10 rounded-full bg-primary shrink-0 mt-0.5"></div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-navy text-sm font-semibold" x-text="event.title"></p>
+                            <p class="text-text-light text-xs mt-0.5 leading-relaxed" x-text="event.description"></p>
+                            <template x-if="event.time">
+                                <p class="text-text-light text-xs mt-1 flex items-center gap-1">
+                                    <span class="material-icons-round text-xs">schedule</span>
+                                    <span x-text="event.time"></span>
+                                </p>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- No Events for Selected Day -->
+    <div x-show="selectedDay && getEventsForDay(selectedDay).length === 0" x-transition x-cloak>
+        <div class="bg-white rounded-2xl border border-border p-8 text-center">
+            <span class="material-icons-round text-2xl text-text-light mb-2">event_busy</span>
+            <p class="text-text-mid text-sm">Нет событий на <span x-text="selectedDay + ' ' + monthName"></span></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

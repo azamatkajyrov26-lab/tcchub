@@ -1,0 +1,223 @@
+{% extends "layouts/site.html" %}
+{% load static %}
+
+{% block title %}Медиа — TCC HUB{% endblock %}
+
+{% block page_css %}
+<style>
+.md-hero{position:relative;padding:140px 24px 70px;background:#fff;overflow:hidden;border-bottom:1px solid var(--border-light)}
+.md-hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(27,42,74,.07) 1px,transparent 0);background-size:28px 28px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%)}
+.md-hero-wrap{max-width:1280px;margin:0 auto;position:relative;z-index:2;display:grid;grid-template-columns:1.4fr 1fr;gap:60px;align-items:end}
+.md-eyebrow{display:inline-flex;align-items:center;gap:14px;font-size:11px;font-weight:800;color:var(--gold-dark);letter-spacing:.22em;text-transform:uppercase;margin-bottom:24px}
+.md-eyebrow .bar{width:32px;height:2px;background:var(--gold)}
+.md-title{font-size:clamp(40px,6vw,76px);font-weight:900;line-height:1.02;letter-spacing:-.03em;color:var(--navy);margin:0 0 20px}
+.md-title em{font-style:italic;font-weight:300;color:var(--gold)}
+.md-lead{font-size:17px;line-height:1.7;color:var(--text-mid);max-width:560px;margin:0}
+.md-meta-card{background:var(--navy);color:#fff;border-radius:20px;padding:32px;position:relative;overflow:hidden}
+.md-meta-card::before{content:"";position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(198,164,109,.18),transparent 70%)}
+.md-meta-num{font-size:64px;font-weight:900;color:var(--gold-light);line-height:1;letter-spacing:-.03em;position:relative}
+.md-meta-lab{font-size:11px;color:rgba(255,255,255,.55);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-top:8px;position:relative}
+.md-meta-divider{height:1px;background:rgba(255,255,255,.1);margin:22px 0;position:relative}
+.md-meta-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:rgba(255,255,255,.65);position:relative}
+.md-meta-row b{color:#fff;font-weight:800}
+
+.md-toolbar{max-width:1280px;margin:0 auto;padding:48px 24px 0;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.md-tab{padding:11px 22px;border-radius:30px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--border-light);background:#fff;color:var(--text-mid);cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:8px}
+.md-tab:hover{border-color:var(--gold);color:var(--gold)}
+.md-tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.md-tab .cnt{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:rgba(255,255,255,.15);font-size:10px;font-weight:900}
+.md-tab:not(.active) .cnt{background:var(--bg-alt);color:var(--text-light)}
+
+.md-grid-wrap{max-width:1280px;margin:0 auto;padding:36px 24px 100px}
+.md-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.md-card{position:relative;background:#fff;border-radius:18px;border:1px solid var(--border-light);overflow:hidden;display:flex;flex-direction:column;transition:all .35s cubic-bezier(.2,.9,.3,1.2);text-decoration:none;color:inherit;cursor:pointer}
+.md-card:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(27,42,74,.10);border-color:rgba(198,164,109,.25)}
+.md-card .thumb{position:relative;height:200px;overflow:hidden;background:linear-gradient(135deg,var(--navy),#0F1D35)}
+.md-card .thumb img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.md-card:hover .thumb img{transform:scale(1.06)}
+.md-card .thumb-fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:rgba(255,255,255,.65)}
+.md-card .type-pill{position:absolute;top:14px;left:14px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);padding:6px 12px;border-radius:14px;font-size:10px;font-weight:800;color:#fff;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(255,255,255,.12);z-index:2}
+.md-card .body{padding:22px;flex:1;display:flex;flex-direction:column;gap:10px}
+.md-card h3{font-size:16px;font-weight:800;color:var(--navy);line-height:1.35;letter-spacing:-.01em;margin:0}
+.md-card p{font-size:13px;color:var(--text-mid);line-height:1.55;margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.md-card .foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-light);font-weight:600}
+.md-card .read{color:var(--gold);font-weight:800;display:inline-flex;align-items:center;gap:5px;transition:gap .3s}
+.md-card:hover .read{gap:9px}
+.md-card.hidden{display:none}
+
+.md-empty{grid-column:1/-1;text-align:center;padding:60px 24px;color:var(--text-light);font-size:14px}
+
+@media(max-width:1024px){.md-grid{grid-template-columns:repeat(2,1fr)}.md-hero-wrap{grid-template-columns:1fr;gap:40px}}
+@media(max-width:640px){.md-grid{grid-template-columns:1fr}.md-hero{padding:120px 20px 50px}.md-grid-wrap{padding:24px 20px 80px}}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="md-hero">
+  <div class="md-hero-wrap">
+    <div>
+      <div class="md-eyebrow"><span class="bar"></span>Медиа TCC</div>
+      <h1 class="md-title">Экспертный<br><em>контент отрасли</em></h1>
+      <p class="md-lead">Статьи, интервью, исследования и видео — всё, что формирует профессиональный взгляд на логистику Евразии и развитие торговых коридоров.</p>
+    </div>
+    <div class="md-meta-card">
+      <div class="md-meta-num">8</div>
+      <div class="md-meta-lab">Материалов в библиотеке</div>
+      <div class="md-meta-divider"></div>
+      <div class="md-meta-row"><span>Категорий</span><b>5</b></div>
+      <div class="md-meta-divider"></div>
+      <div class="md-meta-row"><span>Обновляется</span><b>Еженедельно</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLBAR -->
+<section class="md-toolbar">
+  <button class="md-tab active" data-filter="all">Все <span class="cnt">8</span></button>
+  <button class="md-tab" data-filter="статья">Статьи <span class="cnt">2</span></button>
+  <button class="md-tab" data-filter="интервью">Интервью <span class="cnt">1</span></button>
+  <button class="md-tab" data-filter="исследование">Исследования <span class="cnt">2</span></button>
+  <button class="md-tab" data-filter="видео">Видео <span class="cnt">1</span></button>
+  <button class="md-tab" data-filter="мероприятие">Мероприятия <span class="cnt">2</span></button>
+</section>
+
+<!-- GRID -->
+<section class="md-grid-wrap">
+  <div class="md-grid">
+
+    <div class="md-card reveal" data-type="мероприятие">
+      <div class="thumb" style="background:linear-gradient(135deg,var(--navy),#2D4A7A)">
+        <div class="type-pill">Мероприятие · 2025</div>
+        <div class="thumb-fallback">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700">New Vision Forum</span>
+        </div>
+      </div>
+      <div class="body">
+        <h3>New Vision Forum — ключевая площадка Центральной Азии</h3>
+        <p>Лидеры отраслей, инвесторы и эксперты формируют контуры будущей экономики. TCC представила видение развития логистики региона.</p>
+        <div class="foot"><span>2025</span><span class="read">Подробнее →</span></div>
+      </div>
+    </div>
+
+    <div class="md-card reveal" data-type="мероприятие">
+      <div class="thumb" style="background:linear-gradient(135deg,#1B3A5C,var(--navy))">
+        <div class="type-pill">Мероприятие · 2025</div>
+        <div class="thumb-fallback">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700">Baku Energy Week</span>
+        </div>
+      </div>
+      <div class="body">
+        <h3>Baku Energy Week / Translogistica Caspian</h3>
+        <p>Баку — эпицентр энергетики и логистики. TCC выступила проводником между бизнесом, маршрутами Среднего коридора и развитием человеческого капитала.</p>
+        <div class="foot"><span>2025</span><span class="read">Подробнее →</span></div>
+      </div>
+    </div>
+
+    <div class="md-card reveal" data-type="статья">
+      <div class="thumb">
+        <div class="type-pill">Статья</div>
+        <img loading="lazy" src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&h=400&fit=crop" alt="Торговые маршруты">
+      </div>
+      <div class="body">
+        <h3>Геоэкономика торговых маршрутов: взгляд из Центральной Азии</h3>
+        <p>Кризис в Красном море, санкционное давление и рост Среднего коридора создали уникальное окно возможностей для региона как транзитного хаба.</p>
+        <div class="foot"><span>Март 2025</span><span class="read">Читать →</span></div>
+      </div>
+    </div>
+
+    <div class="md-card reveal" data-type="интервью">
+      <div class="thumb">
+        <div class="type-pill">Интервью</div>
+        <img loading="lazy" src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&h=400&fit=crop" alt="Интервью">
+      </div>
+      <div class="body">
+        <h3>Рустем Бисалиев: «Логистика Евразии — это экосистема знаний»</h3>
+        <p>Основатель TCC о стратегии платформы, роли образования и почему будущее логистики Центральной Азии зависит от компетенций специалистов.</p>
+        <div class="foot"><span>Февраль 2025</span><span class="read">Читать →</span></div>
+      </div>
+    </div>
+
+    <div class="md-card reveal" data-type="исследование">
+      <div class="thumb">
+        <div class="type-pill">Исследование</div>
+        <img loading="lazy" src="https://images.unsplash.com/photo-1488085061387-422e29b40080?w=600&h=400&fit=crop" alt="BRI">
+      </div>
+      <div class="body">
+        <h3>BRI 2025: $128 млрд контрактов и сдвиг к зелёным технологиям</h3>
+        <p>Китайские BRI-контракты выросли на 81% в 2024 году. Анализ влияния на логистические цепочки Евразии и новые инвестиционные приоритеты.</p>
+        <div class="foot"><span>Январь 2025</span><span class="read">Читать →</span></div>
+      </div>
+    </div>
+
+    <div class="md-card reveal" data-type="статья">
+      <div class="thumb">
+        <div class="type-pill">Статья</div>
+        <img loading="lazy" src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&h=400&fit=crop" alt="ТМТМ">
+      </div>
+      <div class="body">
+        <h3>Средний коридор: от пилотных проектов к стабильным грузопотокам</h3>
+        <p>Транскаспийский маршрут вышел на 4.5 млн тонн — пятикратный рост за 7 лет. Инвестиции в $3 млрд в казахстанский участок ТМТМ.</p>
+        <div class="foot"><span>Декабрь 2024</span><span class="read">Читать →</span></div>
+      </div>
+    </div>
+
+    <div class="md-card reveal" data-type="видео">
+      <div class="thumb" style="background:linear-gradient(135deg,#0F1D35,var(--navy))">
+        <div class="type-pill">Видео</div>
+        <div class="thumb-fallback">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="rgba(198,164,109,.85)"><circle cx="12" cy="12" r="11" fill="rgba(255,255,255,.08)"/><path d="M10 8v8l6-4z"/></svg>
+          <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700">Презентация</span>
+        </div>
+      </div>
+      <div class="body">
+        <h3>TCC HUB: обзор образовательной платформы</h3>
+        <p>Структура курсов, формат видеолекций, система сертификации и инструменты для развития компетенций в логистике и SCM.</p>
+        <div class="foot"><span>2025</span><span class="read">Смотреть →</span></div>
+      </div>
+    </div>
+
+    <div class="md-card reveal" data-type="исследование">
+      <div class="thumb">
+        <div class="type-pill">Исследование</div>
+        <img loading="lazy" src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&h=400&fit=crop" alt="Цифровизация">
+      </div>
+      <div class="body">
+        <h3>Цифровизация таможни: опыт Казахстана и Узбекистана</h3>
+        <p>Казахстан сократил время оформления на 40%, Узбекистан запустил единое окно. Какие уроки извлечь для всего региона.</p>
+        <div class="foot"><span>Ноябрь 2024</span><span class="read">Читать →</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="cta-banner">
+  <h2>Подписывайтесь на наш Telegram</h2>
+  <p>Оперативные новости, аналитика и обсуждения с экспертами отрасли</p>
+  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">ПРИСОЕДИНИТЬСЯ</button>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+document.querySelectorAll('.md-tab').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('.md-tab').forEach(function(t){t.classList.remove('active')});
+    tab.classList.add('active');
+    var filter=tab.dataset.filter;
+    document.querySelectorAll('.md-card[data-type]').forEach(function(card){
+      if(filter==='all'||card.dataset.type===filter){
+        card.classList.remove('hidden');
+        card.style.display='';
+      } else {
+        card.classList.add('hidden');
+        card.style.display='none';
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

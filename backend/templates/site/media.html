@@ -58,17 +58,17 @@
 {% cms_visible "media" "section_1" as vis1 %}{% if vis1 %}<section class="md-hero">
   <div class="md-hero-wrap">
     <div>
-      <div class="md-eyebrow"><span class="bar"></span>{% cms_eyebrow "media" "hero" "Медиа TCC" %}</div>
-      <h1 class="md-title">{% cms_heading "media" "hero" "Экспертный контент отрасли" %}</h1>
-      <p class="md-lead">{% cms_sub "media" "hero" "Статьи, интервью, исследования и видео — всё, что формирует профессиональный взгляд на логистику Евразии и развитие торговых коридоров." %}</p>
+      <div class="md-eyebrow" data-i18n="media.hero.label"><span class="bar"></span>{% cms_eyebrow "media" "hero" "Медиа TCC" %}</div>
+      <h1 class="md-title" data-i18n="media.hero.title">{% cms_heading "media" "hero" "Экспертный контент отрасли" %}</h1>
+      <p class="md-lead" data-i18n="media.hero.desc">{% cms_sub "media" "hero" "Статьи, интервью, исследования и видео — всё, что формирует профессиональный взгляд на логистику Евразии и развитие торговых коридоров." %}</p>
     </div>
     <div class="md-meta-card">
       <div class="md-meta-num">8</div>
-      <div class="md-meta-lab">Материалов в библиотеке</div>
+      <div class="md-meta-lab" data-i18n="media.stats.materials">Материалов в библиотеке</div>
       <div class="md-meta-divider"></div>
-      <div class="md-meta-row"><span>Категорий</span><b>5</b></div>
+      <div class="md-meta-row"><span data-i18n="media.stats.categories">Категорий</span><b>5</b></div>
       <div class="md-meta-divider"></div>
-      <div class="md-meta-row"><span>Обновляется</span><b>Еженедельно</b></div>
+      <div class="md-meta-row"><span data-i18n="media.stats.updates">Обновляется</span><b data-i18n="media.stats.weekly">Еженедельно</b></div>
     </div>
   </div>
 </section>{% endif %}
@@ -219,9 +219,9 @@
 </section>{% endif %}
 
 {% cms_visible "media" "cta" as viscta %}{% if viscta %}<div class="cta-banner">
-  {% cms_heading "media" "cta" as h_cta %}{% if h_cta %}<h2>{{ h_cta }}</h2>{% else %}<h2>Подписывайтесь на наш Telegram</h2>{% endif %}
-  <p>{% cms_sub "media" "cta" "Оперативные новости, аналитика и обсуждения с экспертами отрасли" %}</p>
-  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "media" "cta" "ПРИСОЕДИНИТЬСЯ" %}</button>
+  {% cms_heading "media" "cta" as h_cta %}{% if h_cta %}<h2 data-i18n="media.cta.h">{{ h_cta }}</h2>{% else %}<h2 data-i18n="media.cta.h">Подписывайтесь на наш Telegram</h2>{% endif %}
+  <p data-i18n="media.cta.p">{% cms_sub "media" "cta" "Оперативные новости, аналитика и обсуждения с экспертами отрасли" %}</p>
+  <button class="btn-white" data-i18n="media.cta.btn" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "media" "cta" "ПРИСОЕДИНИТЬСЯ" %}</button>
 </div>{% endif %}
 {% endblock %}
 

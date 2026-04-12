@@ -94,15 +94,15 @@
 {% cms_visible "solutions" "section_1" as vis1 %}{% if vis1 %}<section class="sol-hero">
   <div class="sol-hero-wrap">
     <div>
-      <div class="sol-eyebrow"><span class="bar"></span>{% cms_eyebrow "solutions" "hero" "Решения для бизнеса" %}</div>
-      <h1 class="sol-title">{% cms_heading "solutions" "hero" "Стратегическое сопровождение бизнеса" %}</h1>
-      <p class="sol-lead">{% cms_sub "solutions" "hero" "TCC помогает организациям анализировать цепи поставок, выявлять уязвимости, находить устойчивые маршруты и адаптироваться к быстро меняющимся условиям логистики Евразии." %}</p>
+      <div class="sol-eyebrow" data-i18n="sol.hero.label"><span class="bar"></span>{% cms_eyebrow "solutions" "hero" "Решения для бизнеса" %}</div>
+      <h1 class="sol-title" data-i18n="sol.hero.title">{% cms_heading "solutions" "hero" "Стратегическое сопровождение бизнеса" %}</h1>
+      <p class="sol-lead" data-i18n="sol.hero.desc">{% cms_sub "solutions" "hero" "TCC помогает организациям анализировать цепи поставок, выявлять уязвимости, находить устойчивые маршруты и адаптироваться к быстро меняющимся условиям логистики Евразии." %}</p>
     </div>
     <div class="sol-hero-stats">
-      <div class="sol-hs"><div class="sol-hs-num">5</div><div class="sol-hs-lab">Направлений работы</div></div>
-      <div class="sol-hs"><div class="sol-hs-num">4</div><div class="sol-hs-lab">Этапа процесса</div></div>
-      <div class="sol-hs"><div class="sol-hs-num">11</div><div class="sol-hs-lab">Коридоров в анализе</div></div>
-      <div class="sol-hs"><div class="sol-hs-num">10<span style="font-size:.5em;color:rgba(255,255,255,.45);font-weight:600">+</span></div><div class="sol-hs-lab">Лет экспертизы</div></div>
+      <div class="sol-hs"><div class="sol-hs-num">5</div><div class="sol-hs-lab" data-i18n="sol.stats.directions">Направлений работы</div></div>
+      <div class="sol-hs"><div class="sol-hs-num">4</div><div class="sol-hs-lab" data-i18n="sol.stats.steps">Этапа процесса</div></div>
+      <div class="sol-hs"><div class="sol-hs-num">11</div><div class="sol-hs-lab" data-i18n="sol.stats.corridors">Коридоров в анализе</div></div>
+      <div class="sol-hs"><div class="sol-hs-num">10<span style="font-size:.5em;color:rgba(255,255,255,.45);font-weight:600">+</span></div><div class="sol-hs-lab" data-i18n="sol.stats.years">Лет экспертизы</div></div>
     </div>
   </div>
 </section>{% endif %}
@@ -110,8 +110,8 @@
 <!-- BENTO -->
 {% cms_visible "solutions" "section_2" as vis2 %}{% if vis2 %}<section class="sol-section">
   <div class="sol-section-head">
-    {% cms_heading "solutions" "section_2" as h_s2 %}{% if h_s2 %}<h2>{{ h_s2 }}</h2>{% else %}<h2>Направления практической<br><em>работы TCC</em></h2>{% endif %}
-    <div class="sub">{% cms_sub "solutions" "section_2" "От стратегии до выхода на новые рынки — комплексное сопровождение бизнеса" %}</div>
+    {% cms_heading "solutions" "section_2" as h_s2 %}{% if h_s2 %}<h2 data-i18n="sol.dir.label">{{ h_s2 }}</h2>{% else %}<h2 data-i18n="sol.dir.label">Направления практической<br><em>работы TCC</em></h2>{% endif %}
+    <div class="sub" data-i18n="sol.dir.title">{% cms_sub "solutions" "section_2" "От стратегии до выхода на новые рынки — комплексное сопровождение бизнеса" %}</div>
   </div>
 
   <div class="sol-bento">
@@ -139,29 +139,29 @@
 {% cms_visible "solutions" "section_3" as vis3 %}{% if vis3 %}<div class="sol-process-wrap">
   <div class="sol-process-inner">
     <div class="sol-section-head" style="margin-bottom:0">
-      {% cms_heading "solutions" "section_3" as h_s3 %}{% if h_s3 %}<h2>{{ h_s3 }}</h2>{% else %}<h2>Как мы<br><em>работаем</em></h2>{% endif %}
-      <div class="sub">{% cms_sub "solutions" "section_3" "Четыре этапа от первичной диагностики до внедрения решений" %}</div>
+      {% cms_heading "solutions" "section_3" as h_s3 %}{% if h_s3 %}<h2 data-i18n="sol.process.label">{{ h_s3 }}</h2>{% else %}<h2 data-i18n="sol.process.label">Как мы<br><em>работаем</em></h2>{% endif %}
+      <div class="sub" data-i18n="sol.process.title">{% cms_sub "solutions" "section_3" "Четыре этапа от первичной диагностики до внедрения решений" %}</div>
     </div>
     <div class="sol-process-grid">
       <div class="sol-step reveal">
         <div class="sol-step-circle">01</div>
-        <h4>Диагностика</h4>
-        <p>Глубокий анализ текущих процессов, выявление узких мест и точек роста</p>
+        <h4 data-i18n="sol.step1">Диагностика</h4>
+        <p data-i18n="sol.step1.d">Глубокий анализ текущих процессов, выявление узких мест и точек роста</p>
       </div>
       <div class="sol-step reveal">
         <div class="sol-step-circle">02</div>
-        <h4>Анализ</h4>
-        <p>Исследование рынка, конкурентов, маршрутов и геополитических факторов</p>
+        <h4 data-i18n="sol.step2">Анализ</h4>
+        <p data-i18n="sol.step2.d">Исследование рынка, конкурентов, маршрутов и геополитических факторов</p>
       </div>
       <div class="sol-step reveal">
         <div class="sol-step-circle">03</div>
-        <h4>Стратегия</h4>
-        <p>Пошаговый план действий с KPI и временными рамками</p>
+        <h4 data-i18n="sol.step3">Стратегия</h4>
+        <p data-i18n="sol.step3.d">Пошаговый план действий с KPI и временными рамками</p>
       </div>
       <div class="sol-step reveal">
         <div class="sol-step-circle">04</div>
-        <h4>Внедрение</h4>
-        <p>Сопровождение реализации стратегии и корректировка по результатам</p>
+        <h4 data-i18n="sol.step4">Внедрение</h4>
+        <p data-i18n="sol.step4.d">Сопровождение реализации стратегии и корректировка по результатам</p>
       </div>
     </div>
   </div>
@@ -169,8 +169,8 @@
 
 {% endif %}
 {% cms_visible "solutions" "cta" as viscta %}{% if viscta %}<div class="cta-banner">
-  {% cms_heading "solutions" "cta" as h_cta %}{% if h_cta %}<h2>{{ h_cta }}</h2>{% else %}<h2>Запросить стратегическую сессию</h2>{% endif %}
-  <p>{% cms_sub "solutions" "cta" "Получите экспертную оценку ваших цепей поставок и моделирование сценариев от специалистов TCC" %}</p>
-  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "solutions" "cta" "СВЯЗАТЬСЯ С ЭКСПЕРТОМ" %}</button>
+  {% cms_heading "solutions" "cta" as h_cta %}{% if h_cta %}<h2 data-i18n="sol.cta.h">{{ h_cta }}</h2>{% else %}<h2 data-i18n="sol.cta.h">Запросить стратегическую сессию</h2>{% endif %}
+  <p data-i18n="sol.cta.p">{% cms_sub "solutions" "cta" "Получите экспертную оценку ваших цепей поставок и моделирование сценариев от специалистов TCC" %}</p>
+  <button class="btn-white" data-i18n="sol.cta.btn" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "solutions" "cta" "СВЯЗАТЬСЯ С ЭКСПЕРТОМ" %}</button>
 </div>{% endif %}
 {% endblock %}

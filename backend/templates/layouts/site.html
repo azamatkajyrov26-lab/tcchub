@@ -255,6 +255,7 @@ footer{background:#0F172A;color:#fff;padding:64px 24px 32px}
 })();
 window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>30)});
 </script>
+<script src="{% static 'js/i18n.js' %}"></script>
 {% block page_js %}{% endblock %}
 <script>
 /* ── Language dropdown ── */
@@ -264,10 +265,8 @@ window.addEventListener('scroll',()=>{document.getElementById('nav').classList.t
   document.addEventListener('click',function(e){if(!dd.contains(e.target))dd.classList.remove('open')});
   dd.querySelectorAll('.lang-opt').forEach(function(btn){
     btn.addEventListener('click',function(){
-      dd.querySelectorAll('.lang-opt').forEach(function(b){b.classList.remove('active')});
-      btn.classList.add('active');
-      dd.querySelector('.lang-current').textContent=btn.textContent;
-      dd.classList.remove('open');
+      var lang=btn.getAttribute('data-lang');
+      if(window.switchLang) window.switchLang(lang);
     });
   });
 })();

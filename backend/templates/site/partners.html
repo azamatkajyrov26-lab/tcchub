@@ -62,14 +62,14 @@
 <!-- HERO -->
 {% cms_visible "partners" "section_1" as vis1 %}{% if vis1 %}<section class="prt-hero">
   <div class="prt-hero-wrap">
-    <div class="prt-eyebrow"><span class="bar"></span>{% cms_eyebrow "partners" "hero" "Сеть партнёров" %}<span class="bar"></span></div>
-    <h1 class="prt-title">{% cms_heading "partners" "hero" "Партнёры, которые усиливают экосистему" %}</h1>
-    <p class="prt-lead">{% cms_sub "partners" "hero" "Международные организации, университеты и отраслевые объединения, с которыми TCC строит долгосрочные стратегические партнёрства в логистике, образовании и аналитике." %}</p>
+    <div class="prt-eyebrow" data-i18n="pt.hero.label"><span class="bar"></span>{% cms_eyebrow "partners" "hero" "Сеть партнёров" %}<span class="bar"></span></div>
+    <h1 class="prt-title" data-i18n="pt.hero.title">{% cms_heading "partners" "hero" "Партнёры, которые усиливают экосистему" %}</h1>
+    <p class="prt-lead" data-i18n="pt.hero.desc">{% cms_sub "partners" "hero" "Международные организации, университеты и отраслевые объединения, с которыми TCC строит долгосрочные стратегические партнёрства в логистике, образовании и аналитике." %}</p>
     <div class="prt-stats">
-      <div class="prt-stat"><div class="prt-stat-num">8</div><div class="prt-stat-lab">партнёров</div></div>
-      <div class="prt-stat"><div class="prt-stat-num">2</div><div class="prt-stat-lab">направления</div></div>
-      <div class="prt-stat"><div class="prt-stat-num">5</div><div class="prt-stat-lab">стран</div></div>
-      <div class="prt-stat"><div class="prt-stat-num">10<span style="font-size:.5em;color:var(--text-light);font-weight:700;margin-left:4px">+</span></div><div class="prt-stat-lab">лет сотрудничества</div></div>
+      <div class="prt-stat"><div class="prt-stat-num">8</div><div class="prt-stat-lab" data-i18n="pt.stats.partners">партнёров</div></div>
+      <div class="prt-stat"><div class="prt-stat-num">2</div><div class="prt-stat-lab" data-i18n="pt.stats.directions">направления</div></div>
+      <div class="prt-stat"><div class="prt-stat-num">5</div><div class="prt-stat-lab" data-i18n="pt.stats.countries">стран</div></div>
+      <div class="prt-stat"><div class="prt-stat-num">10<span style="font-size:.5em;color:var(--text-light);font-weight:700;margin-left:4px">+</span></div><div class="prt-stat-lab" data-i18n="pt.stats.years">лет сотрудничества</div></div>
     </div>
   </div>
 </section>{% endif %}
@@ -83,8 +83,8 @@
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         </div>
         <div class="prt-cat-meta">
-          <div class="prt-cat-num">— 01 / Международные</div>
-          <h2 class="prt-cat-title">{% cms_heading "partners" "section_2" "Международные организации" %}</h2>
+          <div class="prt-cat-num" data-i18n="pt.int.label">— 01 / Международные</div>
+          <h2 class="prt-cat-title" data-i18n="pt.int.title">{% cms_heading "partners" "section_2" "Международные организации" %}</h2>
         </div>
       </div>
       <div class="prt-cat-count"><b>3</b> партнёра</div>
@@ -109,8 +109,8 @@
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
         </div>
         <div class="prt-cat-meta">
-          <div class="prt-cat-num">— 02 / Образование</div>
-          <h2 class="prt-cat-title">{% cms_heading "partners" "section_3" "Образовательные институты" %}</h2>
+          <div class="prt-cat-num" data-i18n="pt.edu.label">— 02 / Образование</div>
+          <h2 class="prt-cat-title" data-i18n="pt.edu.title">{% cms_heading "partners" "section_3" "Образовательные институты" %}</h2>
         </div>
       </div>
       <div class="prt-cat-count"><b>5</b> университетов</div>
@@ -130,8 +130,8 @@
 
 <!-- CTA -->
 {% cms_visible "partners" "cta" as viscta %}{% if viscta %}<div class="cta-banner">
-  {% cms_heading "partners" "cta" as h_cta %}{% if h_cta %}<h2>{{ h_cta }}</h2>{% else %}<h2>Стать партнёром TransCaspian Cargo</h2>{% endif %}
-  <p>{% cms_sub "partners" "cta" "Присоединяйтесь к экосистеме отраслевой экспертизы в логистике Евразии" %}</p>
-  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "partners" "cta" "НАЧАТЬ СОТРУДНИЧЕСТВО" %}</button>
+  {% cms_heading "partners" "cta" as h_cta %}{% if h_cta %}<h2 data-i18n="pt.cta.h">{{ h_cta }}</h2>{% else %}<h2 data-i18n="pt.cta.h">Стать партнёром TransCaspian Cargo</h2>{% endif %}
+  <p data-i18n="pt.cta.p">{% cms_sub "partners" "cta" "Присоединяйтесь к экосистеме отраслевой экспертизы в логистике Евразии" %}</p>
+  <button class="btn-white" data-i18n="pt.cta.btn" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "partners" "cta" "НАЧАТЬ СОТРУДНИЧЕСТВО" %}</button>
 </div>{% endif %}
 {% endblock %}

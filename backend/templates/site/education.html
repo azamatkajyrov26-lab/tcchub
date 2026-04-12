@@ -111,9 +111,9 @@
 {% cms_visible "education" "section_1" as vis1 %}{% if vis1 %}<section class="ed-hero">
   <div class="ed-hero-wrap">
     <div>
-      <div class="ed-eyebrow"><span class="bar"></span>{% cms_eyebrow "education" "hero" "Образование TCC" %}</div>
-      <h1 class="ed-title">{% cms_heading "education" "hero" "Развитие профессиональных компетенций" %}</h1>
-      <p class="ed-lead">{% cms_sub "education" "hero" "Образовательные программы, executive-форматы и партнёрства с университетами для специалистов логистики, supply chain и стратегического управления." %}</p>
+      <div class="ed-eyebrow" data-i18n="edu.hero.label"><span class="bar"></span>{% cms_eyebrow "education" "hero" "Образование TCC" %}</div>
+      <h1 class="ed-title" data-i18n="edu.hero.title">{% cms_heading "education" "hero" "Развитие профессиональных компетенций" %}</h1>
+      <p class="ed-lead" data-i18n="edu.hero.desc">{% cms_sub "education" "hero" "Образовательные программы, executive-форматы и партнёрства с университетами для специалистов логистики, supply chain и стратегического управления." %}</p>
     </div>
     <div class="ed-quote">
       Инфраструктурные проекты Центральной Азии развиваются быстрее, чем отраслевые компетенции. Это создаёт опасный разрыв: физические возможности растут, но управление не успевает.
@@ -125,8 +125,8 @@
 <!-- FORMATS -->
 {% cms_visible "education" "section_2" as vis2 %}{% if vis2 %}<section class="ed-section">
   <div class="ed-section-head">
-    {% cms_heading "education" "section_2" as h_s2 %}{% if h_s2 %}<h2>{{ h_s2 }}</h2>{% else %}<h2>Форматы<br><em>обучения</em></h2>{% endif %}
-    <div class="sub">{% cms_sub "education" "section_2" "Образовательные программы, практикумы и корпоративное обучение" %}</div>
+    {% cms_heading "education" "section_2" as h_s2 %}{% if h_s2 %}<h2 data-i18n="edu.formats.label">{{ h_s2 }}</h2>{% else %}<h2 data-i18n="edu.formats.label">Форматы<br><em>обучения</em></h2>{% endif %}
+    <div class="sub" data-i18n="edu.formats.title">{% cms_sub "education" "section_2" "Образовательные программы, практикумы и корпоративное обучение" %}</div>
   </div>
 
   <div class="ed-formats">
@@ -145,34 +145,34 @@
 <!-- THEMES -->
 {% cms_visible "education" "section_3" as vis3 %}{% if vis3 %}<section class="ed-section">
   <div class="ed-section-head">
-    {% cms_heading "education" "section_3" as h_s3 %}{% if h_s3 %}<h2>{{ h_s3 }}</h2>{% else %}<h2>Тематические<br><em>направления</em></h2>{% endif %}
-    <div class="sub">{% cms_sub "education" "section_3" "Ключевые области знаний для специалиста нового типа" %}</div>
+    {% cms_heading "education" "section_3" as h_s3 %}{% if h_s3 %}<h2 data-i18n="edu.topics.label">{{ h_s3 }}</h2>{% else %}<h2 data-i18n="edu.topics.label">Тематические<br><em>направления</em></h2>{% endif %}
+    <div class="sub" data-i18n="edu.topics.title">{% cms_sub "education" "section_3" "Ключевые области знаний для специалиста нового типа" %}</div>
   </div>
 
   <div class="ed-themes">
     <div class="ed-theme reveal">
       <div class="big-num">01</div>
       <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-4"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
-      <h4>Логистика</h4>
-      <p>Транспортная, складская, международная. Морские, авто, ЖД и авиа-перевозки.</p>
+      <h4 data-i18n="edu.topic.logistics">Логистика</h4>
+      <p data-i18n="edu.topic.logistics.d">Транспортная, складская, международная. Морские, авто, ЖД и авиа-перевозки.</p>
     </div>
     <div class="ed-theme reveal">
       <div class="big-num">02</div>
       <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-      <h4>Supply Chain</h4>
-      <p>Проектирование и оптимизация цепей поставок, риски, цифровизация, стандарты.</p>
+      <h4 data-i18n="edu.topic.scm">Supply Chain</h4>
+      <p data-i18n="edu.topic.scm.d">Проектирование и оптимизация цепей поставок, риски, цифровизация, стандарты.</p>
     </div>
     <div class="ed-theme reveal">
       <div class="big-num">03</div>
       <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
-      <h4>Геоэкономика</h4>
-      <p>Роль ЦА в глобальной торговле, Средний коридор, евразийская интеграция.</p>
+      <h4 data-i18n="edu.topic.geo">Геоэкономика</h4>
+      <p data-i18n="edu.topic.geo.d">Роль ЦА в глобальной торговле, Средний коридор, евразийская интеграция.</p>
     </div>
     <div class="ed-theme reveal">
       <div class="big-num">04</div>
       <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-      <h4>Санкционные риски</h4>
-      <p>Работа с санкциями, геополитическими ограничениями, адаптация стратегий.</p>
+      <h4 data-i18n="edu.topic.sanctions">Санкционные риски</h4>
+      <p data-i18n="edu.topic.sanctions.d">Работа с санкциями, геополитическими ограничениями, адаптация стратегий.</p>
     </div>
   </div>
 </section>{% endif %}
@@ -180,8 +180,8 @@
 <!-- COURSES -->
 {% cms_visible "education" "section_courses" as viscourses %}{% if viscourses %}<div class="ed-courses-wrap">
   <div class="ed-section-head" style="max-width:1280px;margin:0 auto 48px;padding:0 24px">
-    {% cms_heading "education" "section_courses" as h_c %}{% if h_c %}<h2>{{ h_c }}</h2>{% else %}<h2>Авторские<br><em>программы обучения</em></h2>{% endif %}
-    <div class="sub">{% cms_sub "education" "section_courses" "От практиков отрасли с многолетним опытом" %}</div>
+    {% cms_heading "education" "section_courses" as h_c %}{% if h_c %}<h2 data-i18n="edu.courses.label">{{ h_c }}</h2>{% else %}<h2 data-i18n="edu.courses.label">Авторские<br><em>программы обучения</em></h2>{% endif %}
+    <div class="sub" data-i18n="edu.courses.title">{% cms_sub "education" "section_courses" "От практиков отрасли с многолетним опытом" %}</div>
   </div>
   <div class="ed-courses">
 
@@ -248,8 +248,8 @@
 <!-- EXPERTS -->
 {% cms_visible "education" "section_4" as vis4 %}{% if vis4 %}<section class="ed-section">
   <div class="ed-section-head">
-    {% cms_heading "education" "section_4" as h_s4 %}{% if h_s4 %}<h2>{{ h_s4 }}</h2>{% else %}<h2>Эксперты<br><em>программ</em></h2>{% endif %}
-    <div class="sub">{% cms_sub "education" "section_4" "Практики отрасли с многолетним опытом" %}</div>
+    {% cms_heading "education" "section_4" as h_s4 %}{% if h_s4 %}<h2 data-i18n="edu.experts.label">{{ h_s4 }}</h2>{% else %}<h2 data-i18n="edu.experts.label">Эксперты<br><em>программ</em></h2>{% endif %}
+    <div class="sub" data-i18n="edu.experts.title">{% cms_sub "education" "section_4" "Практики отрасли с многолетним опытом" %}</div>
   </div>
   <div class="ed-experts">
     <div class="ed-expert reveal">
@@ -280,8 +280,8 @@
 </section>{% endif %}
 
 {% cms_visible "education" "cta" as viscta %}{% if viscta %}<div class="cta-banner">
-  {% cms_heading "education" "cta" as h_cta %}{% if h_cta %}<h2>{{ h_cta }}</h2>{% else %}<h2>Развивайте компетенции с TCC</h2>{% endif %}
-  <p>{% cms_sub "education" "cta" "Эволюция требований к специалисту в логистике отражает трансформацию самой экономики" %}</p>
-  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "education" "cta" "СВЯЗАТЬСЯ С НАМИ" %}</button>
+  {% cms_heading "education" "cta" as h_cta %}{% if h_cta %}<h2 data-i18n="edu.cta.h">{{ h_cta }}</h2>{% else %}<h2 data-i18n="edu.cta.h">Развивайте компетенции с TCC</h2>{% endif %}
+  <p data-i18n="edu.cta.p">{% cms_sub "education" "cta" "Эволюция требований к специалисту в логистике отражает трансформацию самой экономики" %}</p>
+  <button class="btn-white" data-i18n="edu.cta.btn" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "education" "cta" "СВЯЗАТЬСЯ С НАМИ" %}</button>
 </div>{% endif %}
 {% endblock %}

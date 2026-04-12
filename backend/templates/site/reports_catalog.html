@@ -64,15 +64,15 @@
 <!-- HERO -->
 {% cms_visible "reports" "section_1" as vis1 %}{% if vis1 %}<section class="rep-hero">
   <div class="rep-hero-wrap">
-    <div class="rep-eyebrow"><span class="bar"></span>{% cms_eyebrow "reports" "hero" "Аналитика TCC" %}</div>
-    <h1 class="rep-title">{% cms_heading "reports" "hero" "Аналитические отчёты торговых коридоров" %}</h1>
-    <p class="rep-lead">{% cms_sub "reports" "hero" "Экспертный анализ цепей поставок Евразии: риск-скоры, санкционный скрининг, сценарии развития коридоров и матрицы решений для бизнеса." %}</p>
+    <div class="rep-eyebrow" data-i18n="rp.hero.label"><span class="bar"></span>{% cms_eyebrow "reports" "hero" "Аналитика TCC" %}</div>
+    <h1 class="rep-title" data-i18n="rp.hero.title">{% cms_heading "reports" "hero" "Аналитические отчёты торговых коридоров" %}</h1>
+    <p class="rep-lead" data-i18n="rp.hero.desc">{% cms_sub "reports" "hero" "Экспертный анализ цепей поставок Евразии: риск-скоры, санкционный скрининг, сценарии развития коридоров и матрицы решений для бизнеса." %}</p>
 
     <div class="rep-kpis">
-      <div class="rep-kpi"><div class="rep-kpi-num">{{ reports|length }}</div><div class="rep-kpi-lab">Отчётов в каталоге</div></div>
-      <div class="rep-kpi"><div class="rep-kpi-num">{{ templates|length }}</div><div class="rep-kpi-lab">Типов аналитики</div></div>
-      <div class="rep-kpi"><div class="rep-kpi-num">11</div><div class="rep-kpi-lab">Коридоров покрыто</div></div>
-      <div class="rep-kpi"><div class="rep-kpi-num">10<span style="font-size:.4em;color:rgba(255,255,255,.45);font-weight:600;margin-left:4px">+</span></div><div class="rep-kpi-lab">Стран в анализе</div></div>
+      <div class="rep-kpi"><div class="rep-kpi-num">{{ reports|length }}</div><div class="rep-kpi-lab" data-i18n="rp.stats.reports">Отчётов в каталоге</div></div>
+      <div class="rep-kpi"><div class="rep-kpi-num">{{ templates|length }}</div><div class="rep-kpi-lab" data-i18n="rp.stats.types">Типов аналитики</div></div>
+      <div class="rep-kpi"><div class="rep-kpi-num">11</div><div class="rep-kpi-lab" data-i18n="rp.stats.corridors">Коридоров покрыто</div></div>
+      <div class="rep-kpi"><div class="rep-kpi-num">10<span style="font-size:.4em;color:rgba(255,255,255,.45);font-weight:600;margin-left:4px">+</span></div><div class="rep-kpi-lab" data-i18n="rp.stats.countries">Стран в анализе</div></div>
     </div>
   </div>
 </section>{% endif %}
@@ -80,7 +80,7 @@
 <!-- TOOLBAR -->
 {% cms_visible "reports" "section_2" as vis2 %}{% if vis2 %}<section class="rep-toolbar">
   <div class="rep-chips">
-    <a href="{% url 'reports_catalog' %}" class="rep-chip {% if not current_template %}active{% endif %}">Все категории</a>
+    <a href="{% url 'reports_catalog' %}" class="rep-chip {% if not current_template %}active{% endif %}" data-i18n="rp.tab.all">Все категории</a>
     {% for tpl in templates %}
     <a href="{% url 'reports_catalog' %}?template={{ tpl.pk }}" class="rep-chip {% if current_template == tpl.pk %}active{% endif %}">{{ tpl.name }}</a>
     {% endfor %}

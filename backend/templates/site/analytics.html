@@ -61,26 +61,26 @@
 <!-- HERO -->
 {% cms_visible "analytics" "section_1" as vis1 %}{% if vis1 %}<section class="an-hero">
   <div class="an-hero-wrap">
-    <div class="an-eyebrow"><span class="bar"></span>{% cms_eyebrow "analytics" "hero" "Аналитика TCC" %}</div>
-    <h1 class="an-title">{% cms_heading "analytics" "hero" "Глубокая экспертиза рынка и точные данные" %}</h1>
-    <p class="an-lead">{% cms_sub "analytics" "hero" "Комплексные исследования логистики и инфраструктуры Центральной Азии, торговых коридоров Евразии и геоэкономических трендов для стратегических решений бизнеса." %}</p>
+    <div class="an-eyebrow" data-i18n="an.hero.label"><span class="bar"></span>{% cms_eyebrow "analytics" "hero" "Аналитика TCC" %}</div>
+    <h1 class="an-title" data-i18n="an.hero.title">{% cms_heading "analytics" "hero" "Глубокая экспертиза рынка и точные данные" %}</h1>
+    <p class="an-lead" data-i18n="an.hero.desc">{% cms_sub "analytics" "hero" "Комплексные исследования логистики и инфраструктуры Центральной Азии, торговых коридоров Евразии и геоэкономических трендов для стратегических решений бизнеса." %}</p>
 
     <div class="an-stats">
-      <div class="an-stat"><div class="an-stat-num">8</div><div class="an-stat-lab">Материалов</div></div>
-      <div class="an-stat"><div class="an-stat-num">4</div><div class="an-stat-lab">Категории</div></div>
-      <div class="an-stat"><div class="an-stat-num">11</div><div class="an-stat-lab">Коридоров</div></div>
-      <div class="an-stat"><div class="an-stat-num">10<em>+</em></div><div class="an-stat-lab">Стран в анализе</div></div>
+      <div class="an-stat"><div class="an-stat-num">8</div><div class="an-stat-lab" data-i18n="an.stats.materials">Материалов</div></div>
+      <div class="an-stat"><div class="an-stat-num">4</div><div class="an-stat-lab" data-i18n="an.stats.categories">Категории</div></div>
+      <div class="an-stat"><div class="an-stat-num">11</div><div class="an-stat-lab" data-i18n="an.stats.corridors">Коридоров</div></div>
+      <div class="an-stat"><div class="an-stat-num">10<em>+</em></div><div class="an-stat-lab" data-i18n="an.stats.countries">Стран в анализе</div></div>
     </div>
   </div>
 </section>{% endif %}
 
 <!-- TOOLBAR -->
 {% cms_visible "analytics" "section_2" as vis2 %}{% if vis2 %}<section class="an-toolbar">
-  <button class="an-tab active" data-filter="all">Все материалы</button>
-  <button class="an-tab" data-filter="обзор">Отраслевые обзоры</button>
-  <button class="an-tab" data-filter="статья">Аналитические статьи</button>
-  <button class="an-tab" data-filter="исследование">Исследования рынка</button>
-  <button class="an-tab" data-filter="отчёт">Экспертные отчёты</button>
+  <button class="an-tab active" data-filter="all" data-i18n="an.tab.all">Все материалы</button>
+  <button class="an-tab" data-filter="обзор" data-i18n="an.tab.reviews">Отраслевые обзоры</button>
+  <button class="an-tab" data-filter="статья" data-i18n="an.tab.articles">Аналитические статьи</button>
+  <button class="an-tab" data-filter="исследование" data-i18n="an.tab.research">Исследования рынка</button>
+  <button class="an-tab" data-filter="отчёт" data-i18n="an.tab.reports">Экспертные отчёты</button>
 </section>{% endif %}
 
 <!-- GRID -->
@@ -188,9 +188,9 @@
 </section>{% endif %}
 
 {% cms_visible "analytics" "cta" as viscta %}{% if viscta %}<div class="cta-banner">
-  {% cms_heading "analytics" "cta" as h_cta %}{% if h_cta %}<h2>{{ h_cta }}</h2>{% else %}<h2>Получайте аналитику первыми</h2>{% endif %}
-  <p>{% cms_sub "analytics" "cta" "Подпишитесь на еженедельный дайджест TCC с экспертными материалами" %}</p>
-  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "analytics" "cta" "ПОДПИСАТЬСЯ" %}</button>
+  {% cms_heading "analytics" "cta" as h_cta %}{% if h_cta %}<h2 data-i18n="an.cta.h">{{ h_cta }}</h2>{% else %}<h2 data-i18n="an.cta.h">Получайте аналитику первыми</h2>{% endif %}
+  <p data-i18n="an.cta.p">{% cms_sub "analytics" "cta" "Подпишитесь на еженедельный дайджест TCC с экспертными материалами" %}</p>
+  <button class="btn-white" data-i18n="an.cta.btn" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "analytics" "cta" "ПОДПИСАТЬСЯ" %}</button>
 </div>{% endif %}
 {% endblock %}
 

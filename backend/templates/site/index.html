@@ -573,32 +573,8 @@
       </div>
     </div>
 
-    <div class="dark-map reveal" style="aspect-ratio:2.2/1;min-height:380px;border-radius:24px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.06)">
-      <svg viewBox="0 0 1100 500" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
-        <defs>
-          <linearGradient id="routeGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#64b4ff" stop-opacity=".2"/>
-            <stop offset="20%" stop-color="var(--gold-light)"/>
-            <stop offset="50%" stop-color="#e8c97a"/>
-            <stop offset="80%" stop-color="var(--gold-light)"/>
-            <stop offset="100%" stop-color="#64b4ff" stop-opacity=".2"/>
-          </linearGradient>
-          <radialGradient id="dotGlow2"><stop offset="0%" stop-color="var(--gold-light)" stop-opacity=".9"/><stop offset="100%" stop-color="var(--gold-light)" stop-opacity="0"/></radialGradient>
-          <filter id="glow2"><feGaussianBlur stdDeviation="4" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        </defs>
-        <path d="M1040,300 C1000,280 960,240 900,220 C840,200 800,195 740,200 C680,205 640,215 595,230 C550,245 540,260 530,275 C520,260 500,250 470,258 C440,266 400,275 360,280 C310,286 270,282 230,275 C190,268 160,260 120,250 C90,243 65,238 45,235" stroke="url(#routeGrad2)" stroke-width="2.5" fill="none"/>
-        <circle r="5" fill="var(--gold-light)" filter="url(#glow2)" opacity=".9">
-          <animateMotion dur="10s" repeatCount="indefinite" path="M1040,300 C1000,280 960,240 900,220 C840,200 800,195 740,200 C680,205 640,215 595,230 C550,245 540,260 530,275 C520,260 500,250 470,258 C440,266 400,275 360,280 C310,286 270,282 230,275 C190,268 160,260 120,250 C90,243 65,238 45,235"/>
-        </circle>
-        <g><circle cx="1040" cy="300" r="20" fill="url(#dotGlow2)"/><circle cx="1040" cy="300" r="5.5" fill="var(--gold-light)" stroke="#080e1a" stroke-width="2.5" filter="url(#glow2)"/><text x="1040" y="330" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="Montserrat" letter-spacing=".08em">ШАНХАЙ</text></g>
-        <g><circle cx="900" cy="220" r="14" fill="url(#dotGlow2)"/><circle cx="900" cy="220" r="4" fill="rgba(198,164,109,.8)" stroke="#080e1a" stroke-width="2"/><text x="900" y="208" text-anchor="middle" fill="rgba(255,255,255,.55)" font-size="9.5" font-weight="600" font-family="Montserrat">ХОРГОС</text></g>
-        <g><circle cx="800" cy="198" r="14" fill="url(#dotGlow2)"/><circle cx="800" cy="198" r="4" fill="rgba(198,164,109,.8)" stroke="#080e1a" stroke-width="2"/><text x="800" y="186" text-anchor="middle" fill="rgba(255,255,255,.55)" font-size="9.5" font-weight="600" font-family="Montserrat">АЛМАТЫ</text></g>
-        <g><circle cx="595" cy="230" r="14" fill="url(#dotGlow2)"/><circle cx="595" cy="230" r="4" fill="rgba(198,164,109,.8)" stroke="#080e1a" stroke-width="2"/><text x="595" y="218" text-anchor="middle" fill="rgba(255,255,255,.55)" font-size="9.5" font-weight="600" font-family="Montserrat">АКТАУ</text></g>
-        <g><circle cx="530" cy="275" r="14" fill="url(#dotGlow2)"/><circle cx="530" cy="275" r="4" fill="rgba(198,164,109,.8)" stroke="#080e1a" stroke-width="2"/><text x="530" y="300" text-anchor="middle" fill="rgba(255,255,255,.55)" font-size="9.5" font-weight="600" font-family="Montserrat">БАКУ</text></g>
-        <g><circle cx="470" cy="258" r="14" fill="url(#dotGlow2)"/><circle cx="470" cy="258" r="4" fill="rgba(198,164,109,.8)" stroke="#080e1a" stroke-width="2"/><text x="470" y="246" text-anchor="middle" fill="rgba(255,255,255,.55)" font-size="9.5" font-weight="600" font-family="Montserrat">ТБИЛИСИ</text></g>
-        <g><circle cx="360" cy="280" r="14" fill="url(#dotGlow2)"/><circle cx="360" cy="280" r="4" fill="rgba(198,164,109,.8)" stroke="#080e1a" stroke-width="2"/><text x="360" y="268" text-anchor="middle" fill="rgba(255,255,255,.55)" font-size="9.5" font-weight="600" font-family="Montserrat">СТАМБУЛ</text></g>
-        <g><circle cx="45" cy="235" r="20" fill="url(#dotGlow2)"/><circle cx="45" cy="235" r="5.5" fill="var(--gold-light)" stroke="#080e1a" stroke-width="2.5" filter="url(#glow2)"/><text x="45" y="260" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="Montserrat" letter-spacing=".08em">РОТТЕРДАМ</text></g>
-      </svg>
+    <div class="dark-map reveal" style="border-radius:24px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.06)">
+      <img src="{% static 'img/map.png' %}" alt="Транскаспийский маршрут ТМТМ — Middle Corridor" style="width:100%;height:auto;display:block;border-radius:24px">
     </div>
 
     <div class="reveal" style="text-align:center;margin-top:40px">

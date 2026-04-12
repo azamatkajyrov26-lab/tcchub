@@ -180,7 +180,6 @@ def kz_logistics_laws_view(request):
 # Tools (login required)
 # ──────────────────────────────────────────────
 
-@login_required
 def corridor_view(request):
     return render(request, "site/corridor.html", {"active_page": "corridor"})
 

@@ -125,9 +125,9 @@ img,svg,video{display:block;max-width:100%;height:auto}
 .mobile-menu a:active,.mobile-menu button:active{color:var(--gold-light);background:rgba(198,164,109,.08)}
 .mobile-menu .mm-section{padding:16px 22px 6px;font-size:10px;font-weight:800;color:var(--gold);letter-spacing:.16em;text-transform:uppercase;border:none;background:none}
 .mobile-menu .mm-sub{padding-left:34px!important;font-size:11px;color:rgba(255,255,255,.62);text-transform:none;letter-spacing:.02em;font-weight:600}
-.mobile-menu-close{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0!important;flex-shrink:0}
+.mobile-menu-close{position:absolute;top:16px;right:16px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0!important;flex-shrink:0}
 .mobile-menu .mm-langs{display:flex;gap:6px;padding:16px 22px 8px;border:none;width:100%;box-sizing:border-box}
-.mobile-menu .mm-langs button{flex:1;padding:9px 4px;text-align:center;border:1px solid rgba(255,255,255,.12);border-radius:20px;font-size:10px;color:rgba(255,255,255,.7);background:transparent;text-transform:uppercase}
+.mobile-menu .mm-langs button{flex:1;padding:10px 4px;text-align:center;border:1px solid rgba(255,255,255,.12);border-radius:20px;font-size:10px;color:rgba(255,255,255,.7);background:transparent;text-transform:uppercase;min-height:44px;cursor:pointer;transition:all .2s}
 .mobile-menu .mm-langs button.active{background:var(--gold);color:var(--navy);border-color:var(--gold)}
 .mobile-menu .mm-cta{margin:14px 22px;padding:13px 18px!important;background:var(--gold)!important;color:var(--navy)!important;border-radius:24px;text-align:center;font-weight:800;border:none!important;width:auto!important}
 body.mm-lock{overflow:hidden}
@@ -190,33 +190,47 @@ footer{background:#0F172A;color:#fff;padding:64px 24px 32px}
 /* Responsive */
 @media(max-width:1024px){
   .nav-links{display:none!important}.nav-burger{display:flex!important}
-  .footer-inner{grid-template-columns:1fr 1fr}
+  .footer-inner{grid-template-columns:1fr 1fr;gap:32px}
   .nav-inner{padding:0 24px}
   .section{padding:80px 32px}
 }
+@media(max-width:900px){
+  .footer-inner{grid-template-columns:1fr 1fr;gap:28px}
+  .section{padding:64px 24px}
+  .page-hero{padding:110px 20px 48px}
+  .section-title{font-size:clamp(22px,3.2vw,36px)}
+  .section-desc{font-size:14px;margin-bottom:36px}
+}
 @media(max-width:640px){
   .nav-logo-text{display:none!important}
-  .footer-inner{grid-template-columns:1fr;gap:32px;text-align:center}
+  .footer-inner{grid-template-columns:1fr;gap:24px;text-align:center}
   .footer-socials{justify-content:center}
-  .section{padding:56px 16px}
+  .footer-col{text-align:center}
+  .section{padding:48px 16px}
   .nav-inner{padding:0 16px;height:64px}
   .nav-right .lang-dropdown{display:none}
   .nav-right .nav-cta{display:none}
-  .page-hero{padding:100px 16px 40px}
-  .page-hero .section-title{font-size:clamp(20px,5vw,32px)}
-  .btn-gold,.btn-outline{width:100%;text-align:center;display:block}
+  .page-hero{padding:100px 16px 36px}
+  .page-hero .section-title{font-size:clamp(20px,5vw,28px)}
+  .page-hero .section-desc{font-size:13px}
+  .btn-gold,.btn-outline{width:100%;text-align:center;display:block;padding:12px 24px;font-size:14px;min-height:48px}
   img{max-width:100%;height:auto}
-  .cta-banner{padding:44px 16px}
-  .cta-banner h2{font-size:clamp(20px,4vw,28px)}
+  .cta-banner{padding:40px 16px}
+  .cta-banner h2{font-size:clamp(20px,4vw,26px)}
+  .cta-banner p{font-size:14px}
+  .cta-banner .btn-white{padding:14px 28px;font-size:13px;width:100%;min-height:48px}
   .profile-toggle .profile-name{display:none}
   .footer-copy{font-size:9px}
   .nav-logo img{height:38px;padding:5px 10px}
+  .section-label{font-size:10px}
+  .section-desc{font-size:13px;line-height:1.7}
 }
 @media(max-width:380px){
-  .nav-inner{padding:0 12px}
-  .section{padding:48px 12px}
-  .page-hero{padding:90px 12px 32px}
-  .cta-banner{padding:36px 12px}
+  .nav-inner{padding:0 14px}
+  .section{padding:40px 14px}
+  .page-hero{padding:90px 14px 28px}
+  .cta-banner{padding:32px 14px}
+  .section-title{font-size:clamp(20px,5vw,28px)}
 }
 </style>
 {% block page_css %}{% endblock %}

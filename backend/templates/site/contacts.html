@@ -1,5 +1,6 @@
 {% extends "layouts/site.html" %}
 {% load static %}
+{% load cms %}
 
 {% block title %}Контакты — TransCaspian Cargo{% endblock %}
 
@@ -85,12 +86,12 @@
 {% endblock %}
 
 {% block content %}
-<section class="ct-section">
+{% cms_visible "contacts" "section_1" as vis1 %}{% if vis1 %}<section class="ct-section">
   <div class="ct-wrap">
     <div class="ct-head">
-      <div class="ct-eyebrow"><span class="bar"></span>Связь с TCC<span class="bar"></span></div>
-      <h1 class="ct-title">Поговорим<br>о вашем <em>проекте</em></h1>
-      <p class="ct-lead">Получите бесплатную консультацию от экспертов TCC по управлению цепями поставок, логистике Евразии и стратегическому развитию.</p>
+      <div class="ct-eyebrow"><span class="bar"></span>{% cms_eyebrow "contacts" "hero" "Связь с TCC" %}<span class="bar"></span></div>
+      <h1 class="ct-title">{% cms_heading "contacts" "hero" "Поговорим о вашем проекте" %}</h1>
+      <p class="ct-lead">{% cms_sub "contacts" "hero" "Получите бесплатную консультацию от экспертов TCC по управлению цепями поставок, логистике Евразии и стратегическому развитию." %}</p>
       <div class="ct-status-pill"><span class="ct-status-dot"></span><span>ОТВЕЧАЕМ В ТЕЧЕНИЕ 2 ЧАСОВ · ПН–ПТ 09:00–18:00</span></div>
     </div>
 
@@ -152,9 +153,9 @@
 
       <!-- RIGHT: form -->
       <div class="ct-form reveal-right" id="contactForm">
-        <div class="ct-form-eyebrow">— Заполните форму</div>
-        <h2 class="ct-form-title">Расскажите о задаче</h2>
-        <p class="ct-form-desc">Опишите вашу задачу — мы свяжемся в ближайшее время и предложим варианты решения от наших экспертов.</p>
+        <div class="ct-form-eyebrow">{% cms_eyebrow "contacts" "form" "— Заполните форму" %}</div>
+        <h2 class="ct-form-title">{% cms_heading "contacts" "form" "Расскажите о задаче" %}</h2>
+        <p class="ct-form-desc">{% cms_sub "contacts" "form" "Опишите вашу задачу — мы свяжемся в ближайшее время и предложим варианты решения от наших экспертов." %}</p>
 
         <div class="ct-field">
           <input type="text" id="cfName" placeholder=" " required>
@@ -187,7 +188,7 @@
       </div>
     </div>
   </div>
-</section>
+</section>{% endif %}
 {% endblock %}
 
 {% block page_js %}
@@ -198,11 +199,18 @@ function submitContact(){
   var email=document.getElementById('cfEmail').value.trim();
   var msg=document.getElementById('cfMessage').value.trim();
   if(!name){var f=document.getElementById('cfName');f.style.borderColor='rgba(231,76,60,.6)';f.focus();return;}
+
+  // Save to backend
+  var fd=new FormData();
+  fd.append('name',name);fd.append('phone',phone);fd.append('email',email);fd.append('message',msg);
+  fetch('/contacts/submit/',{method:'POST',body:fd}).catch(function(){});
+
+  // Show success + open WhatsApp
+  document.getElementById('contactForm').classList.add('sent');
   var text='Заявка с сайта TCC\n\nИмя: '+name;
   if(phone) text+='\nТелефон: '+phone;
   if(email) text+='\nEmail: '+email;
   if(msg) text+='\nСообщение: '+msg;
-  document.getElementById('contactForm').classList.add('sent');
   window.open('https://wa.me/77710544898?text='+encodeURIComponent(text),'_blank');
 }
 </script>

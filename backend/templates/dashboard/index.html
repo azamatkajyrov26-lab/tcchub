@@ -1,197 +1,54 @@
 {% extends "layouts/dashboard.html" %}
-{% block title %}Главная — TCC HUB{% endblock %}
-{% block page_title %}Главная{% endblock %}
-
-{% block page_title_block %}{% endblock %}
+{% block title %}Кабинет — TCC Hub{% endblock %}
+{% block page_eyebrow %}Добро пожаловать, {{ request.user.first_name|default:request.user.username }}{% endblock %}
+{% block page_title %}Ваш <span class="ital">кабинет</span>{% endblock %}
+{% block page_sub %}<p class="cab-sub">Здесь собраны все ваши отчёты, заказы и быстрый доступ к инструментам платформы.</p>{% endblock %}
 
 {% block content %}
-<!-- Editorial Welcome Hero -->
-<section class="relative overflow-hidden mb-12 rounded-[4px]" style="background:#0F1D35;border:1px solid rgba(198,164,109,.18)">
-    <!-- grid mask -->
-    <div aria-hidden="true" style="position:absolute;inset:0;background-image:linear-gradient(rgba(198,164,109,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(198,164,109,.06) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at top right,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at top right,#000 30%,transparent 75%)"></div>
-    <div style="position:absolute;top:0;right:0;width:380px;height:380px;background:radial-gradient(circle,rgba(198,164,109,.15) 0%,transparent 70%);pointer-events:none"></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-bottom:32px">
+  <a href="{% url 'dashboard_my_reports' %}" class="cab-card" style="text-decoration:none;color:inherit;display:block;position:relative;overflow:hidden;transition:border-color .2s" onmouseover="this.style.borderColor='#C6A46D'" onmouseout="this.style.borderColor='#E6E8EE'">
+    <div style="font-size:10px;font-weight:800;letter-spacing:.2em;color:#C6A46D;text-transform:uppercase">01 · Отчёты</div>
+    <div style="font-family:Montserrat;font-size:48px;font-weight:900;color:#0B1628;letter-spacing:-.03em;line-height:1;margin:18px 0 6px">{{ reports_count }}</div>
+    <div style="font-size:12px;color:#64728A;font-weight:600">Доступно вам</div>
+    <div style="position:absolute;right:20px;bottom:18px;font-size:11px;font-weight:800;letter-spacing:.14em;color:#C6A46D">СМОТРЕТЬ →</div>
+  </a>
+  <a href="{% url 'dashboard_my_orders' %}" class="cab-card" style="text-decoration:none;color:inherit;display:block;position:relative;overflow:hidden;transition:border-color .2s" onmouseover="this.style.borderColor='#C6A46D'" onmouseout="this.style.borderColor='#E6E8EE'">
+    <div style="font-size:10px;font-weight:800;letter-spacing:.2em;color:#C6A46D;text-transform:uppercase">02 · Заказы</div>
+    <div style="font-family:Montserrat;font-size:48px;font-weight:900;color:#0B1628;letter-spacing:-.03em;line-height:1;margin:18px 0 6px">{{ orders_count }}</div>
+    <div style="font-size:12px;color:#64728A;font-weight:600">История покупок</div>
+    <div style="position:absolute;right:20px;bottom:18px;font-size:11px;font-weight:800;letter-spacing:.14em;color:#C6A46D">СМОТРЕТЬ →</div>
+  </a>
+  <a href="{% url 'profile' %}" class="cab-card" style="text-decoration:none;color:inherit;display:block;position:relative;overflow:hidden;transition:border-color .2s" onmouseover="this.style.borderColor='#C6A46D'" onmouseout="this.style.borderColor='#E6E8EE'">
+    <div style="font-size:10px;font-weight:800;letter-spacing:.2em;color:#C6A46D;text-transform:uppercase">03 · Профиль</div>
+    <div style="font-family:Montserrat;font-size:22px;font-weight:900;color:#0B1628;letter-spacing:-.015em;margin:18px 0 6px;line-height:1.15">Личные<br>данные</div>
+    <div style="font-size:12px;color:#64728A;font-weight:600">Аккаунт и безопасность</div>
+    <div style="position:absolute;right:20px;bottom:18px;font-size:11px;font-weight:800;letter-spacing:.14em;color:#C6A46D">ОТКРЫТЬ →</div>
+  </a>
+</div>
 
-    <div class="relative px-6 sm:px-10 py-10 sm:py-14">
-        <div class="lms-eyebrow" style="margin-bottom:18px">
-            <span class="lms-eyebrow-bar"></span>
-            <span class="lms-eyebrow-label">Welcome back · {{ request.user.first_name|default:request.user.username }}</span>
-        </div>
-        <h1 style="font-size:clamp(30px,3.6vw,52px);font-weight:900;color:#fff;line-height:1.05;letter-spacing:-.025em;max-width:720px;font-family:Montserrat">
-            Знание&nbsp;—<br>это&nbsp;ваша<br><span style="position:relative;display:inline-block"><span style="position:relative;z-index:1;color:#C6A46D;font-weight:300;font-style:italic">логистика</span><span style="position:absolute;left:0;right:0;bottom:6px;height:14px;background:rgba(198,164,109,.22);z-index:0"></span></span>&nbsp;роста.
-        </h1>
-        <p style="margin-top:24px;max-width:560px;color:rgba(255,255,255,.62);font-size:15px;line-height:1.6">Продолжайте курсы, отслеживайте прогресс и формируйте экспертизу мирового уровня в логистике Среднего коридора.</p>
-    </div>
-</section>
-
-{% if enrollments %}
-<!-- Continue Learning -->
-<section class="mb-12">
-    <div class="lms-eyebrow"><span class="lms-eyebrow-bar"></span><span class="lms-eyebrow-label">01 · Continue</span></div>
-    <h2 style="font-size:clamp(22px,2.2vw,30px);font-weight:900;color:#1B2A4A;letter-spacing:-.02em;margin-bottom:24px">Продолжить <span style="color:#C6A46D;font-weight:300;font-style:italic">обучение</span></h2>
-
-    {% for enrollment in enrollments %}
-    {% if forloop.first %}
-    <!-- Featured Card (first enrollment) -->
-    <a href="{% url 'course_detail' enrollment.course.slug %}" class="block group mb-6">
-        <div class="bg-white rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-            <div class="sm:flex">
-                <!-- Cover Image -->
-                <div class="sm:w-80 shrink-0">
-                    {% if enrollment.course.cover_image %}
-                    <img src="{{ enrollment.course.cover_image.url }}" alt="{{ enrollment.course.title }}"
-                         class="w-full h-48 sm:h-full object-cover">
-                    {% else %}
-                    <div class="w-full h-48 sm:h-full bg-gradient-to-br from-navy to-navy-light flex items-center justify-center min-h-[12rem]">
-                        <span class="material-icons-round text-white/30 text-6xl">menu_book</span>
-                    </div>
-                    {% endif %}
-                </div>
-                <!-- Info -->
-                <div class="flex-1 p-5 sm:p-6 flex flex-col justify-center">
-                    <h3 class="text-xl font-bold text-navy group-hover:text-primary transition mb-2 line-clamp-2">
-                        {{ enrollment.course.title }}
-                    </h3>
-                    {% if enrollment.course.short_description %}
-                    <p class="text-text-light text-sm mb-4 line-clamp-2">{{ enrollment.course.short_description }}</p>
-                    {% endif %}
-                    <!-- Progress -->
-                    <div class="mb-4">
-                        <div class="flex items-center justify-between text-sm mb-1.5">
-                            <span class="text-text-mid font-medium">Прогресс</span>
-                            <span class="text-primary font-bold">{{ enrollment.progress|floatformat:0 }}%</span>
-                        </div>
-                        <div class="h-2 bg-surface-alt rounded-full overflow-hidden">
-                            <div class="h-full bg-primary rounded-full transition-all" style="width: {{ enrollment.progress|floatformat:0 }}%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold group-hover:bg-primary-hover transition">
-                            <span class="material-icons-round text-lg">play_arrow</span>
-                            Продолжить
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="cab-card">
+  <div style="display:inline-flex;align-items:center;gap:12px;margin-bottom:14px">
+    <span style="width:28px;height:2px;background:#C6A46D"></span>
+    <span style="font-size:10px;font-weight:800;letter-spacing:.22em;color:#C6A46D;text-transform:uppercase">Быстрые действия</span>
+  </div>
+  <h2 style="font-family:Montserrat;font-size:24px;font-weight:900;color:#0B1628;letter-spacing:-.015em;margin-bottom:22px">Что вы хотите <span style="color:#C6A46D;font-weight:300;font-style:italic">сделать?</span></h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+    <a href="{% url 'reports_catalog' %}" style="display:block;padding:18px 20px;border:1px solid #E6E8EE;text-decoration:none;color:#0B1628;transition:all .2s" onmouseover="this.style.borderColor='#C6A46D';this.style.background='#FCFAF5'" onmouseout="this.style.borderColor='#E6E8EE';this.style.background='#fff'">
+      <div style="font-size:13px;font-weight:800;color:#0B1628;letter-spacing:-.01em">Купить отчёт</div>
+      <div style="font-size:11px;color:#64728A;margin-top:4px">Каталог аналитики и reports</div>
     </a>
-    {% endif %}
-    {% endfor %}
-
-    {% if enrollments|length > 1 %}
-    <!-- Remaining enrollment cards (horizontal scroll) -->
-    <div class="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 snap-x">
-        {% for enrollment in enrollments %}
-        {% if not forloop.first %}
-        <a href="{% url 'course_detail' enrollment.course.slug %}" class="group shrink-0 w-64 snap-start">
-            <div class="bg-white rounded-xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-shadow h-full">
-                {% if enrollment.course.cover_image %}
-                <img src="{{ enrollment.course.cover_image.url }}" alt="{{ enrollment.course.title }}"
-                     class="w-full h-32 object-cover">
-                {% else %}
-                <div class="w-full h-32 bg-gradient-to-br from-navy to-navy-light flex items-center justify-center">
-                    <span class="material-icons-round text-white/30 text-4xl">menu_book</span>
-                </div>
-                {% endif %}
-                <div class="p-3.5">
-                    <h4 class="text-sm font-semibold text-navy group-hover:text-primary transition line-clamp-2 mb-2">
-                        {{ enrollment.course.title }}
-                    </h4>
-                    <div class="h-1.5 bg-surface-alt rounded-full overflow-hidden mb-1">
-                        <div class="h-full bg-primary rounded-full" style="width: {{ enrollment.progress|floatformat:0 }}%"></div>
-                    </div>
-                    <p class="text-xs text-text-light">{{ enrollment.progress|floatformat:0 }}% завершено</p>
-                </div>
-            </div>
-        </a>
-        {% endif %}
-        {% endfor %}
-    </div>
-    {% endif %}
-</section>
-{% else %}
-<!-- Empty State -->
-<section class="mb-8">
-    <div class="bg-white rounded-2xl border border-border p-8 sm:p-12 text-center">
-        <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-5">
-            <span class="material-icons-round text-primary text-4xl">school</span>
-        </div>
-        <h2 class="text-xl font-bold text-navy mb-2">Начните свой путь обучения</h2>
-        <p class="text-text-light text-sm max-w-md mx-auto mb-6">
-            Вы ещё не записаны ни на один курс. Откройте каталог и выберите интересующее вас направление.
-        </p>
-        <a href="{% url 'courses' %}"
-           class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-hover transition">
-            <span class="material-icons-round text-lg">explore</span>
-            Каталог курсов
-        </a>
-    </div>
-</section>
-{% endif %}
-
-<!-- Editorial Stats Row -->
-<section class="mb-12">
-    <div class="lms-eyebrow"><span class="lms-eyebrow-bar"></span><span class="lms-eyebrow-label">02 · Progress</span></div>
-    <h2 style="font-size:clamp(22px,2.2vw,30px);font-weight:900;color:#1B2A4A;letter-spacing:-.02em;margin-bottom:24px">Ваша <span style="color:#C6A46D;font-weight:300;font-style:italic">статистика</span></h2>
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-        {% for stat in '1234'|make_list %}{% endfor %}
-        <div class="lms-stat-card">
-            <span class="lms-stat-num">01</span>
-            <p class="lms-stat-value">{{ enrolled_count }}</p>
-            <p class="lms-stat-label">Курсов</p>
-        </div>
-        <div class="lms-stat-card">
-            <span class="lms-stat-num">02</span>
-            <p class="lms-stat-value">{{ completed_count }}</p>
-            <p class="lms-stat-label">Завершено</p>
-        </div>
-        <div class="lms-stat-card">
-            <span class="lms-stat-num">03</span>
-            <p class="lms-stat-value">{{ certificates_count }}</p>
-            <p class="lms-stat-label">Сертификатов</p>
-        </div>
-        <div class="lms-stat-card">
-            <span class="lms-stat-num">04</span>
-            <p class="lms-stat-value">{{ badges_count }}</p>
-            <p class="lms-stat-label">Значков</p>
-        </div>
-    </div>
-</section>
-
-<style>
-.lms-stat-card{position:relative;background:#fff;border:1px solid rgba(27,42,74,.08);padding:28px 22px 22px;transition:border-color .25s,transform .25s;border-radius:2px}
-.lms-stat-card:hover{border-color:rgba(198,164,109,.45);transform:translateY(-2px)}
-.lms-stat-card::before{content:"";position:absolute;left:0;top:0;width:32px;height:2px;background:#C6A46D}
-.lms-stat-num{position:absolute;right:18px;top:18px;font-size:11px;font-weight:800;color:#C6A46D;letter-spacing:.12em}
-.lms-stat-value{font-size:38px;font-weight:900;color:#1B2A4A;line-height:1;letter-spacing:-.03em;margin-bottom:8px;font-family:Montserrat}
-.lms-stat-label{font-size:11px;font-weight:700;color:#7A8BA8;text-transform:uppercase;letter-spacing:.1em}
-</style>
-
-<!-- Recent Notifications -->
-{% if recent_notifications %}
-<section>
-    <div class="lms-eyebrow"><span class="lms-eyebrow-bar"></span><span class="lms-eyebrow-label">03 · Updates</span></div>
-    <div class="flex items-end justify-between mb-6">
-        <h2 style="font-size:clamp(22px,2.2vw,30px);font-weight:900;color:#1B2A4A;letter-spacing:-.02em">Свежие <span style="color:#C6A46D;font-weight:300;font-style:italic">уведомления</span></h2>
-        <a href="{% url 'notifications' %}" style="font-size:11px;font-weight:800;letter-spacing:.14em;color:#C6A46D;text-transform:uppercase;border-bottom:1px solid #C6A46D;padding-bottom:2px">Все&nbsp;→</a>
-    </div>
-    <div class="bg-white rounded-xl border border-border divide-y divide-border overflow-hidden">
-        {% for notification in recent_notifications %}
-        <div class="flex items-start gap-3 p-4 {% if not notification.is_read %}bg-primary/[0.03]{% endif %}">
-            <div class="w-8 h-8 rounded-lg {% if not notification.is_read %}bg-primary/10{% else %}bg-surface-alt{% endif %} flex items-center justify-center shrink-0 mt-0.5">
-                <span class="material-icons-round text-sm {% if not notification.is_read %}text-primary{% else %}text-text-light{% endif %}">
-                    {% if notification.notification_type %}{{ notification.notification_type.icon|default:"info" }}{% else %}info{% endif %}
-                </span>
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-sm text-navy {% if not notification.is_read %}font-semibold{% else %}font-medium{% endif %} line-clamp-1">
-                    {{ notification.title }}
-                </p>
-                <p class="text-xs text-text-light mt-0.5 line-clamp-1">{{ notification.message }}</p>
-            </div>
-            <span class="text-xs text-text-light shrink-0 mt-0.5">{{ notification.created_at|timesince }} назад</span>
-        </div>
-        {% endfor %}
-    </div>
-</section>
-{% endif %}
+    <a href="{% url 'corridor' %}" style="display:block;padding:18px 20px;border:1px solid #E6E8EE;text-decoration:none;color:#0B1628;transition:all .2s" onmouseover="this.style.borderColor='#C6A46D';this.style.background='#FCFAF5'" onmouseout="this.style.borderColor='#E6E8EE';this.style.background='#fff'">
+      <div style="font-size:13px;font-weight:800;color:#0B1628;letter-spacing:-.01em">Проверить маршрут</div>
+      <div style="font-size:11px;color:#64728A;margin-top:4px">Риск-скоринг коридоров</div>
+    </a>
+    <a href="{% url 'monitoring' %}" style="display:block;padding:18px 20px;border:1px solid #E6E8EE;text-decoration:none;color:#0B1628;transition:all .2s" onmouseover="this.style.borderColor='#C6A46D';this.style.background='#FCFAF5'" onmouseout="this.style.borderColor='#E6E8EE';this.style.background='#fff'">
+      <div style="font-size:13px;font-weight:800;color:#0B1628;letter-spacing:-.01em">Мониторинг</div>
+      <div style="font-size:11px;color:#64728A;margin-top:4px">Новости и санкции в реальном времени</div>
+    </a>
+    <a href="{% url 'wiki' %}" style="display:block;padding:18px 20px;border:1px solid #E6E8EE;text-decoration:none;color:#0B1628;transition:all .2s" onmouseover="this.style.borderColor='#C6A46D';this.style.background='#FCFAF5'" onmouseout="this.style.borderColor='#E6E8EE';this.style.background='#fff'">
+      <div style="font-size:13px;font-weight:800;color:#0B1628;letter-spacing:-.01em">Вики Логист</div>
+      <div style="font-size:11px;color:#64728A;margin-top:4px">База знаний и справочники</div>
+    </a>
+  </div>
+</div>
 {% endblock %}

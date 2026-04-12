@@ -2,7 +2,7 @@
 <nav class="nav" id="nav">
   <div class="nav-inner">
     <a href="{% url 'landing' %}" class="nav-logo">
-      <img src="{% static 'img/favicon.png' %}" alt="TCC" style="background:#1B2A4A;padding:5px 8px;border-radius:4px;border:1px solid rgba(198,164,109,.35);width:38px;height:38px;object-fit:contain">
+      <img src="{% static 'img/tcc_logo.png' %}" alt="TCC">
       <span class="nav-logo-text">Платформа отраслевой<br>экспертизы</span>
     </a>
     <div class="nav-links">
@@ -37,10 +37,16 @@
       </div>
     </div>
     <div class="nav-right">
-      <div class="lang-switch">
-        <button type="button" class="lang-btn active">РУС</button>
-        <button type="button" class="lang-btn">ҚАЗ</button>
-        <button type="button" class="lang-btn">ENG</button>
+      <div class="lang-dropdown" id="langDropdown">
+        <button type="button" class="lang-toggle" onclick="document.getElementById('langDropdown').classList.toggle('open')">
+          <span class="lang-current">РУС</span>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="lang-menu">
+          <button type="button" class="lang-opt active" data-lang="ru">РУС</button>
+          <button type="button" class="lang-opt" data-lang="kz">ҚАЗ</button>
+          <button type="button" class="lang-opt" data-lang="en">ENG</button>
+        </div>
       </div>
       {% if user.is_authenticated %}
       <div class="profile-dropdown" id="profileDropdown">
@@ -65,7 +71,7 @@
           </a>
           <a href="{% url 'dashboard' %}" class="profile-menu-item">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-            Платформа обучения
+            Кабинет
           </a>
           <a href="{% url 'dashboard_my_reports' %}" class="profile-menu-item">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -74,10 +80,6 @@
           <a href="{% url 'dashboard_my_orders' %}" class="profile-menu-item">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
             Мои заказы
-          </a>
-          <a href="{% url 'certificates' %}" class="profile-menu-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 15l-2 5 2-1 2 1-2-5z"/><circle cx="12" cy="9" r="6"/></svg>
-            Мои сертификаты
           </a>
           <div class="profile-menu-divider"></div>
           <form action="{% url 'logout' %}" method="post" style="margin:0">
@@ -121,12 +123,14 @@
     <a href="{% url 'education' %}">Образование</a>
     <a href="{% url 'contacts' %}">Контакты</a>
     <div class="mm-langs">
-      <button type="button" class="active">РУС</button><button type="button">ҚАЗ</button><button type="button">ENG</button>
+      <button type="button" class="active" onclick="switchLang('ru')">РУС</button>
+      <button type="button" onclick="switchLang('kz')">ҚАЗ</button>
+      <button type="button" onclick="switchLang('en')">ENG</button>
     </div>
     {% if user.is_authenticated %}
       <div class="mm-section">{{ user.get_full_name|default:user.username }}</div>
       <a href="{% url 'profile' %}" class="mm-sub">Мой профиль</a>
-      <a href="{% url 'dashboard' %}" class="mm-sub">Платформа обучения</a>
+      <a href="{% url 'dashboard' %}" class="mm-sub">Кабинет</a>
       <form action="{% url 'logout' %}" method="post" style="margin:0">{% csrf_token %}<button type="submit" style="color:#ff6b6b">Выйти</button></form>
     {% else %}
       <a href="{% url 'login' %}" class="mm-cta">Войти →</a>

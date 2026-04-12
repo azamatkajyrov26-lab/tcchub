@@ -1,5 +1,6 @@
 {% extends "layouts/site.html" %}
 {% load static %}
+{% load cms %}
 
 {% block title %}Медиа — TCC HUB{% endblock %}
 
@@ -54,12 +55,12 @@
 
 {% block content %}
 <!-- HERO -->
-<section class="md-hero">
+{% cms_visible "media" "section_1" as vis1 %}{% if vis1 %}<section class="md-hero">
   <div class="md-hero-wrap">
     <div>
-      <div class="md-eyebrow"><span class="bar"></span>Медиа TCC</div>
-      <h1 class="md-title">Экспертный<br><em>контент отрасли</em></h1>
-      <p class="md-lead">Статьи, интервью, исследования и видео — всё, что формирует профессиональный взгляд на логистику Евразии и развитие торговых коридоров.</p>
+      <div class="md-eyebrow"><span class="bar"></span>{% cms_eyebrow "media" "hero" "Медиа TCC" %}</div>
+      <h1 class="md-title">{% cms_heading "media" "hero" "Экспертный контент отрасли" %}</h1>
+      <p class="md-lead">{% cms_sub "media" "hero" "Статьи, интервью, исследования и видео — всё, что формирует профессиональный взгляд на логистику Евразии и развитие торговых коридоров." %}</p>
     </div>
     <div class="md-meta-card">
       <div class="md-meta-num">8</div>
@@ -70,22 +71,44 @@
       <div class="md-meta-row"><span>Обновляется</span><b>Еженедельно</b></div>
     </div>
   </div>
-</section>
+</section>{% endif %}
 
 <!-- TOOLBAR -->
-<section class="md-toolbar">
+{% cms_visible "media" "section_2" as vis2 %}{% if vis2 %}<section class="md-toolbar">
   <button class="md-tab active" data-filter="all">Все <span class="cnt">8</span></button>
   <button class="md-tab" data-filter="статья">Статьи <span class="cnt">2</span></button>
   <button class="md-tab" data-filter="интервью">Интервью <span class="cnt">1</span></button>
   <button class="md-tab" data-filter="исследование">Исследования <span class="cnt">2</span></button>
   <button class="md-tab" data-filter="видео">Видео <span class="cnt">1</span></button>
   <button class="md-tab" data-filter="мероприятие">Мероприятия <span class="cnt">2</span></button>
-</section>
+</section>{% endif %}
 
 <!-- GRID -->
-<section class="md-grid-wrap">
+{% cms_visible "media" "section_3" as vis3 %}{% if vis3 %}<section class="md-grid-wrap">
   <div class="md-grid">
 
+    {% for n in news_items %}
+    <a class="md-card reveal" data-type="{{ n.kind }}" href="{% if n.external_url %}{{ n.external_url }}{% else %}#{% endif %}" {% if n.external_url %}target="_blank" rel="noopener"{% endif %}>
+      <div class="thumb" {% if not n.cover_src %}style="background:linear-gradient(135deg,var(--navy),#2D4A7A)"{% endif %}>
+        <div class="type-pill">{{ n.get_kind_display }} · {{ n.published_at|date:"Y" }}</div>
+        {% if n.cover_src %}
+          <img loading="lazy" src="{{ n.cover_src }}" alt="{{ n.title }}">
+        {% else %}
+          <div class="thumb-fallback">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 4h16v16H4z"/><path d="M4 10h16M10 4v16"/></svg>
+            <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700">TCC Hub</span>
+          </div>
+        {% endif %}
+      </div>
+      <div class="body">
+        <h3>{{ n.title }}</h3>
+        {% if n.excerpt %}<p>{{ n.excerpt }}</p>{% endif %}
+        <div class="foot"><span>{{ n.published_at|date:"d.m.Y" }}</span><span class="read">Подробнее →</span></div>
+      </div>
+    </a>
+    {% endfor %}
+
+    {% if not news_items %}
     <div class="md-card reveal" data-type="мероприятие">
       <div class="thumb" style="background:linear-gradient(135deg,var(--navy),#2D4A7A)">
         <div class="type-pill">Мероприятие · 2025</div>
@@ -190,15 +213,16 @@
         <div class="foot"><span>Ноябрь 2024</span><span class="read">Читать →</span></div>
       </div>
     </div>
+    {% endif %}
 
   </div>
-</section>
+</section>{% endif %}
 
-<div class="cta-banner">
-  <h2>Подписывайтесь на наш Telegram</h2>
-  <p>Оперативные новости, аналитика и обсуждения с экспертами отрасли</p>
-  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">ПРИСОЕДИНИТЬСЯ</button>
-</div>
+{% cms_visible "media" "cta" as viscta %}{% if viscta %}<div class="cta-banner">
+  {% cms_heading "media" "cta" as h_cta %}{% if h_cta %}<h2>{{ h_cta }}</h2>{% else %}<h2>Подписывайтесь на наш Telegram</h2>{% endif %}
+  <p>{% cms_sub "media" "cta" "Оперативные новости, аналитика и обсуждения с экспертами отрасли" %}</p>
+  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "media" "cta" "ПРИСОЕДИНИТЬСЯ" %}</button>
+</div>{% endif %}
 {% endblock %}
 
 {% block page_js %}

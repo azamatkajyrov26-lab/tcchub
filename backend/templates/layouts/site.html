@@ -61,11 +61,17 @@ img,svg,video{display:block;max-width:100%;height:auto}
 .nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--gold);transition:width .3s}
 .nav-links a:hover::after{width:100%}
 .nav-right{display:flex;align-items:center;gap:12px}
-.lang-switch{display:inline-flex;gap:0;background:#fff;border-radius:24px;padding:0;border:1px solid var(--border-light);overflow:hidden;box-shadow:0 1px 3px rgba(27,42,74,.04)}
-.lang-btn{padding:7px 14px;font-size:10px;font-weight:800;border:none;cursor:pointer;background:transparent;color:var(--text-light);transition:all .3s;letter-spacing:.08em;position:relative}
-.lang-btn+.lang-btn{border-left:1px solid var(--border-light)}
-.lang-btn:hover{color:var(--gold-dark);background:rgba(198,164,109,.06)}
-.lang-btn.active{background:var(--navy);color:#fff}
+.lang-dropdown{position:relative;display:inline-flex}
+.lang-toggle{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;font-size:10px;font-weight:800;letter-spacing:.08em;border:1px solid var(--border-light);border-radius:24px;background:#fff;color:var(--navy);cursor:pointer;transition:all .3s;box-shadow:0 1px 3px rgba(27,42,74,.04)}
+.lang-toggle:hover{border-color:var(--gold);color:var(--gold-dark)}
+.lang-toggle svg{transition:transform .3s}
+.lang-dropdown.open .lang-toggle svg{transform:rotate(180deg)}
+.lang-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:90px;background:#fff;border:1px solid var(--border-light);border-radius:12px;box-shadow:0 8px 24px rgba(27,42,74,.12);opacity:0;visibility:hidden;transform:translateY(-6px);transition:all .25s;z-index:200;overflow:hidden}
+.lang-dropdown.open .lang-menu{opacity:1;visibility:visible;transform:translateY(0)}
+.lang-opt{display:block;width:100%;padding:9px 16px;font-size:11px;font-weight:700;letter-spacing:.06em;border:none;background:transparent;color:var(--text-mid);cursor:pointer;text-align:left;transition:all .2s}
+.lang-opt:hover{background:rgba(198,164,109,.08);color:var(--gold-dark)}
+.lang-opt.active{color:var(--navy);font-weight:800}
+.lang-opt+.lang-opt{border-top:1px solid var(--border-light)}
 .nav-cta{position:relative;display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;padding:11px 22px 11px 24px;border-radius:30px;font-size:11px;font-weight:800;border:1px solid var(--navy);cursor:pointer;transition:all .35s;letter-spacing:.1em;text-transform:uppercase;overflow:hidden}
 .nav-cta::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(198,164,109,.35) 50%,transparent 70%);transform:translateX(-100%);transition:transform .6s;pointer-events:none}
 .nav-cta:hover{background:#0F1D35;border-color:var(--gold);box-shadow:0 8px 24px rgba(27,42,74,.25)}
@@ -194,7 +200,7 @@ footer{background:#0F172A;color:#fff;padding:64px 24px 32px}
   .footer-socials{justify-content:center}
   .section{padding:56px 16px}
   .nav-inner{padding:0 16px;height:64px}
-  .nav-right .lang-switch{display:none}
+  .nav-right .lang-dropdown{display:none}
   .nav-right .nav-cta{display:none}
   .page-hero{padding:100px 16px 40px}
   .page-hero .section-title{font-size:clamp(20px,5vw,32px)}
@@ -250,6 +256,22 @@ footer{background:#0F172A;color:#fff;padding:64px 24px 32px}
 window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>30)});
 </script>
 {% block page_js %}{% endblock %}
+<script>
+/* ── Language dropdown ── */
+(function(){
+  var dd=document.getElementById('langDropdown');
+  if(!dd) return;
+  document.addEventListener('click',function(e){if(!dd.contains(e.target))dd.classList.remove('open')});
+  dd.querySelectorAll('.lang-opt').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      dd.querySelectorAll('.lang-opt').forEach(function(b){b.classList.remove('active')});
+      btn.classList.add('active');
+      dd.querySelector('.lang-current').textContent=btn.textContent;
+      dd.classList.remove('open');
+    });
+  });
+})();
+</script>
 <script>
 (function(){
     /* ── Loading bar + scroll restore for public site ── */

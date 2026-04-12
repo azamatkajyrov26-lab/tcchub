@@ -1,0 +1,89 @@
+{% extends "layouts/dashboard.html" %}
+{% block title %}{{ page.title }} — Редактор{% endblock %}
+{% block page_eyebrow %}Админ · CMS · /{{ page.slug }}{% endblock %}
+{% block page_title %}{{ page.title }}{% endblock %}
+{% block page_sub %}<p class="cab-sub"><a href="{% url 'dashboard_cms_list' %}" style="color:#C6A46D;font-weight:700">← Все страницы</a></p>{% endblock %}
+
+{% block content %}
+<style>
+.ed-label{display:block;font-size:10px;font-weight:800;letter-spacing:.14em;color:#8a92a6;text-transform:uppercase;margin-bottom:6px}
+.ed-input,.ed-textarea{width:100%;padding:10px 12px;background:#fff;border:1px solid #D9DCE4;color:#0B1628;font-size:14px;font-weight:600;border-radius:2px;font-family:inherit}
+.ed-input:focus,.ed-textarea:focus{outline:none;border-color:#C6A46D}
+.ed-textarea{min-height:80px;resize:vertical}
+.ed-btn{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;background:#0F1D35;color:#C6A46D;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border:none;cursor:pointer}
+.ed-btn.gold{background:#C6A46D;color:#0F1D35}
+.ed-btn:hover{opacity:.9}
+.ed-block{border-top:1px solid #E6E8EE;padding:20px 0;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ed-block:first-of-type{border-top:none}
+.ed-block .full{grid-column:1/-1}
+.ed-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:4px}
+.ed-tag{font-size:10px;font-weight:800;letter-spacing:.16em;color:#C6A46D;text-transform:uppercase}
+.ed-toggle{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:#0B1628;text-transform:uppercase;letter-spacing:.1em;cursor:pointer}
+.ed-toggle input{width:16px;height:16px;accent-color:#C6A46D}
+</style>
+
+<div class="cab-card">
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="save_page">
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;align-items:end">
+      <div><label class="ed-label">Название страницы</label><input class="ed-input" name="title" value="{{ page.title }}"></div>
+      <div><button class="ed-btn gold" type="submit">Сохранить</button></div>
+      <div class="full"><label class="ed-label">Meta title (SEO)</label><input class="ed-input" name="meta_title" value="{{ page.meta_title }}"></div>
+      <div class="full"><label class="ed-label">Meta description (SEO)</label><textarea class="ed-textarea" name="meta_description">{{ page.meta_description }}</textarea></div>
+    </div>
+  </form>
+</div>
+
+<div class="cab-card">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+    <div>
+      <div class="ed-tag">Блоки страницы</div>
+      <h2 style="font-family:Montserrat;font-size:22px;font-weight:900;color:#0B1628;margin:4px 0 0">Тексты и видимость</h2>
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="save_sections">
+    {% for s in sections %}
+    <div class="ed-block">
+      <div class="full ed-head">
+        <div>
+          <span class="ed-tag">#{{ s.order }} · {{ s.section_key }}</span>
+        </div>
+        <label class="ed-toggle">
+          <input type="checkbox" name="sec_{{ s.id }}_is_visible" {% if s.is_visible %}checked{% endif %}>
+          Показывать на сайте
+        </label>
+      </div>
+      <div><label class="ed-label">Eyebrow (надпись над заголовком)</label><input class="ed-input" name="sec_{{ s.id }}_eyebrow" value="{{ s.eyebrow }}"></div>
+      <div><label class="ed-label">Heading (заголовок)</label><input class="ed-input" name="sec_{{ s.id }}_heading" value="{{ s.heading }}"></div>
+      <div class="full"><label class="ed-label">Subheading (подзаголовок)</label><input class="ed-input" name="sec_{{ s.id }}_subheading" value="{{ s.subheading }}"></div>
+      <div class="full"><label class="ed-label">Body (текст)</label><textarea class="ed-textarea" name="sec_{{ s.id }}_body">{{ s.body }}</textarea></div>
+      <div><label class="ed-label">CTA label (кнопка)</label><input class="ed-input" name="sec_{{ s.id }}_cta_label" value="{{ s.cta_label }}"></div>
+      <div><label class="ed-label">CTA url (ссылка)</label><input class="ed-input" name="sec_{{ s.id }}_cta_url" value="{{ s.cta_url }}"></div>
+    </div>
+    {% empty %}
+    <div style="padding:20px 0;color:#64728A">На этой странице пока нет блоков.</div>
+    {% endfor %}
+
+    <div style="margin-top:24px;display:flex;gap:12px;align-items:center">
+      <button type="submit" class="ed-btn gold">Сохранить всё →</button>
+      <a href="/{% if page.slug == 'landing' %}{% else %}{{ page.slug }}/{% endif %}" target="_blank" style="font-size:11px;font-weight:800;letter-spacing:.12em;color:#C6A46D;text-transform:uppercase;text-decoration:none">Открыть страницу на сайте ↗</a>
+    </div>
+  </form>
+</div>
+
+<div class="cab-card" style="margin-top:24px">
+  <div class="ed-tag">Не нашли нужное поле?</div>
+  <h2 style="font-family:Montserrat;font-size:20px;font-weight:900;color:#0B1628;margin:4px 0 12px">Запрос разработчику</h2>
+  <p style="font-size:13px;color:#64728A;margin:0 0 14px">Опишите, какой текст, блок или картинку нужно изменить — сообщение придёт разработчику на почту.</p>
+  <form method="post" action="{% url 'dashboard_cms_request' %}">
+    {% csrf_token %}
+    <input type="hidden" name="page_slug" value="{{ page.slug }}">
+    <textarea class="ed-textarea" name="message" placeholder="Например: в секции 3 замените картинку и заголовок на..." required style="min-height:100px"></textarea>
+    <div style="margin-top:12px"><button type="submit" class="ed-btn">Отправить запрос →</button></div>
+  </form>
+</div>
+{% endblock %}

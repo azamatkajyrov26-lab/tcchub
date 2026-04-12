@@ -1,0 +1,35 @@
+{% extends "layouts/dashboard.html" %}
+{% block title %}Редактор страниц — TCC Hub{% endblock %}
+{% block page_eyebrow %}Админ · CMS{% endblock %}
+{% block page_title %}Редактор <span class="ital">страниц</span>{% endblock %}
+{% block page_sub %}<p class="cab-sub">Выбери страницу, чтобы редактировать её тексты и скрывать блоки.</p>{% endblock %}
+
+{% block content %}
+<div class="cab-card" style="margin-bottom:20px;border-left:3px solid #C6A46D">
+  <div style="font-size:10px;font-weight:800;letter-spacing:.2em;color:#C6A46D;text-transform:uppercase">Контент-блоки</div>
+  <div style="font-family:Montserrat;font-size:18px;font-weight:900;color:#0B1628;margin:8px 0 12px">Динамические разделы</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <a href="{% url 'dashboard_cms_news_list' %}" style="padding:10px 18px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border:1px solid #0B1628;color:#0B1628;text-decoration:none;border-radius:6px">📰 Новости / Медиа</a>
+    <a href="{% url 'dashboard_cms_items_list' 'article' %}" style="padding:10px 18px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border:1px solid #0B1628;color:#0B1628;text-decoration:none;border-radius:6px">📊 Статьи аналитики</a>
+    <a href="{% url 'dashboard_cms_items_list' 'partner' %}" style="padding:10px 18px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border:1px solid #0B1628;color:#0B1628;text-decoration:none;border-radius:6px">🤝 Партнёры</a>
+    <a href="{% url 'dashboard_cms_items_list' 'project' %}" style="padding:10px 18px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border:1px solid #0B1628;color:#0B1628;text-decoration:none;border-radius:6px">🚀 Проекты</a>
+    <a href="{% url 'dashboard_cms_items_list' 'program' %}" style="padding:10px 18px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border:1px solid #0B1628;color:#0B1628;text-decoration:none;border-radius:6px">🎓 Программы</a>
+    <a href="{% url 'dashboard_cms_items_list' 'team' %}" style="padding:10px 18px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border:1px solid #0B1628;color:#0B1628;text-decoration:none;border-radius:6px">👥 Команда</a>
+    <a href="{% url 'dashboard_cms_items_list' 'expert' %}" style="padding:10px 18px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border:1px solid #0B1628;color:#0B1628;text-decoration:none;border-radius:6px">👔 Эксперты</a>
+    <a href="{% url 'dashboard_cms_items_list' 'solution' %}" style="padding:10px 18px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border:1px solid #0B1628;color:#0B1628;text-decoration:none;border-radius:6px">💼 Решения</a>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
+  {% for p in pages %}
+  <a href="{% url 'dashboard_cms_page' p.slug %}" class="cab-card" style="text-decoration:none;color:inherit;display:block;transition:border-color .2s" onmouseover="this.style.borderColor='#C6A46D'" onmouseout="this.style.borderColor='#D9DCE4'">
+    <div style="font-size:10px;font-weight:800;letter-spacing:.2em;color:#C6A46D;text-transform:uppercase">/{{ p.slug }}</div>
+    <div style="font-family:Montserrat;font-size:22px;font-weight:900;color:#0B1628;margin:12px 0 6px;letter-spacing:-.015em">{{ p.title }}</div>
+    <div style="font-size:12px;color:#64728A">{{ p.sections.count }} блок(ов) · {% if p.is_published %}опубликовано{% else %}черновик{% endif %}</div>
+    <div style="margin-top:14px;font-size:11px;font-weight:800;letter-spacing:.14em;color:#C6A46D">РЕДАКТИРОВАТЬ →</div>
+  </a>
+  {% empty %}
+  <div class="cab-card">Нет страниц.</div>
+  {% endfor %}
+</div>
+{% endblock %}

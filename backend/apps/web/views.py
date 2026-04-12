@@ -1,34 +1,46 @@
 import json
-from datetime import datetime, timedelta
+import logging
+import urllib.request
+from datetime import datetime
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import CustomUser
-from apps.assignments.models import Assignment, Submission, SubmissionFile
-from apps.badges.models import BadgeIssuance
-from apps.calendar.models import Event
-from apps.certificates.models import IssuedCertificate
-from apps.content.models import Activity, ActivityCompletion, Folder, FolderFile, Resource
-from apps.courses.models import Course, Enrollment, Section
-from apps.grades.models import Grade, GradeItem
 from apps.landing.models import (
     Advantage,
     ContactInfo,
+    ContactSubmission,
     ContentBlock,
     HeroSection,
     Metric,
     Partner,
     Testimonial,
 )
-from apps.messaging.models import Conversation, Message
-from apps.notifications.models import Notification
-from apps.quizzes.models import Answer, Question, Quiz, QuizAttempt, QuizResponse
+
+_tg_logger = logging.getLogger("tcchub.telegram")
+
+
+def _notify_telegram(text):
+    """Send notification to Telegram bot (non-blocking, fail-silent)."""
+    token = getattr(settings, "TELEGRAM_BOT_TOKEN", "") or ""
+    chat_id = getattr(settings, "TELEGRAM_CHAT_ID", "") or ""
+    if not token or not chat_id:
+        return
+    try:
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        payload = json.dumps({"chat_id": chat_id, "text": text, "parse_mode": "HTML"}).encode()
+        req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
+        urllib.request.urlopen(req, timeout=5)
+    except Exception as e:
+        _tg_logger.warning("telegram notify failed: %s", e)
 
 
 # ──────────────────────────────────────────────
@@ -42,7 +54,6 @@ def landing_view(request):
     testimonials = list(Testimonial.objects.all())
     advantages = Advantage.objects.all()
     contact = ContactInfo.objects.first()
-    featured_courses = Course.objects.filter(is_published=True)[:3]
     content_blocks = ContentBlock.objects.filter(is_visible=True)
 
     return render(request, "site/index.html", {
@@ -53,58 +64,112 @@ def landing_view(request):
         "testimonials": testimonials,
         "advantages": advantages,
         "contact": contact,
-        "featured_courses": featured_courses,
         "content_blocks": content_blocks,
         "current_year": datetime.now().year,
     })
 
 
 # ──────────────────────────────────────────────
-# Main Site Pages
+# Public Pages
 # ──────────────────────────────────────────────
 
 def about_view(request):
-    return render(request, "site/about.html", {"active_page": "about"})
+    return render(request, "site/about.html", {
+        "active_page": "about",
+        "experts": _site_items("expert").order_by("order"),
+    })
 
 
 def site_analytics_view(request):
-    return render(request, "site/analytics.html", {"active_page": "analytics"})
+    from apps.landing.models import SiteItem
+    articles = SiteItem.objects.filter(category="article", is_published=True).order_by("order")
+    return render(request, "site/analytics.html", {
+        "active_page": "analytics",
+        "articles": articles,
+    })
+
+
 
 
 def solutions_view(request):
-    return render(request, "site/solutions.html", {"active_page": "solutions"})
+    return render(request, "site/solutions.html", {
+        "active_page": "solutions",
+        "solutions_list": _site_items("solution").order_by("order"),
+    })
 
 
 def education_view(request):
-    return render(request, "site/education.html", {"active_page": "education"})
+    return render(request, "site/education.html", {
+        "active_page": "education",
+        "programs": _site_items("program").order_by("order"),
+    })
 
 
 def projects_view(request):
-    return render(request, "site/projects.html", {"active_page": "projects"})
+    return render(request, "site/projects.html", {
+        "active_page": "projects",
+        "projects_mc": _site_items("project", "middle_corridor").order_by("order"),
+        "projects_intl": _site_items("project", "international").order_by("order"),
+        "projects_research": _site_items("project", "research").order_by("order"),
+    })
 
 
 def site_media_view(request):
-    return render(request, "site/media.html", {"active_page": "media"})
+    from apps.landing.models import SiteNews
+    news = SiteNews.objects.filter(is_published=True)
+    return render(request, "site/media.html", {
+        "active_page": "media",
+        "news_items": news,
+    })
+
+
+def _site_items(category, subcategory=None):
+    from apps.landing.models import SiteItem
+    qs = SiteItem.objects.filter(category=category, is_published=True)
+    if subcategory is not None:
+        qs = qs.filter(subcategory=subcategory)
+    return qs
 
 
 def site_partners_view(request):
-    return render(request, "site/partners.html", {"active_page": "partners"})
+    return render(request, "site/partners.html", {
+        "active_page": "partners",
+        "partners_intl": _site_items("partner", "international").order_by("order"),
+        "partners_edu": _site_items("partner", "education").order_by("order"),
+    })
 
 
 def contacts_view(request):
     return render(request, "site/contacts.html", {"active_page": "contacts"})
 
 
+@csrf_exempt
+@require_POST
+def contact_submit_view(request):
+    """AJAX endpoint: save contact form + notify via Telegram."""
+    name = (request.POST.get("name") or "").strip()[:200]
+    phone = (request.POST.get("phone") or "").strip()[:50]
+    email = (request.POST.get("email") or "").strip()[:254]
+    message = (request.POST.get("message") or "").strip()[:3000]
+    if not name:
+        return JsonResponse({"ok": False, "error": "Укажите имя"}, status=400)
+    sub = ContactSubmission.objects.create(
+        name=name, phone=phone, email=email, message=message, source="contacts",
+    )
+    tg_text = (
+        f"<b>Новая заявка с сайта</b>\n\n"
+        f"<b>Имя:</b> {name}\n"
+        f"<b>Телефон:</b> {phone or '—'}\n"
+        f"<b>Email:</b> {email or '—'}\n"
+        f"<b>Сообщение:</b> {message or '—'}\n\n"
+        f"#{sub.pk} · {sub.created_at:%d.%m.%Y %H:%M}"
+    )
+    _notify_telegram(tg_text)
+    return JsonResponse({"ok": True})
+
+
 def wiki_view(request):
     return render(request, "site/wiki.html", {"active_page": "wiki"})
-
-
-def corridor_view(request):
-    return render(request, "site/corridor.html", {"active_page": "corridor"})
-
-
-def live_data_view(request):
-    return render(request, "site/live_data.html", {"active_page": "live_data"})
 
 
 def kz_logistics_laws_view(request):
@@ -112,7 +177,55 @@ def kz_logistics_laws_view(request):
 
 
 # ──────────────────────────────────────────────
-# Article Detail (Analytics)
+# Tools (login required)
+# ──────────────────────────────────────────────
+
+@login_required
+def corridor_view(request):
+    return render(request, "site/corridor.html", {"active_page": "corridor"})
+
+
+@login_required
+def corridor_map_view(request):
+    return render(request, "site/corridor_map.html", {"active_page": "corridor_map"})
+
+
+@login_required
+def live_data_view(request):
+    return render(request, "site/live_data.html", {"active_page": "live_data"})
+
+
+@login_required
+def monitoring_view(request):
+    return render(request, "site/monitoring.html", {"active_page": "monitoring"})
+
+
+@login_required
+def export_route_scores_view(request):
+    from apps.tcc_data.exports import export_route_scores_csv
+    return export_route_scores_csv(request)
+
+
+@login_required
+def export_risk_factors_view(request):
+    from apps.tcc_data.exports import export_risk_factors_csv
+    return export_risk_factors_csv(request)
+
+
+@login_required
+def export_trade_flows_view(request):
+    from apps.tcc_data.exports import export_trade_flows_csv
+    return export_trade_flows_csv(request)
+
+
+@login_required
+def export_sanctions_view(request):
+    from apps.tcc_data.exports import export_sanctions_csv
+    return export_sanctions_csv(request)
+
+
+# ──────────────────────────────────────────────
+# Articles
 # ──────────────────────────────────────────────
 
 ARTICLES = {
@@ -507,10 +620,7 @@ def article_detail_view(request, slug):
     article = ARTICLES.get(slug)
     if not article:
         raise Http404("Статья не найдена")
-
-    # Pick 3 related articles (excluding current)
     related = [a for s, a in ARTICLES.items() if s != slug][:3]
-
     return render(request, "site/article_detail.html", {
         "active_page": "analytics",
         "article": article,
@@ -525,28 +635,23 @@ def article_detail_view(request, slug):
 def login_view(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
-
     if request.method == "POST":
         email = request.POST.get("email", "").strip()
         password = request.POST.get("password", "")
         user = authenticate(request, username=email, password=password)
         if user is not None:
             login(request, user)
-            next_url = request.GET.get("next", "/dashboard/")
-            return redirect(next_url)
-        else:
-            return render(request, "auth/login.html", {
-                "form_errors": "Неверный email или пароль",
-                "email": email,
-            })
-
+            return redirect(request.GET.get("next", "/dashboard/"))
+        return render(request, "auth/login.html", {
+            "form_errors": "Неверный email или пароль",
+            "email": email,
+        })
     return render(request, "auth/login.html")
 
 
 def register_view(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
-
     if request.method == "POST":
         email = request.POST.get("email", "").strip()
         username = request.POST.get("username", "").strip()
@@ -585,7 +690,6 @@ def register_view(request):
         )
         login(request, user)
         return redirect("dashboard")
-
     return render(request, "auth/register.html")
 
 
@@ -596,764 +700,19 @@ def logout_view(request):
 
 
 # ──────────────────────────────────────────────
-# Dashboard
+# Client cabinet
 # ──────────────────────────────────────────────
 
 @login_required
 def dashboard_view(request):
-    enrollments = Enrollment.objects.filter(
-        user=request.user, is_active=True
-    ).select_related("course")[:6]
-
-    enrolled_count = Enrollment.objects.filter(user=request.user, is_active=True).count()
-    completed_count = Enrollment.objects.filter(
-        user=request.user, completed_at__isnull=False
-    ).count()
-    certificates_count = IssuedCertificate.objects.filter(user=request.user).count()
-    badges_count = BadgeIssuance.objects.filter(user=request.user).count()
-
-    recent_notifications = Notification.objects.filter(user=request.user)[:5]
-    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-
+    from apps.tcc_commerce.models import Order, ReportAccess
+    reports_count = ReportAccess.objects.filter(user=request.user).count()
+    orders_count = Order.objects.filter(user=request.user).count()
     return render(request, "dashboard/index.html", {
-        "enrollments": enrollments,
-        "enrolled_count": enrolled_count,
-        "completed_count": completed_count,
-        "certificates_count": certificates_count,
-        "badges_count": badges_count,
-        "recent_notifications": recent_notifications,
-        "unread_count": unread_count,
+        "reports_count": reports_count,
+        "orders_count": orders_count,
     })
 
-
-# ──────────────────────────────────────────────
-# Courses
-# ──────────────────────────────────────────────
-
-@login_required
-def courses_view(request):
-    enrollments = Enrollment.objects.filter(
-        user=request.user, is_active=True
-    ).select_related("course", "course__category")
-    all_courses = Course.objects.filter(is_published=True).select_related("category")
-    enrolled_slugs = list(enrollments.values_list("course__slug", flat=True))
-    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-
-    return render(request, "dashboard/courses.html", {
-        "enrollments": enrollments,
-        "all_courses": all_courses,
-        "enrolled_slugs": enrolled_slugs,
-        "unread_count": unread_count,
-    })
-
-
-@login_required
-def course_detail_view(request, slug):
-    course = get_object_or_404(Course, slug=slug)
-    enrollment = Enrollment.objects.filter(user=request.user, course=course).first()
-    sections = Section.objects.filter(
-        course=course, is_visible=True
-    ).prefetch_related("activities")
-
-    completed_ids = set(
-        ActivityCompletion.objects.filter(
-            user=request.user, completed=True,
-            activity__section__course=course,
-        ).values_list("activity_id", flat=True)
-    )
-
-    # Build structured section data: primary lesson (video/folder) + supplementary materials
-    VIDEO_TYPES = {"video", "folder", "lesson"}
-    QUIZ_TYPES = {"quiz"}
-    ASSIGNMENT_TYPES = {"assignment"}
-    structured_sections = []
-    video_count = 0
-    for section in sections:
-        activities = list(section.activities.filter(is_visible=True))
-        primary = None  # The main video/lesson
-        materials = []   # Documents, resources, URLs
-        quizzes = []
-        assignments = []
-        for act in activities:
-            if act.activity_type in VIDEO_TYPES and primary is None:
-                primary = act
-                video_count += 1
-            elif act.activity_type in QUIZ_TYPES:
-                quizzes.append(act)
-            elif act.activity_type in ASSIGNMENT_TYPES:
-                assignments.append(act)
-            else:
-                materials.append(act)
-        structured_sections.append({
-            "section": section,
-            "primary": primary,
-            "materials": materials,
-            "quizzes": quizzes,
-            "assignments": assignments,
-            "all_activities": activities,
-        })
-
-    # Find the first uncompleted primary lesson for "Continue" button
-    next_uncompleted_url = None
-    if enrollment:
-        from django.urls import reverse
-        for item in structured_sections:
-            if item["primary"] and item["primary"].id not in completed_ids:
-                next_uncompleted_url = reverse(
-                    "activity_detail",
-                    kwargs={"slug": course.slug, "activity_id": item["primary"].id},
-                )
-                break
-
-    students_count = Enrollment.objects.filter(course=course, role="student").count()
-    activities_count = Activity.objects.filter(section__course=course, is_visible=True).count()
-    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-
-    return render(request, "dashboard/course_detail.html", {
-        "course": course,
-        "enrollment": enrollment,
-        "sections": sections,
-        "structured_sections": structured_sections,
-        "completed_ids": completed_ids,
-        "students_count": students_count,
-        "activities_count": activities_count,
-        "video_count": video_count,
-        "next_uncompleted_url": next_uncompleted_url,
-        "unread_count": unread_count,
-    })
-
-
-@login_required
-def activity_detail_view(request, slug, activity_id):
-    course = get_object_or_404(Course, slug=slug)
-    activity = get_object_or_404(Activity, id=activity_id, section__course=course)
-    enrollment = Enrollment.objects.filter(user=request.user, course=course).first()
-
-    is_completed = ActivityCompletion.objects.filter(
-        user=request.user, activity=activity, completed=True
-    ).exists()
-
-    # All sections with activities for sidebar curriculum
-    sections = Section.objects.filter(
-        course=course, is_visible=True
-    ).prefetch_related("activities")
-
-    completed_ids = set(
-        ActivityCompletion.objects.filter(
-            user=request.user, completed=True,
-            activity__section__course=course,
-        ).values_list("activity_id", flat=True)
-    )
-
-    # Build flat list of primary lessons (video/folder/lesson) for prev/next
-    VIDEO_TYPES = {"video", "folder", "lesson"}
-    all_primaries = []
-    for section in sections:
-        for act in section.activities.filter(is_visible=True):
-            if act.activity_type in VIDEO_TYPES:
-                all_primaries.append(act)
-                break  # Only first per section
-
-    current_idx = None
-    for i, act in enumerate(all_primaries):
-        if act.id == activity.id:
-            current_idx = i
-            break
-
-    prev_activity = all_primaries[current_idx - 1] if current_idx and current_idx > 0 else None
-    next_activity = all_primaries[current_idx + 1] if current_idx is not None and current_idx < len(all_primaries) - 1 else None
-
-    resource = None
-    try:
-        resource = activity.resource
-    except Resource.DoesNotExist:
-        pass
-
-    folder_files = []
-    try:
-        folder = activity.folder
-        folder_files = FolderFile.objects.filter(folder=folder)
-    except Folder.DoesNotExist:
-        pass
-
-    quiz = None
-    try:
-        quiz = activity.quiz
-    except Quiz.DoesNotExist:
-        pass
-
-    assignment = None
-    try:
-        assignment = activity.assignment
-    except Assignment.DoesNotExist:
-        pass
-
-    # Collect all supplementary materials from the same section
-    section_materials = []
-    section_quizzes = []
-    section_assignments = []
-    for act in activity.section.activities.filter(is_visible=True):
-        if act.id == activity.id:
-            continue
-        if act.activity_type in {"quiz"}:
-            try:
-                section_quizzes.append({"activity": act, "quiz": act.quiz})
-            except Quiz.DoesNotExist:
-                section_quizzes.append({"activity": act, "quiz": None})
-        elif act.activity_type in {"assignment"}:
-            try:
-                section_assignments.append({"activity": act, "assignment": act.assignment})
-            except Assignment.DoesNotExist:
-                section_assignments.append({"activity": act, "assignment": None})
-        elif act.activity_type not in VIDEO_TYPES:
-            mat_resource = None
-            try:
-                mat_resource = act.resource
-            except Resource.DoesNotExist:
-                pass
-            mat_folder_files = []
-            try:
-                mat_folder = act.folder
-                mat_folder_files = list(FolderFile.objects.filter(folder=mat_folder))
-            except Folder.DoesNotExist:
-                pass
-            section_materials.append({
-                "activity": act,
-                "resource": mat_resource,
-                "folder_files": mat_folder_files,
-            })
-
-    # Video timestamps and progress
-    from apps.content.models import VideoTimestamp, VideoProgress
-    timestamps = VideoTimestamp.objects.filter(activity=activity)
-    video_progress = VideoProgress.objects.filter(user=request.user, activity=activity).first()
-
-    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-
-    # Use player layout for video-type activities, dashboard layout for others
-    is_video_type = activity.activity_type in VIDEO_TYPES
-    template = "dashboard/activity_detail.html" if is_video_type else "dashboard/activity_simple.html"
-
-    # Current lesson index / total for "Урок X из Y"
-    lesson_index = (current_idx + 1) if current_idx is not None else 1
-    total_lessons = len(all_primaries)
-
-    return render(request, template, {
-        "course": course,
-        "activity": activity,
-        "section": activity.section,
-        "enrollment": enrollment,
-        "is_completed": is_completed,
-        "is_video_type": is_video_type,
-        "sections": sections,
-        "completed_ids": completed_ids,
-        "prev_activity": prev_activity,
-        "next_activity": next_activity,
-        "resource": resource,
-        "folder_files": folder_files,
-        "quiz": quiz,
-        "assignment": assignment,
-        "section_materials": section_materials,
-        "section_quizzes": section_quizzes,
-        "section_assignments": section_assignments,
-        "timestamps": timestamps,
-        "video_progress": video_progress,
-        "unread_count": unread_count,
-        "lesson_index": lesson_index,
-        "total_lessons": total_lessons,
-    })
-
-
-@login_required
-@require_POST
-def complete_activity_view(request, slug, activity_id):
-    activity = get_object_or_404(Activity, id=activity_id, section__course__slug=slug)
-    completion, created = ActivityCompletion.objects.get_or_create(
-        user=request.user, activity=activity,
-        defaults={"completed": True, "completed_at": timezone.now()},
-    )
-    if not completion.completed:
-        completion.completed = True
-        completion.completed_at = timezone.now()
-        completion.save()
-
-    # Update enrollment progress
-    course = activity.section.course
-    enrollment = Enrollment.objects.filter(user=request.user, course=course).first()
-    if enrollment:
-        total = Activity.objects.filter(section__course=course, is_visible=True).count()
-        done = ActivityCompletion.objects.filter(
-            user=request.user, completed=True, activity__section__course=course
-        ).count()
-        if total > 0:
-            enrollment.progress = round((done / total) * 100, 2)
-            enrollment.save(update_fields=["progress"])
-
-    return render(request, "partials/_completion_done.html", {})
-
-
-@login_required
-@require_POST
-def save_video_progress_view(request, slug, activity_id):
-    activity = get_object_or_404(Activity, id=activity_id, section__course__slug=slug)
-    from apps.content.models import VideoProgress
-    current_time = int(request.POST.get("current_time", 0))
-    duration = int(request.POST.get("duration", 0))
-
-    VideoProgress.objects.update_or_create(
-        user=request.user, activity=activity,
-        defaults={"current_time": current_time, "duration": duration},
-    )
-    return HttpResponse(status=204)
-
-
-@login_required
-@require_POST
-def enroll_view(request, slug):
-    course = get_object_or_404(Course, slug=slug)
-    Enrollment.objects.get_or_create(
-        user=request.user, course=course,
-        defaults={"role": "student"},
-    )
-    messages.success(request, f'Вы записаны на курс "{course.title}"')
-    return redirect("course_detail", slug=slug)
-
-
-# ──────────────────────────────────────────────
-# Quizzes
-# ──────────────────────────────────────────────
-
-@login_required
-def quiz_start_view(request, quiz_id):
-    quiz = get_object_or_404(Quiz, id=quiz_id)
-    questions_count = quiz.questions.count()
-    previous_attempts = QuizAttempt.objects.filter(
-        quiz=quiz, user=request.user, state="finished"
-    )
-    attempts_used = previous_attempts.count()
-    can_attempt = attempts_used < quiz.max_attempts
-
-    if request.method == "POST" and can_attempt:
-        attempt = QuizAttempt.objects.create(
-            quiz=quiz,
-            user=request.user,
-            attempt_number=attempts_used + 1,
-        )
-        return redirect("quiz_take", quiz_id=quiz.id, attempt_id=attempt.id)
-
-    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-
-    return render(request, "dashboard/quiz_start.html", {
-        "quiz": quiz,
-        "questions_count": questions_count,
-        "previous_attempts": previous_attempts,
-        "attempts_used": attempts_used,
-        "can_attempt": can_attempt,
-        "unread_count": unread_count,
-    })
-
-
-@login_required
-def quiz_take_view(request, quiz_id, attempt_id):
-    quiz = get_object_or_404(Quiz, id=quiz_id)
-    attempt = get_object_or_404(
-        QuizAttempt, id=attempt_id, quiz=quiz, user=request.user, state="in_progress"
-    )
-    questions = quiz.questions.prefetch_related("answers").all()
-    if quiz.shuffle_questions:
-        questions = questions.order_by("?")
-
-    time_remaining = 0
-    if quiz.time_limit:
-        elapsed = (timezone.now() - attempt.started_at).total_seconds()
-        time_remaining = max(0, int(quiz.time_limit * 60 - elapsed))
-
-    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-
-    return render(request, "dashboard/quiz_take.html", {
-        "quiz": quiz,
-        "attempt": attempt,
-        "questions": questions,
-        "time_remaining": time_remaining,
-        "unread_count": unread_count,
-    })
-
-
-@login_required
-@require_POST
-def quiz_submit_view(request, quiz_id, attempt_id):
-    quiz = get_object_or_404(Quiz, id=quiz_id)
-    attempt = get_object_or_404(
-        QuizAttempt, id=attempt_id, quiz=quiz, user=request.user, state="in_progress"
-    )
-
-    questions = quiz.questions.prefetch_related("answers").all()
-    total_points = 0
-    earned_points = 0
-
-    for question in questions:
-        total_points += float(question.points)
-        answer_key = f"question_{question.id}"
-        submitted = request.POST.get(answer_key, "")
-
-        response_data = {
-            "attempt": attempt,
-            "question": question,
-        }
-
-        if question.question_type in ("multiple_choice", "true_false"):
-            try:
-                answer = Answer.objects.get(id=int(submitted), question=question)
-                response_data["answer"] = answer
-                response_data["is_correct"] = answer.is_correct
-                if answer.is_correct:
-                    response_data["score"] = question.points
-                    earned_points += float(question.points)
-                else:
-                    response_data["score"] = 0
-            except (Answer.DoesNotExist, ValueError):
-                response_data["is_correct"] = False
-                response_data["score"] = 0
-        elif question.question_type in ("short_answer",):
-            response_data["text_response"] = submitted
-            correct_answers = question.answers.filter(is_correct=True).values_list("text", flat=True)
-            if submitted.strip().lower() in [a.strip().lower() for a in correct_answers]:
-                response_data["is_correct"] = True
-                response_data["score"] = question.points
-                earned_points += float(question.points)
-            else:
-                response_data["is_correct"] = False
-                response_data["score"] = 0
-        else:
-            response_data["text_response"] = submitted
-            response_data["score"] = 0
-            response_data["is_correct"] = None
-
-        QuizResponse.objects.update_or_create(
-            attempt=attempt, question=question,
-            defaults=response_data,
-        )
-
-    score = (earned_points / total_points * 100) if total_points > 0 else 0
-    attempt.score = round(score, 2)
-    attempt.state = "finished"
-    attempt.finished_at = timezone.now()
-    attempt.save()
-
-    return redirect("quiz_results", quiz_id=quiz.id, attempt_id=attempt.id)
-
-
-@login_required
-def quiz_results_view(request, quiz_id, attempt_id):
-    quiz = get_object_or_404(Quiz, id=quiz_id)
-    attempt = get_object_or_404(
-        QuizAttempt, id=attempt_id, quiz=quiz, user=request.user
-    )
-    responses = QuizResponse.objects.filter(attempt=attempt).select_related(
-        "question", "answer"
-    ).order_by("question__order")
-    passed = attempt.score is not None and attempt.score >= quiz.passing_grade
-
-    course_slug = quiz.activity.section.course.slug
-    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-
-    return render(request, "dashboard/quiz_results.html", {
-        "quiz": quiz,
-        "attempt": attempt,
-        "responses": responses,
-        "passed": passed,
-        "course_slug": course_slug,
-        "unread_count": unread_count,
-    })
-
-
-# ──────────────────────────────────────────────
-# Assignments
-# ──────────────────────────────────────────────
-
-@login_required
-def assignment_detail_view(request, assignment_id):
-    assignment = get_object_or_404(Assignment, id=assignment_id)
-    submission = Submission.objects.filter(
-        assignment=assignment, user=request.user
-    ).order_by("-submitted_at").first()
-    submission_files = []
-    if submission:
-        submission_files = SubmissionFile.objects.filter(submission=submission)
-
-    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-
-    return render(request, "dashboard/assignment_detail.html", {
-        "assignment": assignment,
-        "submission": submission,
-        "submission_files": submission_files,
-        "unread_count": unread_count,
-    })
-
-
-@login_required
-@require_POST
-def assignment_submit_view(request, assignment_id):
-    assignment = get_object_or_404(Assignment, id=assignment_id)
-
-    submission, created = Submission.objects.get_or_create(
-        assignment=assignment,
-        user=request.user,
-        defaults={"status": "submitted"},
-    )
-    if not created:
-        submission.status = "submitted"
-        submission.save()
-
-    files = request.FILES.getlist("files")
-    for f in files[:assignment.max_files]:
-        SubmissionFile.objects.create(
-            submission=submission,
-            file=f,
-            original_name=f.name,
-        )
-
-    messages.success(request, "Работа отправлена")
-    return redirect("assignment_detail", assignment_id=assignment_id)
-
-
-# ──────────────────────────────────────────────
-# Grades
-# ──────────────────────────────────────────────
-
-@login_required
-def grades_view(request):
-    enrollments = Enrollment.objects.filter(
-        user=request.user, is_active=True
-    ).select_related("course")
-
-    grades_by_course = []
-    for enrollment in enrollments:
-        grades = Grade.objects.filter(
-            user=request.user,
-            grade_item__course=enrollment.course,
-        ).select_related("grade_item")
-        if grades.exists():
-            grades_by_course.append({
-                "course": enrollment.course,
-                "grades": grades,
-            })
-
-    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-
-    return render(request, "dashboard/grades.html", {
-        "grades_by_course": grades_by_course,
-        "unread_count": unread_count,
-    })
-
-
-# ──────────────────────────────────────────────
-# Certificates
-# ──────────────────────────────────────────────
-
-@login_required
-def certificates_view(request):
-    certificates = IssuedCertificate.objects.filter(
-        user=request.user
-    ).select_related("course", "template")
-    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-
-    return render(request, "dashboard/certificates.html", {
-        "certificates": certificates,
-        "unread_count": unread_count,
-    })
-
-
-# ──────────────────────────────────────────────
-# Messages
-# ──────────────────────────────────────────────
-
-@login_required
-def messages_view(request):
-    conversations = Conversation.objects.filter(
-        participants=request.user
-    ).prefetch_related("participants")
-
-    # Annotate with last message
-    for conv in conversations:
-        conv.last_message = conv.messages.order_by("-created_at").first()
-
-    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-
-    return render(request, "dashboard/messages.html", {
-        "conversations": conversations,
-        "active_conversation": None,
-        "conversation_messages": [],
-        "unread_count": unread_count,
-    })
-
-
-@login_required
-def conversation_view(request, conversation_id):
-    conversations = Conversation.objects.filter(
-        participants=request.user
-    ).prefetch_related("participants")
-
-    for conv in conversations:
-        conv.last_message = conv.messages.order_by("-created_at").first()
-
-    active_conversation = get_object_or_404(
-        Conversation, id=conversation_id, participants=request.user
-    )
-    conversation_messages = Message.objects.filter(
-        conversation=active_conversation
-    ).select_related("sender")
-
-    # Mark messages as read
-    Message.objects.filter(
-        conversation=active_conversation, is_read=False
-    ).exclude(sender=request.user).update(is_read=True)
-
-    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-
-    if request.headers.get("HX-Request"):
-        return render(request, "dashboard/messages.html", {
-            "conversations": conversations,
-            "active_conversation": active_conversation,
-            "conversation_messages": conversation_messages,
-            "unread_count": unread_count,
-        })
-
-    return render(request, "dashboard/messages.html", {
-        "conversations": conversations,
-        "active_conversation": active_conversation,
-        "conversation_messages": conversation_messages,
-        "unread_count": unread_count,
-    })
-
-
-@login_required
-@require_POST
-def send_message_view(request, conversation_id):
-    conversation = get_object_or_404(
-        Conversation, id=conversation_id, participants=request.user
-    )
-    content = request.POST.get("content", "").strip()
-    if content:
-        msg = Message.objects.create(
-            conversation=conversation,
-            sender=request.user,
-            content=content,
-        )
-        conversation.save()  # Update updated_at
-
-        if request.headers.get("HX-Request"):
-            return render(request, "partials/message_bubble.html", {"msg": msg})
-
-    return redirect("conversation", conversation_id=conversation_id)
-
-
-# ──────────────────────────────────────────────
-# Notifications
-# ──────────────────────────────────────────────
-
-@login_required
-def notifications_view(request):
-    notifications = Notification.objects.filter(user=request.user)
-    unread_count = notifications.filter(is_read=False).count()
-
-    return render(request, "dashboard/notifications.html", {
-        "notifications": notifications,
-        "unread_count": unread_count,
-    })
-
-
-@login_required
-@require_POST
-def mark_notification_read(request, notification_id):
-    notification = get_object_or_404(
-        Notification, id=notification_id, user=request.user
-    )
-    notification.is_read = True
-    notification.save(update_fields=["is_read"])
-
-    return render(request, "partials/notification_item.html", {
-        "notification": notification,
-    })
-
-
-@login_required
-@require_POST
-def mark_all_notifications_read(request):
-    Notification.objects.filter(
-        user=request.user, is_read=False
-    ).update(is_read=True)
-
-    notifications = Notification.objects.filter(user=request.user)
-    return render(request, "dashboard/notifications.html", {
-        "notifications": notifications,
-        "unread_count": 0,
-    })
-
-
-# ──────────────────────────────────────────────
-# Calendar
-# ──────────────────────────────────────────────
-
-@login_required
-def calendar_view(request):
-    now = timezone.now()
-    month = int(request.GET.get("month", now.month))
-    year = int(request.GET.get("year", now.year))
-
-    start_date = datetime(year, month, 1, tzinfo=timezone.get_current_timezone())
-    if month == 12:
-        end_date = datetime(year + 1, 1, 1, tzinfo=timezone.get_current_timezone())
-    else:
-        end_date = datetime(year, month + 1, 1, tzinfo=timezone.get_current_timezone())
-
-    events = Event.objects.filter(
-        start_date__gte=start_date,
-        start_date__lt=end_date,
-    ).filter(
-        models_q_user_or_site(request.user)
-    )
-
-    events_data = [
-        {
-            "id": e.id,
-            "title": e.title,
-            "description": e.description or "",
-            "start_date": e.start_date.isoformat(),
-            "time": e.start_date.strftime("%H:%M") if e.start_date else "",
-        }
-        for e in events
-    ]
-
-    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-        return JsonResponse({"events": events_data})
-
-    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-
-    return render(request, "dashboard/calendar.html", {
-        "current_month": month,
-        "current_year": year,
-        "events_json": json.dumps(events_data),
-        "unread_count": unread_count,
-    })
-
-
-def models_q_user_or_site(user):
-    """Return Q filter for events visible to user."""
-    from django.db.models import Q
-    enrolled_courses = Enrollment.objects.filter(
-        user=user, is_active=True
-    ).values_list("course_id", flat=True)
-    return (
-        Q(user=user) |
-        Q(event_type="site") |
-        Q(event_type="course", course_id__in=enrolled_courses)
-    )
-
-
-# ──────────────────────────────────────────────
-# Profile
-# ──────────────────────────────────────────────
 
 @login_required
 def profile_view(request):
@@ -1364,27 +723,12 @@ def profile_view(request):
         user.phone = request.POST.get("phone", user.phone)
         user.city = request.POST.get("city", user.city)
         user.country = request.POST.get("country", user.country)
-
         if "avatar" in request.FILES:
             user.avatar = request.FILES["avatar"]
-
         user.save()
         messages.success(request, "Профиль обновлён")
         return redirect("profile")
-
-    stats = {
-        "enrolled": Enrollment.objects.filter(user=request.user, is_active=True).count(),
-        "completed": Enrollment.objects.filter(user=request.user, completed_at__isnull=False).count(),
-        "certificates": IssuedCertificate.objects.filter(user=request.user).count(),
-        "badges": BadgeIssuance.objects.filter(user=request.user).count(),
-    }
-
-    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
-
-    return render(request, "dashboard/profile.html", {
-        "stats": stats,
-        "unread_count": unread_count,
-    })
+    return render(request, "dashboard/profile.html", {})
 
 
 @login_required
@@ -1397,11 +741,9 @@ def change_password_view(request):
     if not request.user.check_password(old_password):
         messages.error(request, "Текущий пароль неверный")
         return redirect("profile")
-
     if new_password != new_password_confirm:
         messages.error(request, "Новые пароли не совпадают")
         return redirect("profile")
-
     if len(new_password) < 8:
         messages.error(request, "Пароль должен содержать минимум 8 символов")
         return redirect("profile")
@@ -1413,15 +755,15 @@ def change_password_view(request):
     return redirect("profile")
 
 
-# ─── Reports catalog & commerce ───────────────────────────────────
+# ──────────────────────────────────────────────
+# Reports catalog & commerce
+# ──────────────────────────────────────────────
 
 def reports_catalog_view(request):
     from apps.tcc_reports.models import Report, ReportTemplate
-
     reports = Report.objects.filter(status="published").select_related(
         "template", "created_by"
     ).prefetch_related("corridors")
-
     templates = ReportTemplate.objects.all()
     current_template = request.GET.get("template")
     if current_template:
@@ -1430,7 +772,6 @@ def reports_catalog_view(request):
             reports = reports.filter(template_id=current_template)
         except (ValueError, TypeError):
             current_template = None
-
     return render(request, "site/reports_catalog.html", {
         "reports": reports,
         "templates": templates,
@@ -1441,7 +782,6 @@ def reports_catalog_view(request):
 
 def report_detail_view(request, slug):
     from apps.tcc_reports.models import Report
-
     report = get_object_or_404(
         Report.objects.select_related("template", "created_by").prefetch_related(
             "corridors", "countries", "sections"
@@ -1449,17 +789,13 @@ def report_detail_view(request, slug):
         slug=slug,
         status="published",
     )
-
-    # Increment views
     Report.objects.filter(pk=report.pk).update(views_count=report.views_count + 1)
-
     has_access = False
     if request.user.is_authenticated:
         has_access = (
             request.user.is_staff
             or report.accesses.filter(user=request.user).exists()
         )
-
     return render(request, "site/report_detail.html", {
         "report": report,
         "has_access": has_access,
@@ -1474,13 +810,10 @@ def buy_report_view(request, slug):
     from apps.tcc_reports.models import Report
 
     report = get_object_or_404(Report, slug=slug, status="published")
-
-    # Already has access?
     if report.accesses.filter(user=request.user).exists():
         messages.info(request, "У вас уже есть доступ к этому отчёту")
         return redirect("report_detail", slug=slug)
 
-    # Find or create product for this report
     product = Product.objects.filter(report=report, is_active=True).first()
     if not product:
         product = Product.objects.create(
@@ -1499,7 +832,6 @@ def buy_report_view(request, slug):
         status="pending",
     )
 
-    # Auto-complete for free reports
     if product.price_usd == 0:
         order.status = "paid"
         order.paid_at = timezone.now()
@@ -1512,7 +844,6 @@ def buy_report_view(request, slug):
         messages.success(request, "Доступ получен!")
         return redirect("report_detail", slug=slug)
 
-    # For paid reports — simulate payment for now
     order.status = "paid"
     order.paid_at = timezone.now()
     order.payment_ref = f"SIM-{order.pk}-{timezone.now().strftime('%Y%m%d%H%M%S')}"
@@ -1529,11 +860,9 @@ def buy_report_view(request, slug):
 @login_required
 def dashboard_my_reports_view(request):
     from apps.tcc_commerce.models import ReportAccess
-
     accesses = ReportAccess.objects.filter(
         user=request.user
     ).select_related("report", "report__template")
-
     return render(request, "dashboard/my_reports.html", {
         "accesses": accesses,
         "active_page": "my_reports",
@@ -1543,46 +872,503 @@ def dashboard_my_reports_view(request):
 @login_required
 def dashboard_my_orders_view(request):
     from apps.tcc_commerce.models import Order
-
     orders = Order.objects.filter(
         user=request.user
     ).select_related("product")
-
     return render(request, "dashboard/my_orders.html", {
         "orders": orders,
         "active_page": "my_orders",
     })
 
 
-# ─── Phase 5: Visualizations, monitoring, exports ─────────────────
+# ──────────────────────────────────────────────
+# CMS Editor (admin-only, inside dashboard)
+# ──────────────────────────────────────────────
+# Security:
+#   - All views gated by _staff_required (is_authenticated + is_staff).
+#   - POST is CSRF-protected by Django's middleware.
+#   - Input lengths are clamped server-side to prevent DoS/abuse via huge payloads.
+#   - Field values are auto-escaped by Django templates (no XSS).
+#     Exception: cms_html renders `body` via mark_safe — admin users are trusted
+#     to enter HTML in that field (same trust model as Wagtail / WordPress).
+#   - CMS mutations are logged for audit.
+import logging
 
-def corridor_map_view(request):
-    return render(request, "site/corridor_map.html", {"active_page": "corridor_map"})
+from django.contrib.auth.decorators import user_passes_test
+
+from apps.landing.models import Page, PageSection
+
+cms_logger = logging.getLogger("tcchub.cms")
+
+_staff_required = user_passes_test(lambda u: u.is_authenticated and u.is_staff)
+
+# Input length limits (chars). Matches model field limits + sanity cap on body.
+_CMS_LIMITS = {
+    "title": 200,
+    "meta_title": 200,
+    "meta_description": 500,
+    "eyebrow": 120,
+    "heading": 300,
+    "subheading": 500,
+    "body": 20000,
+    "cta_label": 120,
+    "cta_url": 500,
+}
 
 
-def monitoring_view(request):
-    return render(request, "site/monitoring.html", {"active_page": "monitoring"})
+def _clean(request_post, key, limit):
+    """Strip + length-clamp a POST field."""
+    value = (request_post.get(key) or "").strip()
+    if len(value) > limit:
+        value = value[:limit]
+    return value
 
 
-@login_required
-def export_route_scores_view(request):
-    from apps.tcc_data.exports import export_route_scores_csv
-    return export_route_scores_csv(request)
+# Expected PageSection keys per page slug — ensures editor always shows the full
+# block list even if DB rows were never seeded. Order matches visual order on page.
+# Per-page block manifest with default text.
+# Format: (section_key, eyebrow, heading, subheading)
+# Used by _ensure_sections to: (a) create missing rows, (b) backfill empty
+# fields on existing rows so the editor shows current text for editing.
+_CMS_PAGE_MANIFEST = {
+    "landing": [
+        ("hero", "Eurasia · TMTM · BRI", "TransCaspian Cargo",
+         "Экосистема бизнес-решений в логистике и цепях поставок"),
+        ("intro", "Манифест", "Мировая торговля переживает структурную трансформацию.",
+         "— подход TransCaspian Cargo"),
+        ("features", "Контекст 2026", "Почему TCC актуален именно сейчас",
+         "Три структурных сдвига последних лет изменили правила игры в логистике. Игнорировать их — значит проигрывать ещё до начала проекта."),
+        ("stats", "Средний коридор", "Транскаспийский маршрут ТМТМ",
+         "Средний коридор становится одним из ключевых маршрутов между Европой и Азией. TransCaspian Cargo участвует в развитии экспертной и проектной инфраструктуры этого направления."),
+        ("services", "Последние исследования", "Экспертные материалы", ""),
+        ("cases", "Наши клиенты и партнёры", "Экосистема партнёрств TCC",
+         "Логистические компании, университеты, отраслевые ассоциации, промышленные группы и международные организации"),
+        ("testimonials", "Юридическая легитимность", "Платформа с подтверждённым правовым статусом",
+         "TCC — официально зарегистрированная организация Республики Казахстан с международной аккредитацией и патентом на собственную технологическую платформу."),
+        ("cta", "Сотрудничество", "Стать партнёром TransCaspian Cargo",
+         "Присоединяйтесь к экосистеме отраслевой экспертизы в логистике Евразии"),
+    ],
+    "about": [
+        ("hero", "О платформе", "TransCaspian Cargo",
+         "Экосистема стратегических решений для бизнеса, инвесторов, институтов развития и государственных структур — на пересечении логистики, аналитики и образования"),
+        ("section_1", "О компании", "История создания TransCaspian Cargo",
+         "TCC — это экосистема стратегических решений для бизнеса, инвесторов, институтов развития и государственных структур. TCC работает там, где пересекаются логистика, аналитика, стратегия, экспертиза, образование и международное сотрудничество."),
+        ("section_2", "Миссия", "Формирование устойчивой логистической инфраструктуры Евразии",
+         "Повышать качество стратегического управления в логистике и инфраструктуре, снижать риски, усиливать устойчивость проектов и укреплять капитал компаний через более зрелые цепи поставок, сильные управленческие решения и развитие профессиональной среды."),
+        ("section_3", "Видение", "Ключевая интеллектуальная и практическая платформа Евразии в области логистики",
+         "TCC стремится стать одной из ключевых интеллектуальных и практических платформ Евразии в области логистики, supply chain management, транспортных коридоров и профессионального развития отрасли."),
+        ("section_4", "Экосистема TCC", "Ключевые направления платформы",
+         "Каждое направление усиливает остальные, формируя единую экосистему, где знания превращаются в инструменты, инструменты — в решения, а решения — в устойчивые результаты."),
+        ("section_5", "Команда", "Эксперты и партнёры",
+         "Практики с многолетним опытом в логистике, транспорте и цепях поставок"),
+        ("section_6", "", "Присоединяйтесь к экосистеме TCC",
+         "Станьте частью платформы отраслевой экспертизы в логистике Евразии"),
+    ],
+    "analytics": [
+        ("hero", "Аналитика TCC", "Глубокая экспертиза рынка и точные данные",
+         "Комплексные исследования логистики и инфраструктуры Центральной Азии, торговых коридоров Евразии и геоэкономических трендов для стратегических решений бизнеса."),
+        ("cta", "", "Получайте аналитику первыми",
+         "Подпишитесь на еженедельный дайджест TCC с экспертными материалами"),
+    ],
+    "reports": [
+        ("hero", "Аналитика TCC", "Аналитические отчёты торговых коридоров",
+         "Экспертный анализ цепей поставок Евразии: риск-скоры, санкционный скрининг, сценарии развития коридоров и матрицы решений для бизнеса."),
+    ],
+    "solutions": [
+        ("hero", "Решения для бизнеса", "Стратегическое сопровождение бизнеса",
+         "TCC помогает организациям анализировать цепи поставок, выявлять уязвимости, находить устойчивые маршруты и адаптироваться к быстро меняющимся условиям логистики Евразии."),
+        ("section_2", "", "Направления практической работы TCC",
+         "От стратегии до выхода на новые рынки — комплексное сопровождение бизнеса"),
+        ("section_3", "", "Как мы работаем",
+         "Четыре этапа от первичной диагностики до внедрения решений"),
+        ("cta", "", "Запросить стратегическую сессию",
+         "Получите экспертную оценку ваших цепей поставок и моделирование сценариев от специалистов TCC"),
+    ],
+    "projects": [
+        ("hero", "Отраслевые проекты", "Инициативы, которые меняют логистику Евразии",
+         "Проекты TCC объединяют экспертизу, аналитику и партнёрство для развития Среднего коридора, международных перевозок и исследовательских программ."),
+        ("cta", "", "Стать участником проекта",
+         "Присоединяйтесь к отраслевым инициативам TransCaspian Cargo"),
+    ],
+    "partners": [
+        ("hero", "Сеть партнёров", "Партнёры, которые усиливают экосистему",
+         "Международные организации, университеты и отраслевые объединения, с которыми TCC строит долгосрочные стратегические партнёрства в логистике, образовании и аналитике."),
+        ("section_2", "", "Международные организации", ""),
+        ("section_3", "", "Образовательные институты", ""),
+        ("cta", "", "Стать партнёром TransCaspian Cargo",
+         "Присоединяйтесь к экосистеме отраслевой экспертизы в логистике Евразии"),
+    ],
+    "education": [
+        ("hero", "Образование TCC", "Развитие профессиональных компетенций",
+         "Образовательные программы, executive-форматы и партнёрства с университетами для специалистов логистики, supply chain и стратегического управления."),
+        ("section_2", "", "Форматы обучения",
+         "Образовательные программы, практикумы и корпоративное обучение"),
+        ("section_3", "", "Тематические направления",
+         "Ключевые области знаний для специалиста нового типа"),
+        ("section_courses", "", "Авторские программы обучения",
+         "От практиков отрасли с многолетним опытом"),
+        ("section_4", "", "Эксперты программ",
+         "Практики отрасли с многолетним опытом"),
+        ("cta", "", "Развивайте компетенции с TCC",
+         "Эволюция требований к специалисту в логистике отражает трансформацию самой экономики"),
+    ],
+    "media": [
+        ("hero", "Медиа TCC", "Экспертный контент отрасли",
+         "Статьи, интервью, исследования и видео — всё, что формирует профессиональный взгляд на логистику Евразии и развитие торговых коридоров."),
+        ("cta", "", "Подписывайтесь на наш Telegram",
+         "Оперативные новости, аналитика и обсуждения с экспертами отрасли"),
+    ],
+    "contacts": [
+        ("hero", "Связь с TCC", "Поговорим о вашем проекте",
+         "Получите бесплатную консультацию от экспертов TCC по управлению цепями поставок, логистике Евразии и стратегическому развитию."),
+        ("form", "— Заполните форму", "Расскажите о задаче",
+         "Опишите вашу задачу — мы свяжемся в ближайшее время и предложим варианты решения от наших экспертов."),
+    ],
+    "wiki": [
+        ("hero", "Справочник логиста", "WikiЛогист — энциклопедия логистики",
+         "270+ терминов · Законы РК · Документы · Конвенции · Ресурсы"),
+    ],
+}
 
 
-@login_required
-def export_risk_factors_view(request):
-    from apps.tcc_data.exports import export_risk_factors_csv
-    return export_risk_factors_csv(request)
+def _ensure_sections(page):
+    """Create missing PageSection rows AND backfill empty fields from manifest
+    defaults, so the editor always shows current text for editing."""
+    manifest = _CMS_PAGE_MANIFEST.get(page.slug)
+    if not manifest:
+        return
+    existing = {s.section_key: s for s in page.sections.all()}
+    for order, row in enumerate(manifest, start=1):
+        key, eyebrow, heading, subheading = row
+        section = existing.get(key)
+        if section is None:
+            PageSection.objects.create(
+                page=page,
+                section_key=key,
+                order=order,
+                is_visible=True,
+                eyebrow=eyebrow,
+                heading=heading,
+                subheading=subheading,
+            )
+            continue
+        # Backfill only empty fields — never overwrite admin edits.
+        changed = False
+        if not section.eyebrow and eyebrow:
+            section.eyebrow = eyebrow
+            changed = True
+        if not section.heading and heading:
+            section.heading = heading
+            changed = True
+        if not section.subheading and subheading:
+            section.subheading = subheading
+            changed = True
+        if changed:
+            section.save(update_fields=["eyebrow", "heading", "subheading"])
 
 
-@login_required
-def export_trade_flows_view(request):
-    from apps.tcc_data.exports import export_trade_flows_csv
-    return export_trade_flows_csv(request)
+@_staff_required
+def dashboard_cms_list(request):
+    pages = Page.objects.all().order_by("title").prefetch_related("sections")
+    return render(request, "dashboard/cms_list.html", {"pages": pages})
 
 
-@login_required
-def export_sanctions_view(request):
-    from apps.tcc_data.exports import export_sanctions_csv
-    return export_sanctions_csv(request)
+@_staff_required
+def dashboard_cms_page(request, slug):
+    page = get_object_or_404(Page, slug=slug)
+    _ensure_sections(page)
+    if request.method == "POST":
+        action = request.POST.get("action")
+        if action == "save_page":
+            page.title = _clean(request.POST, "title", _CMS_LIMITS["title"]) or page.title
+            page.meta_title = _clean(request.POST, "meta_title", _CMS_LIMITS["meta_title"])
+            page.meta_description = _clean(request.POST, "meta_description", _CMS_LIMITS["meta_description"])
+            page.save()
+            cms_logger.info("cms.page.save user=%s slug=%s", request.user.pk, slug)
+            messages.success(request, "Страница сохранена")
+            return redirect("dashboard_cms_page", slug=slug)
+        if action == "save_sections":
+            changed = 0
+            for section in page.sections.all():
+                prefix = f"sec_{section.id}_"
+                section.is_visible = bool(request.POST.get(prefix + "is_visible"))
+                section.eyebrow = _clean(request.POST, prefix + "eyebrow", _CMS_LIMITS["eyebrow"])
+                section.heading = _clean(request.POST, prefix + "heading", _CMS_LIMITS["heading"])
+                section.subheading = _clean(request.POST, prefix + "subheading", _CMS_LIMITS["subheading"])
+                section.body = _clean(request.POST, prefix + "body", _CMS_LIMITS["body"])
+                section.cta_label = _clean(request.POST, prefix + "cta_label", _CMS_LIMITS["cta_label"])
+                section.cta_url = _clean(request.POST, prefix + "cta_url", _CMS_LIMITS["cta_url"])
+                section.save()
+                changed += 1
+            cms_logger.info("cms.sections.save user=%s slug=%s count=%d", request.user.pk, slug, changed)
+            messages.success(request, "Блоки сохранены")
+            return redirect("dashboard_cms_page", slug=slug)
+    sections = page.sections.all().order_by("order", "id")
+    return render(request, "dashboard/cms_page.html", {"page": page, "sections": sections})
+
+
+@_staff_required
+@require_POST
+def dashboard_cms_toggle(request, section_id):
+    s = get_object_or_404(PageSection, id=section_id)
+    s.is_visible = not s.is_visible
+    s.save(update_fields=["is_visible"])
+    cms_logger.info("cms.section.toggle user=%s section=%d visible=%s",
+                    request.user.pk, s.id, s.is_visible)
+    return redirect("dashboard_cms_page", slug=s.page.slug)
+
+
+@_staff_required
+def dashboard_cms_help(request):
+    return render(request, "dashboard/cms_help.html", {})
+
+
+DEVELOPER_EMAIL = "kairov.a@apec.edu.kz"
+
+
+@_staff_required
+@require_POST
+def dashboard_cms_request(request):
+    """Send change request email to the developer."""
+    from django.core.mail import send_mail
+    from django.conf import settings
+
+    page_slug = _clean(request.POST, "page_slug", 80)
+    section_key = _clean(request.POST, "section_key", 80)
+    message = _clean(request.POST, "message", 5000)
+    if not message:
+        messages.error(request, "Опишите, что нужно изменить")
+        return redirect(request.META.get("HTTP_REFERER") or "dashboard_cms_list")
+
+    user = request.user
+    subject = f"[TCC Hub CMS] Запрос на изменение: /{page_slug or '—'}"
+    body = (
+        f"От: {user.get_full_name() or user.username} <{user.email or '—'}>\n"
+        f"Страница: /{page_slug}\n"
+        f"Блок: {section_key or '—'}\n\n"
+        f"Сообщение:\n{message}\n"
+    )
+    try:
+        send_mail(
+            subject,
+            body,
+            settings.DEFAULT_FROM_EMAIL,
+            [DEVELOPER_EMAIL],
+            fail_silently=False,
+        )
+        cms_logger.info("cms.request.sent user=%s slug=%s", user.pk, page_slug)
+        messages.success(request, "Запрос отправлен разработчику")
+    except Exception as e:
+        cms_logger.error("cms.request.failed user=%s err=%s", user.pk, e)
+        messages.error(request, f"Не удалось отправить: {e}")
+
+    if page_slug:
+        return redirect("dashboard_cms_page", slug=page_slug)
+    return redirect("dashboard_cms_list")
+
+
+# ──────────────────────────────────────────────
+# CMS · SiteNews CRUD (news editor)
+# ──────────────────────────────────────────────
+from apps.landing.models import SiteNews
+from datetime import date as _date
+
+
+def _parse_date(val, default=None):
+    from datetime import datetime
+    if not val:
+        return default or _date.today()
+    try:
+        return datetime.strptime(val, "%Y-%m-%d").date()
+    except Exception:
+        return default or _date.today()
+
+
+@_staff_required
+def dashboard_cms_news_list(request):
+    news = SiteNews.objects.all()
+    return render(request, "dashboard/cms_news_list.html", {
+        "news": news,
+        "active_page": "cms",
+    })
+
+
+@_staff_required
+def dashboard_cms_news_edit(request, news_id=None):
+    item = None
+    if news_id:
+        item = SiteNews.objects.filter(pk=news_id).first()
+        if not item:
+            messages.error(request, "Новость не найдена")
+            return redirect("dashboard_cms_news_list")
+
+    if request.method == "POST":
+        title = _clean(request.POST, "title", 300)
+        if not title:
+            messages.error(request, "Заголовок обязателен")
+            return redirect(request.path)
+
+        kind = _clean(request.POST, "kind", 32) or "новость"
+        valid_kinds = {k for k, _ in SiteNews.TYPE_CHOICES}
+        if kind not in valid_kinds:
+            kind = "новость"
+
+        excerpt = _clean(request.POST, "excerpt", 600)
+        body = request.POST.get("body", "")[:20000]
+        cover_url = _clean(request.POST, "cover_url", 1000)
+        external_url = _clean(request.POST, "external_url", 1000)
+        published_at = _parse_date(request.POST.get("published_at"))
+        is_published = bool(request.POST.get("is_published"))
+        show_on_landing = bool(request.POST.get("show_on_landing"))
+        try:
+            order = int(request.POST.get("order") or 0)
+        except ValueError:
+            order = 0
+
+        if item is None:
+            item = SiteNews()
+        item.title = title
+        item.kind = kind
+        item.excerpt = excerpt
+        item.body = body
+        item.cover_url = cover_url
+        item.external_url = external_url
+        item.published_at = published_at
+        item.is_published = is_published
+        item.show_on_landing = show_on_landing
+        item.order = order
+        if request.FILES.get("cover"):
+            item.cover = request.FILES["cover"]
+        item.save()
+        cms_logger.info("cms.news.save user=%s id=%s", request.user.pk, item.pk)
+        messages.success(request, "Новость сохранена")
+        return redirect("dashboard_cms_news_edit", news_id=item.pk)
+
+    return render(request, "dashboard/cms_news_edit.html", {
+        "item": item,
+        "kinds": SiteNews.TYPE_CHOICES,
+        "active_page": "cms",
+    })
+
+
+# ──────────────────────────────────────────────
+# CMS · SiteItem CRUD (articles/partners/projects/programs/reports/team)
+# ──────────────────────────────────────────────
+from apps.landing.models import SiteItem
+
+_CATEGORY_LABELS = dict(SiteItem.CATEGORY_CHOICES)
+
+_CATEGORY_SUBCATS = {
+    "partner": [("international", "Международные"), ("education", "Образование")],
+    "project": [("middle_corridor", "Средний коридор"),
+                ("international", "Международные"),
+                ("research", "Исследования")],
+}
+
+
+@_staff_required
+def dashboard_cms_items_list(request, category):
+    if category not in _CATEGORY_LABELS:
+        messages.error(request, "Неизвестная категория")
+        return redirect("dashboard_cms_list")
+    items = SiteItem.objects.filter(category=category)
+    return render(request, "dashboard/cms_items_list.html", {
+        "items": items,
+        "category": category,
+        "category_label": _CATEGORY_LABELS[category],
+        "active_page": "cms",
+    })
+
+
+@_staff_required
+def dashboard_cms_items_edit(request, category, item_id=None):
+    if category not in _CATEGORY_LABELS:
+        messages.error(request, "Неизвестная категория")
+        return redirect("dashboard_cms_list")
+
+    item = None
+    if item_id:
+        item = SiteItem.objects.filter(pk=item_id, category=category).first()
+        if not item:
+            messages.error(request, "Элемент не найден")
+            return redirect("dashboard_cms_items_list", category=category)
+
+    if request.method == "POST":
+        title = _clean(request.POST, "title", 300)
+        if not title:
+            messages.error(request, "Заголовок обязателен")
+            return redirect(request.path)
+
+        if item is None:
+            item = SiteItem(category=category)
+        item.title = title
+        item.subtitle = _clean(request.POST, "subtitle", 300)
+        item.subcategory = _clean(request.POST, "subcategory", 80)
+        item.slug = _clean(request.POST, "slug", 200)
+        item.description = _clean(request.POST, "description", 1500)
+        item.body = request.POST.get("body", "")[:30000]
+        item.image_url = _clean(request.POST, "image_url", 1000)
+        item.link_url = _clean(request.POST, "link_url", 1000)
+        item.tag = _clean(request.POST, "tag", 80)
+        item.status = _clean(request.POST, "status", 40)
+        item.is_published = bool(request.POST.get("is_published"))
+        try:
+            item.order = int(request.POST.get("order") or 0)
+        except ValueError:
+            item.order = 0
+        # metrics
+        metrics_raw = _clean(request.POST, "metrics", 500)
+        if metrics_raw:
+            item.data = dict(item.data or {})
+            item.data["metrics"] = [m.strip() for m in metrics_raw.split("|") if m.strip()]
+        if request.FILES.get("image"):
+            item.image = request.FILES["image"]
+        item.save()
+        cms_logger.info("cms.item.save user=%s cat=%s id=%s",
+                        request.user.pk, category, item.pk)
+        messages.success(request, "Сохранено")
+        return redirect("dashboard_cms_items_edit", category=category, item_id=item.pk)
+
+    return render(request, "dashboard/cms_items_edit.html", {
+        "item": item,
+        "category": category,
+        "category_label": _CATEGORY_LABELS[category],
+        "subcats": _CATEGORY_SUBCATS.get(category, []),
+        "active_page": "cms",
+    })
+
+
+@_staff_required
+@require_POST
+def dashboard_cms_items_delete(request, category, item_id):
+    item = SiteItem.objects.filter(pk=item_id, category=category).first()
+    if item:
+        item.delete()
+        cms_logger.info("cms.item.delete user=%s cat=%s id=%s",
+                        request.user.pk, category, item_id)
+        messages.success(request, "Удалено")
+    return redirect("dashboard_cms_items_list", category=category)
+
+
+@_staff_required
+@require_POST
+def dashboard_cms_news_delete(request, news_id):
+    item = SiteNews.objects.filter(pk=news_id).first()
+    if item:
+        item.delete()
+        cms_logger.info("cms.news.delete user=%s id=%s", request.user.pk, news_id)
+        messages.success(request, "Новость удалена")
+    return redirect("dashboard_cms_news_list")
+
+
+# ──────────────────────────────────────────────
+# Dashboard · Заявки (contact submissions)
+# ──────────────────────────────────────────────
+
+@_staff_required
+def dashboard_submissions_list(request):
+    subs = ContactSubmission.objects.all()[:100]
+    unread = [s.pk for s in subs if not s.is_read]
+    if unread:
+        ContactSubmission.objects.filter(pk__in=unread).update(is_read=True)
+    return render(request, "dashboard/submissions_list.html", {"submissions": subs})

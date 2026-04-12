@@ -1,5 +1,6 @@
 {% extends "layouts/site.html" %}
 {% load static %}
+{% load cms %}
 
 {% block title %}Партнёры — TransCaspian Cargo{% endblock %}
 
@@ -59,11 +60,11 @@
 
 {% block content %}
 <!-- HERO -->
-<section class="prt-hero">
+{% cms_visible "partners" "section_1" as vis1 %}{% if vis1 %}<section class="prt-hero">
   <div class="prt-hero-wrap">
-    <div class="prt-eyebrow"><span class="bar"></span>Сеть партнёров<span class="bar"></span></div>
-    <h1 class="prt-title">Партнёры,<br>которые <em>усиливают</em> экосистему</h1>
-    <p class="prt-lead">Международные организации, университеты и отраслевые объединения, с которыми TCC строит долгосрочные стратегические партнёрства в логистике, образовании и аналитике.</p>
+    <div class="prt-eyebrow"><span class="bar"></span>{% cms_eyebrow "partners" "hero" "Сеть партнёров" %}<span class="bar"></span></div>
+    <h1 class="prt-title">{% cms_heading "partners" "hero" "Партнёры, которые усиливают экосистему" %}</h1>
+    <p class="prt-lead">{% cms_sub "partners" "hero" "Международные организации, университеты и отраслевые объединения, с которыми TCC строит долгосрочные стратегические партнёрства в логистике, образовании и аналитике." %}</p>
     <div class="prt-stats">
       <div class="prt-stat"><div class="prt-stat-num">8</div><div class="prt-stat-lab">партнёров</div></div>
       <div class="prt-stat"><div class="prt-stat-num">2</div><div class="prt-stat-lab">направления</div></div>
@@ -71,9 +72,9 @@
       <div class="prt-stat"><div class="prt-stat-num">10<span style="font-size:.5em;color:var(--text-light);font-weight:700;margin-left:4px">+</span></div><div class="prt-stat-lab">лет сотрудничества</div></div>
     </div>
   </div>
-</section>
+</section>{% endif %}
 
-<section class="prt-section">
+{% cms_visible "partners" "section_2" as vis2 %}{% if vis2 %}<section class="prt-section">
   <!-- CATEGORY 01 -->
   <div class="prt-cat reveal">
     <div class="prt-cat-head">
@@ -83,30 +84,20 @@
         </div>
         <div class="prt-cat-meta">
           <div class="prt-cat-num">— 01 / Международные</div>
-          <h2 class="prt-cat-title">Международные организации</h2>
+          <h2 class="prt-cat-title">{% cms_heading "partners" "section_2" "Международные организации" %}</h2>
         </div>
       </div>
       <div class="prt-cat-count"><b>3</b> партнёра</div>
     </div>
     <div class="prt-grid">
-      <a href="https://www.newsilkroadnetwork.com/" target="_blank" rel="noopener" class="prt-card reveal-scale">
-        <div class="prt-logo-frame"><img src="https://cdn.prod.website-files.com/63d8b07e8e897ea292020f31/63d8c1a749fdb30c3fac59ae_Frame%201.svg" alt="New Silk Road Network"></div>
-        <div class="prt-name">New Silk Road Network</div>
-        <div class="prt-desc">Международная сеть развития Нового Шёлкового пути</div>
+      {% for p in partners_intl %}
+      <a href="{{ p.link_url|default:'#' }}" {% if p.link_url %}target="_blank" rel="noopener"{% endif %} class="prt-card reveal-scale">
+        <div class="prt-logo-frame">{% if p.image_src %}<img src="{{ p.image_src }}" alt="{{ p.title }}">{% endif %}</div>
+        <div class="prt-name">{{ p.title }}</div>
+        <div class="prt-desc">{{ p.description }}</div>
         <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
       </a>
-      <a href="https://petrocouncil.kz/ru" target="_blank" rel="noopener" class="prt-card reveal-scale">
-        <div class="prt-logo-frame"><img src="https://petrocouncil.kz/storage/app/media/logo.png" alt="PetroCouncil"></div>
-        <div class="prt-name">PetroCouncil Kazakhstan</div>
-        <div class="prt-desc">Нефтегазовый Совет Казахстана</div>
-        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
-      </a>
-      <a href="https://euca-alliance.com/" target="_blank" rel="noopener" class="prt-card reveal-scale">
-        <div class="prt-logo-frame"><img src="https://euca-alliance.com/wp-content/uploads/2023/08/Black-2.png" alt="EUCA Alliance"></div>
-        <div class="prt-name">EUCA Alliance</div>
-        <div class="prt-desc">Объединение ведущих логистических компаний Евразии</div>
-        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
-      </a>
+      {% endfor %}
     </div>
   </div>
 
@@ -119,50 +110,28 @@
         </div>
         <div class="prt-cat-meta">
           <div class="prt-cat-num">— 02 / Образование</div>
-          <h2 class="prt-cat-title">Образовательные институты</h2>
+          <h2 class="prt-cat-title">{% cms_heading "partners" "section_3" "Образовательные институты" %}</h2>
         </div>
       </div>
       <div class="prt-cat-count"><b>5</b> университетов</div>
     </div>
     <div class="prt-grid">
-      <a href="https://aogu.edu.kz/" target="_blank" rel="noopener" class="prt-card reveal-scale">
-        <div class="prt-logo-frame"><img src="https://aogu.edu.kz/local/templates/aogu_main/img/favicon.png" alt="AUNG"></div>
-        <div class="prt-name">Атырауский университет нефти и газа</div>
-        <div class="prt-desc">им. С. Утебаева</div>
+      {% for p in partners_edu %}
+      <a href="{{ p.link_url|default:'#' }}" {% if p.link_url %}target="_blank" rel="noopener"{% endif %} class="prt-card reveal-scale">
+        <div class="prt-logo-frame">{% if p.image_src %}<img src="{{ p.image_src }}" alt="{{ p.title }}">{% endif %}</div>
+        <div class="prt-name">{{ p.title }}</div>
+        <div class="prt-desc">{{ p.description }}</div>
         <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
       </a>
-      <a href="https://dku.kz/ru" target="_blank" rel="noopener" class="prt-card reveal-scale">
-        <div class="prt-logo-frame"><img src="https://dku.kz/storage/app/media/logo.png" alt="DKU"></div>
-        <div class="prt-name">Казахстанско-Немецкий Университет</div>
-        <div class="prt-desc">DKU · Алматы</div>
-        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
-      </a>
-      <a href="https://yu.edu.kz/" target="_blank" rel="noopener" class="prt-card reveal-scale">
-        <div class="prt-logo-frame"><img src="https://yu.edu.kz/wp-content/uploads/2023/08/blue_logo.png" alt="Yasawi University"></div>
-        <div class="prt-name">МКТУ им. Ходжи Ахмеда Ясави</div>
-        <div class="prt-desc">Международный казахско-турецкий университет</div>
-        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
-      </a>
-      <a href="https://apec.edu.kz/" target="_blank" rel="noopener" class="prt-card reveal-scale">
-        <div class="prt-logo-frame"><img src="https://apec.edu.kz/assets/main_logo.png" alt="APEC PetroTechnic"></div>
-        <div class="prt-name">Высший колледж APEC PetroTechnic</div>
-        <div class="prt-desc">Атырау</div>
-        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
-      </a>
-      <a href="https://satbayev.university/en" target="_blank" rel="noopener" class="prt-card reveal-scale">
-        <div class="prt-logo-frame"><img src="https://satbayev.university/files/img/university/logo-nav-blue.svg" alt="Satbayev University"></div>
-        <div class="prt-name">Satbayev University</div>
-        <div class="prt-desc">Казахский национальный исследовательский технический университет</div>
-        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
-      </a>
+      {% endfor %}
     </div>
   </div>
-</section>
+</section>{% endif %}
 
 <!-- CTA -->
-<div class="cta-banner">
-  <h2>Стать партнёром TransCaspian Cargo</h2>
-  <p>Присоединяйтесь к экосистеме отраслевой экспертизы в логистике Евразии</p>
-  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">НАЧАТЬ СОТРУДНИЧЕСТВО</button>
-</div>
+{% cms_visible "partners" "cta" as viscta %}{% if viscta %}<div class="cta-banner">
+  {% cms_heading "partners" "cta" as h_cta %}{% if h_cta %}<h2>{{ h_cta }}</h2>{% else %}<h2>Стать партнёром TransCaspian Cargo</h2>{% endif %}
+  <p>{% cms_sub "partners" "cta" "Присоединяйтесь к экосистеме отраслевой экспертизы в логистике Евразии" %}</p>
+  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "partners" "cta" "НАЧАТЬ СОТРУДНИЧЕСТВО" %}</button>
+</div>{% endif %}
 {% endblock %}

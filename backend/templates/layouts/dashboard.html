@@ -3,268 +3,200 @@
 
 {% block extra_head %}
 <style>
-.lms-nav-link{position:relative;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--tcc-text-mid);padding:24px 0;transition:color .2s}
-.lms-nav-link:hover{color:var(--tcc-text-main)}
-.lms-nav-link.is-active{color:var(--tcc-text-main)}
-.lms-nav-link.is-active::after{content:"";position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:28px;height:2px;background:var(--tcc-gold)}
-.lms-eyebrow{display:inline-flex;align-items:center;gap:14px;margin-bottom:14px}
-.lms-eyebrow-bar{width:36px;height:2px;background:var(--tcc-gold)}
-.lms-eyebrow-label{font-size:11px;font-weight:800;letter-spacing:.18em;color:var(--tcc-gold);text-transform:uppercase}
-.lms-h1{font-size:clamp(28px,3.2vw,44px);font-weight:900;color:var(--tcc-text-main);line-height:1.05;letter-spacing:-.025em;font-family:Montserrat}
-.lms-h1 .accent{color:var(--tcc-gold);font-weight:300;font-style:italic;position:relative;display:inline-block}
-.lms-h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:4px;height:10px;background:var(--tcc-gold-soft);z-index:-1}
-.lms-topbar{background:var(--tcc-bg-card);border-bottom:1px solid var(--tcc-border-soft);box-shadow:0 1px 0 var(--tcc-gold-soft)}
-.lms-logo-badge{background:var(--tcc-navy);padding:5px 9px;border-radius:4px;border:1px solid rgba(198,164,109,.35)}
-html.dark .lms-logo-badge{background:#1B2A4A;border-color:rgba(212,184,126,.45)}
-.lms-theme-btn{position:relative;padding:8px;border-radius:10px;color:var(--tcc-text-mid);transition:color .2s,background-color .2s}
-.lms-theme-btn:hover{color:var(--tcc-text-main);background:var(--tcc-surface-alt)}
-.lms-dropdown{background:var(--tcc-bg-card);border:1px solid var(--tcc-border-soft);box-shadow:var(--tcc-shadow)}
-.lms-mobile-menu{background:var(--tcc-bg-card);border-top:1px solid var(--tcc-border-soft)}
+:root{
+  --cab-bg:#F4F5F8;
+  --cab-surface:#ffffff;
+  --cab-border:#E6E8EE;
+  --cab-text:#0B1628;
+  --cab-text-mid:#64728A;
+  --cab-navy:#0F1D35;
+  --cab-navy-2:#1B2A4A;
+  --cab-gold:#C6A46D;
+}
+html.dark body, body{background:#EEF0F4 !important;color:#0B1628 !important}
+.cab-shell{display:grid;grid-template-columns:272px 1fr;min-height:100vh;background:#EEF0F4}
+.cab-main{background:#EEF0F4;color:#0B1628}
+.cab-card{background:#ffffff !important;color:#0B1628;border:1px solid #D9DCE4 !important;box-shadow:0 1px 2px rgba(11,22,40,.04)}
+.cab-h1, .cab-sub{color:#0B1628}
+.cab-sub{color:#4A566E !important}
+@media (max-width:1023px){.cab-shell{grid-template-columns:1fr}}
+
+/* Sidebar */
+.cab-side{background:var(--cab-navy);color:#fff;padding:28px 22px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:28px}
+@media (max-width:1023px){.cab-side{position:static;height:auto}}
+.cab-brand{display:flex;align-items:center;gap:12px;padding-bottom:24px;border-bottom:1px solid rgba(255,255,255,.08)}
+.cab-brand img{height:34px;width:auto}
+.cab-brand-text{display:flex;flex-direction:column;line-height:1}
+.cab-brand-eyebrow{font-size:9px;font-weight:800;letter-spacing:.22em;color:var(--cab-gold);text-transform:uppercase}
+.cab-brand-name{font-family:Montserrat;font-size:17px;font-weight:900;color:#fff;margin-top:4px;letter-spacing:-.01em}
+.cab-brand-name span{color:var(--cab-gold);font-weight:300;font-style:italic}
+
+.cab-user{display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:2px}
+.cab-avatar{width:42px;height:42px;border-radius:50%;background:var(--cab-gold);color:var(--cab-navy);display:flex;align-items:center;justify-content:center;font-family:Montserrat;font-weight:900;font-size:16px;overflow:hidden;flex-shrink:0}
+.cab-avatar img{width:100%;height:100%;object-fit:cover}
+.cab-user-name{font-size:13px;font-weight:700;color:#fff;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cab-user-email{font-size:10px;color:rgba(255,255,255,.5);margin-top:3px;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.cab-nav{display:flex;flex-direction:column;gap:2px;flex:1}
+.cab-nav-label{font-size:9px;font-weight:800;letter-spacing:.22em;color:rgba(255,255,255,.35);text-transform:uppercase;margin:14px 10px 8px}
+.cab-nav-item{display:flex;align-items:center;gap:14px;padding:12px 14px;color:rgba(255,255,255,.7);font-size:13px;font-weight:600;letter-spacing:.01em;border-left:2px solid transparent;transition:all .18s;text-decoration:none}
+.cab-nav-item svg{width:18px;height:18px;flex-shrink:0;opacity:.7}
+.cab-nav-item:hover{color:#fff;background:rgba(255,255,255,.04)}
+.cab-nav-item.is-active{color:#fff;background:rgba(198,164,109,.08);border-left-color:var(--cab-gold)}
+.cab-nav-item.is-active svg{opacity:1;color:var(--cab-gold)}
+
+.cab-side-foot{border-top:1px solid rgba(255,255,255,.08);padding-top:18px;display:flex;flex-direction:column;gap:4px}
+.cab-side-foot a, .cab-side-foot button{display:flex;align-items:center;gap:12px;padding:10px 14px;color:rgba(255,255,255,.55);font-size:12px;font-weight:600;letter-spacing:.02em;background:none;border:none;cursor:pointer;text-align:left;width:100%}
+.cab-side-foot a:hover, .cab-side-foot button:hover{color:#fff}
+.cab-side-foot .danger{color:#ff8a8a}
+.cab-side-foot .danger:hover{color:#ff6b6b}
+.cab-side-foot svg{width:16px;height:16px}
+
+/* Main area */
+.cab-main{padding:44px 48px;max-width:1280px;width:100%}
+@media (max-width:1023px){.cab-main{padding:28px 20px}}
+.cab-page-head{margin-bottom:36px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.cab-eyebrow{display:inline-flex;align-items:center;gap:12px;margin-bottom:14px}
+.cab-eyebrow::before{content:"";width:28px;height:2px;background:var(--cab-gold)}
+.cab-eyebrow-label{font-size:10px;font-weight:800;letter-spacing:.22em;color:var(--cab-gold);text-transform:uppercase}
+.cab-h1{font-family:Montserrat;font-size:clamp(30px,3.4vw,44px);font-weight:900;color:var(--cab-text);letter-spacing:-.025em;line-height:1.02}
+.cab-h1 .ital{color:var(--cab-gold);font-weight:300;font-style:italic}
+.cab-sub{color:var(--cab-text-mid);font-size:14px;margin-top:10px;max-width:560px;line-height:1.5}
+
+.cab-card{background:var(--cab-surface);border:1px solid var(--cab-border);padding:28px}
+.cab-card+.cab-card{margin-top:20px}
+
+/* Mobile burger */
+.cab-mobile-bar{display:none;background:var(--cab-navy);color:#fff;padding:14px 18px;align-items:center;justify-content:space-between}
+@media (max-width:1023px){.cab-mobile-bar{display:flex}.cab-side{display:none}.cab-side.open{display:flex;position:fixed;inset:0;z-index:60;height:100vh}}
+.cab-burger{background:none;border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 10px;border-radius:2px;cursor:pointer}
 </style>
 {% endblock %}
 
 {% block body %}
-<div x-data="{ mobileMenu: false, profileOpen: false }" class="min-h-screen">
+{% with request.resolver_match.url_name as current %}
+<div class="cab-mobile-bar">
+  <a href="{% url 'dashboard' %}" style="display:flex;align-items:center;gap:10px">
+    <img src="{% static 'img/tcc_logo.png' %}" alt="" style="height:28px">
+    <span style="font-family:Montserrat;font-weight:900;font-size:14px">TCC <span style="color:#C6A46D;font-weight:300;font-style:italic">Hub</span></span>
+  </a>
+  <button class="cab-burger" onclick="document.querySelector('.cab-side').classList.toggle('open')">МЕНЮ</button>
+</div>
 
-    <!-- Top Navigation Bar -->
-    <nav class="lms-topbar fixed top-0 left-0 right-0 z-50">
-        <div class="max-w-[1440px] mx-auto px-4 lg:px-6">
-            <div class="h-[68px] flex items-center justify-between" x-data="{ dark: document.documentElement.classList.contains('dark') }">
-
-                <!-- Left: Logo + Nav Links -->
-                <div class="flex items-center gap-8">
-                    <!-- Logo (editorial — matches public site) -->
-                    <a href="{% url 'dashboard' %}" class="flex items-center gap-3 shrink-0 group">
-                        <img src="{% static 'img/favicon.png' %}" alt="TCC" class="h-9 w-9 lms-logo-badge object-contain">
-                        <div class="hidden sm:flex flex-col leading-tight pl-3" style="border-left:1px solid rgba(27,42,74,.12)">
-                            <span style="font-size:9px;font-weight:800;letter-spacing:.18em;color:#C6A46D;text-transform:uppercase">Learning</span>
-                            <span class="text-[15px] font-black text-navy" style="letter-spacing:-.02em;font-family:Montserrat">TCC <span style="color:#C6A46D;font-weight:300;font-style:italic">Hub</span></span>
-                        </div>
-                    </a>
-
-                    <!-- Desktop Nav Links (editorial — gold underline indicator) -->
-                    <div class="hidden md:flex items-center gap-7" hx-boost="true">
-                        {% with request.resolver_match.url_name as current %}
-                        <a href="{% url 'courses' %}" class="lms-nav-link {% if current == 'courses' or current == 'course_detail' %}is-active{% endif %}">МОЁ&nbsp;ОБУЧЕНИЕ</a>
-                        <a href="{% url 'grades' %}" class="lms-nav-link {% if current == 'grades' %}is-active{% endif %}">ОЦЕНКИ</a>
-                        <a href="{% url 'certificates' %}" class="lms-nav-link {% if current == 'certificates' %}is-active{% endif %}">СЕРТИФИКАТЫ</a>
-                        <a href="{% url 'calendar' %}" class="lms-nav-link {% if current == 'calendar' %}is-active{% endif %}">КАЛЕНДАРЬ</a>
-                        {% endwith %}
-                    </div>
-                </div>
-
-                <!-- Right: Icons + Profile -->
-                <div class="flex items-center gap-2" hx-boost="true">
-                    <!-- Notification Bell -->
-                    <a href="{% url 'notifications' %}" class="relative p-2 rounded-lg text-text-light hover:text-navy hover:bg-surface transition">
-                        <span class="material-icons-round text-[22px]">notifications</span>
-                        {% if unread_count %}
-                        <span class="absolute top-1 right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full text-[10px] flex items-center justify-center text-white font-bold px-1">{{ unread_count }}</span>
-                        {% endif %}
-                    </a>
-
-                    <!-- Messages -->
-                    <a href="{% url 'messages' %}" class="p-2 rounded-lg text-text-light hover:text-navy hover:bg-surface transition hidden sm:flex">
-                        <span class="material-icons-round text-[22px]">chat</span>
-                    </a>
-
-                    <!-- Theme Toggle -->
-                    <button type="button" class="lms-theme-btn" aria-label="Переключить тему"
-                            @click="dark = !dark; document.documentElement.classList.toggle('dark', dark); try{localStorage.setItem('tcc_theme', dark ? 'dark' : 'light')}catch(e){}">
-                        <span class="material-icons-round text-[22px]" x-text="dark ? 'light_mode' : 'dark_mode'">dark_mode</span>
-                    </button>
-
-                    <!-- Profile Dropdown -->
-                    <div class="relative ml-1" x-data @click.outside="profileOpen = false">
-                        <button @click="profileOpen = !profileOpen"
-                                class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-surface transition">
-                            {% if request.user.avatar %}
-                                <img src="{{ request.user.avatar.url }}" alt=""
-                                     class="w-8 h-8 rounded-full object-cover ring-2 ring-transparent hover:ring-primary/30">
-                            {% else %}
-                                <span class="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold">
-                                    {{ request.user.first_name|first|default:"U" }}
-                                </span>
-                            {% endif %}
-                            <span class="material-icons-round text-text-light text-lg hidden sm:block"
-                                  :class="profileOpen ? 'rotate-180' : ''"
-                                  style="transition: transform 0.2s">expand_more</span>
-                        </button>
-
-                        <!-- Dropdown Menu -->
-                        <div x-show="profileOpen"
-                             x-transition:enter="transition ease-out duration-150"
-                             x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
-                             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                             x-transition:leave="transition ease-in duration-100"
-                             x-transition:leave-start="opacity-100 scale-100"
-                             x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
-                             x-cloak
-                             class="lms-dropdown absolute right-0 top-full mt-2 w-64 rounded-xl py-2 z-50">
-
-                            <!-- User Info -->
-                            <div class="px-4 py-3 border-b">
-                                <p class="text-sm font-semibold text-navy truncate">{{ request.user.get_full_name|default:request.user.email }}</p>
-                                <p class="text-xs text-text-light truncate mt-0.5">{{ request.user.email }}</p>
-                            </div>
-
-                            <div class="py-1">
-                                <a href="{% url 'profile' %}"
-                                   class="flex items-center gap-3 px-4 py-2.5 text-sm text-text-mid hover:text-navy hover:bg-surface transition">
-                                    <span class="material-icons-round text-lg">person</span>
-                                    Профиль
-                                </a>
-                                <a href="{% url 'calendar' %}"
-                                   class="flex items-center gap-3 px-4 py-2.5 text-sm text-text-mid hover:text-navy hover:bg-surface transition">
-                                    <span class="material-icons-round text-lg">calendar_month</span>
-                                    Календарь
-                                </a>
-                                <a href="{% url 'landing' %}" hx-boost="false"
-                                   class="flex items-center gap-3 px-4 py-2.5 text-sm text-text-mid hover:text-navy hover:bg-surface transition">
-                                    <span class="material-icons-round text-lg">language</span>
-                                    На сайт
-                                </a>
-                            </div>
-
-                            <div class="border-t pt-1">
-                                <form action="{% url 'logout' %}" method="post" hx-boost="false">
-                                    {% csrf_token %}
-                                    <button type="submit"
-                                            class="flex items-center gap-3 px-4 py-2.5 w-full text-sm text-red-500 hover:bg-red-50 transition rounded-b-xl">
-                                        <span class="material-icons-round text-lg">logout</span>
-                                        Выйти
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Mobile Burger -->
-                    <button @click="mobileMenu = !mobileMenu"
-                            class="md:hidden p-2 rounded-lg text-text-light hover:text-navy hover:bg-surface transition ml-1">
-                        <span class="material-icons-round" x-text="mobileMenu ? 'close' : 'menu'">menu</span>
-                    </button>
-                </div>
-            </div>
+<div class="cab-shell">
+  <aside class="cab-side">
+    <div>
+      <div class="cab-brand">
+        <img src="{% static 'img/tcc_logo.png' %}" alt="TCC">
+        <div class="cab-brand-text">
+          <span class="cab-brand-eyebrow">Кабинет</span>
+          <span class="cab-brand-name">TCC <span>Hub</span></span>
         </div>
+      </div>
+    </div>
 
-        <!-- Mobile Menu (slide-down) -->
-        <div x-show="mobileMenu"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 -translate-y-2"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 translate-y-0"
-             x-transition:leave-end="opacity-0 -translate-y-2"
-             x-cloak
-             class="lms-mobile-menu md:hidden border-t px-4 pb-4 shadow-lg">
+    <div class="cab-user">
+      <div class="cab-avatar">
+        {% if request.user.avatar %}<img src="{{ request.user.avatar.url }}" alt="">
+        {% else %}{{ request.user.first_name|first|default:"U"|upper }}{% endif %}
+      </div>
+      <div style="min-width:0">
+        <div class="cab-user-name">{{ request.user.get_full_name|default:request.user.email }}</div>
+        <div class="cab-user-email">{{ request.user.email }}</div>
+      </div>
+    </div>
 
-            {% with request.resolver_match.url_name as current %}
-            <div class="space-y-1 py-3" hx-boost="true">
-                <a href="{% url 'courses' %}" @click="mobileMenu = false"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition
-                          {% if current == 'courses' or current == 'course_detail' %}text-primary bg-primary/10{% else %}text-text-mid hover:text-navy hover:bg-surface{% endif %}">
-                    <span class="material-icons-round text-xl">menu_book</span>
-                    Моё обучение
-                </a>
-                <a href="{% url 'grades' %}" @click="mobileMenu = false"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition
-                          {% if current == 'grades' %}text-primary bg-primary/10{% else %}text-text-mid hover:text-navy hover:bg-surface{% endif %}">
-                    <span class="material-icons-round text-xl">grade</span>
-                    Оценки
-                </a>
-                <a href="{% url 'certificates' %}" @click="mobileMenu = false"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition
-                          {% if current == 'certificates' %}text-primary bg-primary/10{% else %}text-text-mid hover:text-navy hover:bg-surface{% endif %}">
-                    <span class="material-icons-round text-xl">workspace_premium</span>
-                    Сертификаты
-                </a>
-                <a href="{% url 'calendar' %}" @click="mobileMenu = false"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition
-                          {% if current == 'calendar' %}text-primary bg-primary/10{% else %}text-text-mid hover:text-navy hover:bg-surface{% endif %}">
-                    <span class="material-icons-round text-xl">calendar_month</span>
-                    Календарь
-                </a>
-                <a href="{% url 'messages' %}" @click="mobileMenu = false"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition sm:hidden
-                          {% if current == 'messages' %}text-primary bg-primary/10{% else %}text-text-mid hover:text-navy hover:bg-surface{% endif %}">
-                    <span class="material-icons-round text-xl">chat</span>
-                    Сообщения
-                </a>
-            </div>
+    <nav class="cab-nav">
+      <div class="cab-nav-label">Кабинет</div>
+      <a href="{% url 'dashboard' %}" class="cab-nav-item {% if current == 'dashboard' %}is-active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        Обзор
+      </a>
+      <a href="{% url 'dashboard_my_reports' %}" class="cab-nav-item {% if current == 'dashboard_my_reports' %}is-active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Мои отчёты
+      </a>
+      <a href="{% url 'dashboard_my_orders' %}" class="cab-nav-item {% if current == 'dashboard_my_orders' %}is-active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Мои заказы
+      </a>
+      {% if request.user.is_staff %}
+      <a href="{% url 'dashboard_cms_list' %}" class="cab-nav-item {% if current == 'dashboard_cms_list' or current == 'dashboard_cms_page' %}is-active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+        Редактор сайта
+      </a>
+      <a href="{% url 'dashboard_submissions' %}" class="cab-nav-item {% if current == 'dashboard_submissions' %}is-active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Заявки
+      </a>
+      <a href="{% url 'dashboard_cms_help' %}" class="cab-nav-item {% if current == 'dashboard_cms_help' %}is-active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Инструкция
+      </a>
+      {% endif %}
+      <a href="{% url 'profile' %}" class="cab-nav-item {% if current == 'profile' %}is-active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Профиль
+      </a>
 
-            <!-- Mobile user section -->
-            <div class="border-t pt-3 space-y-1">
-                <div class="flex items-center gap-3 px-3 py-2">
-                    {% if request.user.avatar %}
-                        <img src="{{ request.user.avatar.url }}" alt="" class="w-8 h-8 rounded-full object-cover">
-                    {% else %}
-                        <span class="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold">{{ request.user.first_name|first|default:"U" }}</span>
-                    {% endif %}
-                    <div class="min-w-0">
-                        <p class="text-sm font-semibold text-navy truncate">{{ request.user.get_full_name|default:request.user.email }}</p>
-                    </div>
-                </div>
-                <a href="{% url 'profile' %}" @click="mobileMenu = false"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-text-mid hover:text-navy hover:bg-surface transition">
-                    <span class="material-icons-round text-xl">person</span>
-                    Профиль
-                </a>
-                <a href="{% url 'calendar' %}" @click="mobileMenu = false"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-text-mid hover:text-navy hover:bg-surface transition">
-                    <span class="material-icons-round text-xl">calendar_month</span>
-                    Календарь
-                </a>
-                <a href="{% url 'landing' %}" hx-boost="false" @click="mobileMenu = false"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-text-mid hover:text-navy hover:bg-surface transition">
-                    <span class="material-icons-round text-xl">language</span>
-                    На сайт
-                </a>
-                <form action="{% url 'logout' %}" method="post" hx-boost="false">
-                    {% csrf_token %}
-                    <button type="submit"
-                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 transition w-full text-left">
-                        <span class="material-icons-round text-xl">logout</span>
-                        Выйти
-                    </button>
-                </form>
-            </div>
-            {% endwith %}
-        </div>
+      <div class="cab-nav-label">Платформа</div>
+      <a href="{% url 'reports_catalog' %}" class="cab-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg>
+        Каталог отчётов
+      </a>
+      <a href="{% url 'corridor' %}" class="cab-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 20 10.2C20 17.5 12 22 12 22z"/><circle cx="12" cy="10" r="3"/></svg>
+        Маршруты
+      </a>
+      <a href="{% url 'monitoring' %}" class="cab-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Мониторинг
+      </a>
     </nav>
 
-    <!-- Content Area -->
-    <main class="pt-[68px]">
-        <div class="max-w-7xl mx-auto px-4 lg:px-6 py-8 lg:py-12">
+    <div class="cab-side-foot">
+      {% if request.user.is_staff %}
+      <a href="/admin/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.33.22.69.22 1.06V11a2 2 0 1 1 0 4h-.09c-.37 0-.73.08-1.06.22z"/></svg>
+        Админка
+      </a>
+      {% endif %}
+      <a href="{% url 'landing' %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/></svg>
+        На публичный сайт
+      </a>
+      <form action="{% url 'logout' %}" method="post" style="margin:0">
+        {% csrf_token %}
+        <button type="submit" class="danger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Выйти
+        </button>
+      </form>
+    </div>
+  </aside>
 
-            <!-- Editorial Page Title -->
-            {% block page_title_block %}
-            <header class="mb-10">
-                <div class="lms-eyebrow">
-                    <span class="lms-eyebrow-bar"></span>
-                    <span class="lms-eyebrow-label">{% block page_eyebrow %}TCC Hub · Learning{% endblock %}</span>
-                </div>
-                <h1 class="lms-h1">{% block page_title %}{% endblock %}</h1>
-            </header>
-            {% endblock %}
+  <main class="cab-main">
+    {% block page_title_block %}
+    <header class="cab-page-head">
+      <div>
+        <div class="cab-eyebrow"><span class="cab-eyebrow-label">{% block page_eyebrow %}TCC Hub · Кабинет{% endblock %}</span></div>
+        <h1 class="cab-h1">{% block page_title %}{% endblock %}</h1>
+        {% block page_sub %}{% endblock %}
+      </div>
+      {% block page_actions %}{% endblock %}
+    </header>
+    {% endblock %}
 
-            <!-- Django Messages -->
-            {% if messages %}
-            <div class="mb-6 space-y-2">
-                {% for message in messages %}
-                <div class="px-4 py-3 rounded-xl text-sm font-medium
-                            {% if message.tags == 'error' %}bg-red-50 text-red-600 border border-red-200
-                            {% elif message.tags == 'success' %}bg-green-50 text-green-600 border border-green-200
-                            {% else %}bg-amber-50 text-primary border border-amber-200{% endif %}">
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+    {% if messages %}
+    <div style="margin-bottom:24px;display:flex;flex-direction:column;gap:10px">
+      {% for message in messages %}
+      <div style="padding:14px 18px;border:1px solid {% if message.tags == 'error' %}#fecaca;background:#fef2f2;color:#b91c1c{% elif message.tags == 'success' %}#bbf7d0;background:#f0fdf4;color:#15803d{% else %}#fde68a;background:#fffbeb;color:#92400e{% endif %};font-size:13px;font-weight:600">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
 
-            <!-- Page Content -->
-            {% block content %}{% endblock %}
-        </div>
-    </main>
+    {% block content %}{% endblock %}
+  </main>
 </div>
+{% endwith %}
 {% endblock %}

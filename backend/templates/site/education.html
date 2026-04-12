@@ -1,5 +1,6 @@
 {% extends "layouts/site.html" %}
 {% load static %}
+{% load cms %}
 
 {% block title %}Образование — TCC HUB{% endblock %}
 
@@ -107,59 +108,45 @@
 
 {% block content %}
 <!-- HERO -->
-<section class="ed-hero">
+{% cms_visible "education" "section_1" as vis1 %}{% if vis1 %}<section class="ed-hero">
   <div class="ed-hero-wrap">
     <div>
-      <div class="ed-eyebrow"><span class="bar"></span>Образование TCC</div>
-      <h1 class="ed-title">Развитие<br><em>профессиональных компетенций</em></h1>
-      <p class="ed-lead">Образовательные программы, executive-форматы и партнёрства с университетами для специалистов логистики, supply chain и стратегического управления.</p>
+      <div class="ed-eyebrow"><span class="bar"></span>{% cms_eyebrow "education" "hero" "Образование TCC" %}</div>
+      <h1 class="ed-title">{% cms_heading "education" "hero" "Развитие профессиональных компетенций" %}</h1>
+      <p class="ed-lead">{% cms_sub "education" "hero" "Образовательные программы, executive-форматы и партнёрства с университетами для специалистов логистики, supply chain и стратегического управления." %}</p>
     </div>
     <div class="ed-quote">
       Инфраструктурные проекты Центральной Азии развиваются быстрее, чем отраслевые компетенции. Это создаёт опасный разрыв: физические возможности растут, но управление не успевает.
       <b>— Видение TCC HUB</b>
     </div>
   </div>
-</section>
+</section>{% endif %}
 
 <!-- FORMATS -->
-<section class="ed-section">
+{% cms_visible "education" "section_2" as vis2 %}{% if vis2 %}<section class="ed-section">
   <div class="ed-section-head">
-    <h2>Форматы<br><em>обучения</em></h2>
-    <div class="sub">Образовательные программы, практикумы и корпоративное обучение</div>
+    {% cms_heading "education" "section_2" as h_s2 %}{% if h_s2 %}<h2>{{ h_s2 }}</h2>{% else %}<h2>Форматы<br><em>обучения</em></h2>{% endif %}
+    <div class="sub">{% cms_sub "education" "section_2" "Образовательные программы, практикумы и корпоративное обучение" %}</div>
   </div>
 
   <div class="ed-formats">
+    {% for pg in programs %}
     <div class="ed-fmt reveal">
-      <div class="num">01 — ПРОГРАММЫ</div>
+      <div class="num">{{ pg.data.num|default:pg.subtitle }}</div>
       <div class="icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
-      <h3>Курсы</h3>
-      <p>Структурированные программы по логистике, supply chain и стратегическому управлению. Цель — специалист, способный мыслить системно и видеть связь логистики с экономикой.</p>
-      <div class="tags"><span class="tag">Онлайн</span><span class="tag">Гибрид</span><span class="tag">Сертификат</span></div>
+      <h3>{{ pg.title }}</h3>
+      <p>{{ pg.description }}</p>
+      <div class="tags">{% for t in pg.data.tags %}<span class="tag">{{ t }}</span>{% endfor %}</div>
     </div>
-
-    <div class="ed-fmt reveal">
-      <div class="num">02 — EXECUTIVE</div>
-      <div class="icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
-      <h3>Практикумы</h3>
-      <p>Executive-форматы с фокусом на реальные кейсы, симуляции и проектную работу. Интенсивное развитие управленческих компетенций для руководителей.</p>
-      <div class="tags"><span class="tag">Кейсы</span><span class="tag">Симуляции</span><span class="tag">Воркшопы</span></div>
-    </div>
-
-    <div class="ed-fmt reveal">
-      <div class="num">03 — B2B</div>
-      <div class="icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-      <h3>Корпоративные программы</h3>
-      <p>Партнёрские проекты с университетами и индивидуальные программы для компаний. Адаптация под специфику бизнеса и уровень команды.</p>
-      <div class="tags"><span class="tag">Команды</span><span class="tag">Кастом</span><span class="tag">Консалтинг</span></div>
-    </div>
+    {% endfor %}
   </div>
-</section>
+</section>{% endif %}
 
 <!-- THEMES -->
-<section class="ed-section">
+{% cms_visible "education" "section_3" as vis3 %}{% if vis3 %}<section class="ed-section">
   <div class="ed-section-head">
-    <h2>Тематические<br><em>направления</em></h2>
-    <div class="sub">Ключевые области знаний для специалиста нового типа</div>
+    {% cms_heading "education" "section_3" as h_s3 %}{% if h_s3 %}<h2>{{ h_s3 }}</h2>{% else %}<h2>Тематические<br><em>направления</em></h2>{% endif %}
+    <div class="sub">{% cms_sub "education" "section_3" "Ключевые области знаний для специалиста нового типа" %}</div>
   </div>
 
   <div class="ed-themes">
@@ -188,13 +175,13 @@
       <p>Работа с санкциями, геополитическими ограничениями, адаптация стратегий.</p>
     </div>
   </div>
-</section>
+</section>{% endif %}
 
 <!-- COURSES -->
-<div class="ed-courses-wrap">
+{% cms_visible "education" "section_courses" as viscourses %}{% if viscourses %}<div class="ed-courses-wrap">
   <div class="ed-section-head" style="max-width:1280px;margin:0 auto 48px;padding:0 24px">
-    <h2>Авторские<br><em>программы обучения</em></h2>
-    <div class="sub">От практиков отрасли с многолетним опытом</div>
+    {% cms_heading "education" "section_courses" as h_c %}{% if h_c %}<h2>{{ h_c }}</h2>{% else %}<h2>Авторские<br><em>программы обучения</em></h2>{% endif %}
+    <div class="sub">{% cms_sub "education" "section_courses" "От практиков отрасли с многолетним опытом" %}</div>
   </div>
   <div class="ed-courses">
 
@@ -257,11 +244,12 @@
   </div>
 </div>
 
+{% endif %}
 <!-- EXPERTS -->
-<section class="ed-section">
+{% cms_visible "education" "section_4" as vis4 %}{% if vis4 %}<section class="ed-section">
   <div class="ed-section-head">
-    <h2>Эксперты<br><em>программ</em></h2>
-    <div class="sub">Практики отрасли с многолетним опытом</div>
+    {% cms_heading "education" "section_4" as h_s4 %}{% if h_s4 %}<h2>{{ h_s4 }}</h2>{% else %}<h2>Эксперты<br><em>программ</em></h2>{% endif %}
+    <div class="sub">{% cms_sub "education" "section_4" "Практики отрасли с многолетним опытом" %}</div>
   </div>
   <div class="ed-experts">
     <div class="ed-expert reveal">
@@ -289,11 +277,11 @@
       <div class="years">7+ лет</div>
     </div>
   </div>
-</section>
+</section>{% endif %}
 
-<div class="cta-banner">
-  <h2>Развивайте компетенции с TCC</h2>
-  <p>Эволюция требований к специалисту в логистике отражает трансформацию самой экономики</p>
-  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">СВЯЗАТЬСЯ С НАМИ</button>
-</div>
+{% cms_visible "education" "cta" as viscta %}{% if viscta %}<div class="cta-banner">
+  {% cms_heading "education" "cta" as h_cta %}{% if h_cta %}<h2>{{ h_cta }}</h2>{% else %}<h2>Развивайте компетенции с TCC</h2>{% endif %}
+  <p>{% cms_sub "education" "cta" "Эволюция требований к специалисту в логистике отражает трансформацию самой экономики" %}</p>
+  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "education" "cta" "СВЯЗАТЬСЯ С НАМИ" %}</button>
+</div>{% endif %}
 {% endblock %}

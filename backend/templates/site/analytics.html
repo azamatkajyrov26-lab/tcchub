@@ -1,5 +1,6 @@
 {% extends "layouts/site.html" %}
 {% load static %}
+{% load cms %}
 
 {% block title %}Аналитика и исследования — TCC HUB{% endblock %}
 
@@ -58,11 +59,11 @@
 
 {% block content %}
 <!-- HERO -->
-<section class="an-hero">
+{% cms_visible "analytics" "section_1" as vis1 %}{% if vis1 %}<section class="an-hero">
   <div class="an-hero-wrap">
-    <div class="an-eyebrow"><span class="bar"></span>Аналитика TCC</div>
-    <h1 class="an-title">Глубокая <em>экспертиза рынка</em><br>и точные данные</h1>
-    <p class="an-lead">Комплексные исследования логистики и инфраструктуры Центральной Азии, торговых коридоров Евразии и геоэкономических трендов для стратегических решений бизнеса.</p>
+    <div class="an-eyebrow"><span class="bar"></span>{% cms_eyebrow "analytics" "hero" "Аналитика TCC" %}</div>
+    <h1 class="an-title">{% cms_heading "analytics" "hero" "Глубокая экспертиза рынка и точные данные" %}</h1>
+    <p class="an-lead">{% cms_sub "analytics" "hero" "Комплексные исследования логистики и инфраструктуры Центральной Азии, торговых коридоров Евразии и геоэкономических трендов для стратегических решений бизнеса." %}</p>
 
     <div class="an-stats">
       <div class="an-stat"><div class="an-stat-num">8</div><div class="an-stat-lab">Материалов</div></div>
@@ -71,21 +72,37 @@
       <div class="an-stat"><div class="an-stat-num">10<em>+</em></div><div class="an-stat-lab">Стран в анализе</div></div>
     </div>
   </div>
-</section>
+</section>{% endif %}
 
 <!-- TOOLBAR -->
-<section class="an-toolbar">
+{% cms_visible "analytics" "section_2" as vis2 %}{% if vis2 %}<section class="an-toolbar">
   <button class="an-tab active" data-filter="all">Все материалы</button>
   <button class="an-tab" data-filter="обзор">Отраслевые обзоры</button>
   <button class="an-tab" data-filter="статья">Аналитические статьи</button>
   <button class="an-tab" data-filter="исследование">Исследования рынка</button>
   <button class="an-tab" data-filter="отчёт">Экспертные отчёты</button>
-</section>
+</section>{% endif %}
 
 <!-- GRID -->
-<section class="an-grid-wrap">
+{% cms_visible "analytics" "section_3" as vis3 %}{% if vis3 %}<section class="an-grid-wrap">
   <div class="an-grid">
 
+    {% for a in articles %}
+    <a href="{{ a.link_url|default:'#' }}" class="an-card {% if a.data.featured %}featured{% endif %} reveal" data-type="{{ a.tag|lower }}">
+      <div class="img">
+        <span class="tag">{{ a.tag }}</span>
+        {% if a.image_src %}<img loading="lazy" src="{{ a.image_src }}" alt="{{ a.title }}">{% endif %}
+      </div>
+      <div class="body">
+        <h3>{{ a.title }}</h3>
+        <p>{{ a.description }}</p>
+        {% if a.data.metrics %}<div class="an-metrics">{% for m in a.data.metrics %}<span class="an-metric">{{ m }}</span>{% endfor %}</div>{% endif %}
+        <div class="read">Читать →</div>
+      </div>
+    </a>
+    {% endfor %}
+
+    {% if not articles %}
     <a href="{% url 'article_detail' slug='transkaspiyskiy-marshrut' %}" class="an-card featured reveal" data-type="обзор">
       <div class="img"><span class="tag">Отраслевой обзор</span><img loading="lazy" src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=1200&h=700&fit=crop" alt="Транскаспийский маршрут"></div>
       <div class="body">
@@ -165,15 +182,16 @@
         <div class="read">Читать →</div>
       </div>
     </a>
+    {% endif %}
 
   </div>
-</section>
+</section>{% endif %}
 
-<div class="cta-banner">
-  <h2>Получайте аналитику первыми</h2>
-  <p>Подпишитесь на еженедельный дайджест TCC с экспертными материалами</p>
-  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">ПОДПИСАТЬСЯ</button>
-</div>
+{% cms_visible "analytics" "cta" as viscta %}{% if viscta %}<div class="cta-banner">
+  {% cms_heading "analytics" "cta" as h_cta %}{% if h_cta %}<h2>{{ h_cta }}</h2>{% else %}<h2>Получайте аналитику первыми</h2>{% endif %}
+  <p>{% cms_sub "analytics" "cta" "Подпишитесь на еженедельный дайджест TCC с экспертными материалами" %}</p>
+  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "analytics" "cta" "ПОДПИСАТЬСЯ" %}</button>
+</div>{% endif %}
 {% endblock %}
 
 {% block page_js %}

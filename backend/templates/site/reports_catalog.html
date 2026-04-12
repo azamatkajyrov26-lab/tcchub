@@ -1,4 +1,5 @@
 {% extends "layouts/site.html" %}
+{% load cms %}
 {% block title %}Аналитические отчёты — TCC HUB{% endblock %}
 
 {% block page_css %}
@@ -61,11 +62,11 @@
 
 {% block content %}
 <!-- HERO -->
-<section class="rep-hero">
+{% cms_visible "reports" "section_1" as vis1 %}{% if vis1 %}<section class="rep-hero">
   <div class="rep-hero-wrap">
-    <div class="rep-eyebrow"><span class="bar"></span>Аналитика TCC</div>
-    <h1 class="rep-title">Аналитические отчёты<br><em>торговых коридоров</em></h1>
-    <p class="rep-lead">Экспертный анализ цепей поставок Евразии: риск-скоры, санкционный скрининг, сценарии развития коридоров и матрицы решений для бизнеса.</p>
+    <div class="rep-eyebrow"><span class="bar"></span>{% cms_eyebrow "reports" "hero" "Аналитика TCC" %}</div>
+    <h1 class="rep-title">{% cms_heading "reports" "hero" "Аналитические отчёты торговых коридоров" %}</h1>
+    <p class="rep-lead">{% cms_sub "reports" "hero" "Экспертный анализ цепей поставок Евразии: риск-скоры, санкционный скрининг, сценарии развития коридоров и матрицы решений для бизнеса." %}</p>
 
     <div class="rep-kpis">
       <div class="rep-kpi"><div class="rep-kpi-num">{{ reports|length }}</div><div class="rep-kpi-lab">Отчётов в каталоге</div></div>
@@ -74,10 +75,10 @@
       <div class="rep-kpi"><div class="rep-kpi-num">10<span style="font-size:.4em;color:rgba(255,255,255,.45);font-weight:600;margin-left:4px">+</span></div><div class="rep-kpi-lab">Стран в анализе</div></div>
     </div>
   </div>
-</section>
+</section>{% endif %}
 
 <!-- TOOLBAR -->
-<section class="rep-toolbar">
+{% cms_visible "reports" "section_2" as vis2 %}{% if vis2 %}<section class="rep-toolbar">
   <div class="rep-chips">
     <a href="{% url 'reports_catalog' %}" class="rep-chip {% if not current_template %}active{% endif %}">Все категории</a>
     {% for tpl in templates %}
@@ -85,10 +86,10 @@
     {% endfor %}
   </div>
   <div class="rep-count-info"><b>{{ reports|length }}</b> {% if current_template %}отчётов в категории{% else %}отчётов опубликовано{% endif %}</div>
-</section>
+</section>{% endif %}
 
 <!-- GRID -->
-<section class="rep-grid-wrap">
+{% cms_visible "reports" "section_3" as vis3 %}{% if vis3 %}<section class="rep-grid-wrap">
   <div class="rep-grid">
     {% for report in reports %}
     <a href="{% url 'report_detail' report.slug %}" class="rep-card reveal">
@@ -134,5 +135,5 @@
     </div>
     {% endfor %}
   </div>
-</section>
+</section>{% endif %}
 {% endblock %}

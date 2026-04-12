@@ -1,5 +1,6 @@
 {% extends "layouts/site.html" %}
 {% load static %}
+{% load cms %}
 
 {% block title %}О платформе — TransCaspian Cargo{% endblock %}
 
@@ -108,21 +109,21 @@
 <!-- PAGE HERO -->
 <div class="about-hero">
   <div class="about-hero-inner">
-    <div class="about-eyebrow">О платформе</div>
-    <h1>TransCaspian<br><span class="gold">Cargo</span></h1>
-    <p>Экосистема стратегических решений для бизнеса, инвесторов, институтов развития и государственных структур — на пересечении логистики, аналитики и образования</p>
+    <div class="about-eyebrow">{% cms_eyebrow "about" "hero" "О платформе" %}</div>
+    <h1>{% cms_heading "about" "hero" "TransCaspian Cargo" %}</h1>
+    <p>{% cms_sub "about" "hero" "Экосистема стратегических решений для бизнеса, инвесторов, институтов развития и государственных структур — на пересечении логистики, аналитики и образования" %}</p>
   </div>
 </div>
 
 <!-- 1. О КОМПАНИИ — История создания -->
-<section class="section about-section">
+{% cms_visible "about" "section_1" as vis1 %}{% if vis1 %}<section class="section about-section">
   <div style="max-width:1240px;margin:0 auto">
     <div class="about-grid">
       <div class="reveal-left">
         <div class="about-text">
-          <div class="section-label">О компании</div>
-          <h2 class="section-title" style="font-size:clamp(20px,3vw,32px)">История создания <span class="gold">TransCaspian Cargo</span></h2>
-          <p>TCC — это экосистема стратегических решений для бизнеса, инвесторов, институтов развития и государственных структур. TCC работает там, где пересекаются логистика, аналитика, стратегия, экспертиза, образование и международное сотрудничество.</p>
+          <div class="section-label">{% cms_eyebrow "about" "section_1" "О компании" %}</div>
+          {% cms_heading "about" "section_1" as h_s1 %}{% if h_s1 %}<h2 class="section-title" style="font-size:clamp(20px,3vw,32px)">{{ h_s1 }}</h2>{% else %}<h2 class="section-title" style="font-size:clamp(20px,3vw,32px)">История создания <span class="gold">TransCaspian Cargo</span></h2>{% endif %}
+          <p>{% cms_sub "about" "section_1" "TCC — это экосистема стратегических решений для бизнеса, инвесторов, институтов развития и государственных структур. TCC работает там, где пересекаются логистика, аналитика, стратегия, экспертиза, образование и международное сотрудничество." %}</p>
           <p>TCC помогает выстраивать не точечные ответы, а системную логику. Не отдельные действия, а целостную архитектуру. Не временные меры, а основу для устойчивого развития. Компания работает одновременно с настоящими задачами бизнеса и с будущим самой отрасли.</p>
           <p>TCC — это архитектор решений для логистики Евразии, а не просто поставщик услуги.</p>
         </div>
@@ -209,26 +210,26 @@
     </div>
 
   </div>
-</section>
+</section>{% endif %}
 
 <!-- 2. МИССИЯ -->
-<div class="section-divider"></div>
+{% cms_visible "about" "section_2" as vis2 %}{% if vis2 %}<div class="section-divider"></div>
 <div class="section">
   <div style="max-width:1240px;margin:0 auto">
     <div class="reveal" style="max-width:860px;margin:0 auto;border:2px solid rgba(198,164,109,.2);border-radius:20px;padding:48px 56px;position:relative;background:linear-gradient(135deg,rgba(198,164,109,.02),rgba(27,42,74,.02));box-shadow:0 8px 40px rgba(0,0,0,.03)">
       <div style="position:absolute;top:-1px;left:48px;right:48px;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);border-radius:0 0 2px 2px"></div>
       <div style="text-align:center">
-        <div class="section-label" style="justify-content:center">Миссия</div>
-        <h2 class="section-title" style="font-size:clamp(22px,3vw,36px);max-width:700px;margin-left:auto;margin-right:auto">Формирование устойчивой <span class="gold">логистической инфраструктуры</span> Евразии</h2>
+        <div class="section-label" style="justify-content:center">{% cms_eyebrow "about" "section_2" "Миссия" %}</div>
+        {% cms_heading "about" "section_2" as h_s2 %}{% if h_s2 %}<h2 class="section-title" style="font-size:clamp(22px,3vw,36px);max-width:700px;margin-left:auto;margin-right:auto">{{ h_s2 }}</h2>{% else %}<h2 class="section-title" style="font-size:clamp(22px,3vw,36px);max-width:700px;margin-left:auto;margin-right:auto">Формирование устойчивой <span class="gold">логистической инфраструктуры</span> Евразии</h2>{% endif %}
         <div style="width:48px;height:2px;background:var(--gold);border-radius:1px;margin:24px auto"></div>
-        <p style="color:var(--text-mid);font-size:15px;line-height:1.9;max-width:680px;margin:0 auto">Повышать качество стратегического управления в логистике и инфраструктуре, снижать риски, усиливать устойчивость проектов и укреплять капитал компаний через более зрелые цепи поставок, сильные управленческие решения и развитие профессиональной среды.</p>
+        <p style="color:var(--text-mid);font-size:15px;line-height:1.9;max-width:680px;margin:0 auto">{% cms_sub "about" "section_2" "Повышать качество стратегического управления в логистике и инфраструктуре, снижать риски, усиливать устойчивость проектов и укреплять капитал компаний через более зрелые цепи поставок, сильные управленческие решения и развитие профессиональной среды." %}</p>
       </div>
     </div>
   </div>
-</div>
+</div>{% endif %}
 
 <!-- 3. ВИДЕНИЕ -->
-<div class="section-divider"></div>
+{% cms_visible "about" "section_3" as vis3 %}{% if vis3 %}<div class="section-divider"></div>
 <div style="background:linear-gradient(160deg,#080e1a 0%,#0F1D35 40%,#1B2A4A 100%);padding:100px 24px;position:relative;overflow:hidden">
   <!-- Ambient glow -->
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(198,164,109,.06),transparent 70%);pointer-events:none"></div>
@@ -238,11 +239,11 @@
     <div class="reveal" style="text-align:center;margin-bottom:56px">
       <div style="display:inline-flex;align-items:center;gap:8px;font-size:11px;color:var(--gold-light);font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:20px">
         <span style="display:inline-block;width:28px;height:2px;background:linear-gradient(90deg,transparent,var(--gold-light));border-radius:1px"></span>
-        Видение
+        {% cms_eyebrow "about" "section_3" "Видение" %}
         <span style="display:inline-block;width:28px;height:2px;background:linear-gradient(90deg,var(--gold-light),transparent);border-radius:1px"></span>
       </div>
-      <h2 style="font-size:clamp(26px,4vw,44px);font-weight:800;color:#fff;line-height:1.15;max-width:800px;margin:0 auto 20px">Ключевая интеллектуальная и практическая платформа Евразии <span style="color:var(--gold-light)">в области логистики</span></h2>
-      <p style="font-size:16px;color:rgba(255,255,255,.5);line-height:1.8;max-width:680px;margin:0 auto">TCC стремится стать одной из ключевых интеллектуальных и практических платформ Евразии в области логистики, supply chain management, транспортных коридоров и профессионального развития отрасли.</p>
+      {% cms_heading "about" "section_3" as h_s3 %}{% if h_s3 %}<h2 style="font-size:clamp(26px,4vw,44px);font-weight:800;color:#fff;line-height:1.15;max-width:800px;margin:0 auto 20px">{{ h_s3 }}</h2>{% else %}<h2 style="font-size:clamp(26px,4vw,44px);font-weight:800;color:#fff;line-height:1.15;max-width:800px;margin:0 auto 20px">Ключевая интеллектуальная и практическая платформа Евразии <span style="color:var(--gold-light)">в области логистики</span></h2>{% endif %}
+      <p style="font-size:16px;color:rgba(255,255,255,.5);line-height:1.8;max-width:680px;margin:0 auto">{% cms_sub "about" "section_3" "TCC стремится стать одной из ключевых интеллектуальных и практических платформ Евразии в области логистики, supply chain management, транспортных коридоров и профессионального развития отрасли." %}</p>
     </div>
 
     <!-- Vision pillars — horizontal cards with left accent -->
@@ -269,13 +270,14 @@
   </div>
 </div>
 
+{% endif %}
 <!-- 4. ЭКОСИСТЕМА TCC — Hub Orbit -->
-<div class="section" style="padding-bottom:60px">
+{% cms_visible "about" "section_4" as vis4 %}{% if vis4 %}<div class="section" style="padding-bottom:60px">
   <div style="max-width:1240px;margin:0 auto">
     <div class="reveal" style="text-align:center;margin-bottom:24px">
-      <div class="section-label" style="justify-content:center">Экосистема TCC</div>
-      <h2 class="section-title">Ключевые направления <span class="gold">платформы</span></h2>
-      <p class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center">Каждое направление усиливает остальные, формируя единую экосистему, где знания превращаются в инструменты, инструменты — в решения, а решения — в устойчивые результаты.</p>
+      <div class="section-label" style="justify-content:center">{% cms_eyebrow "about" "section_4" "Экосистема TCC" %}</div>
+      {% cms_heading "about" "section_4" as h_s4 %}{% if h_s4 %}<h2 class="section-title">{{ h_s4 }}</h2>{% else %}<h2 class="section-title">Ключевые направления <span class="gold">платформы</span></h2>{% endif %}
+      <p class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center">{% cms_sub "about" "section_4" "Каждое направление усиливает остальные, формируя единую экосистему, где знания превращаются в инструменты, инструменты — в решения, а решения — в устойчивые результаты." %}</p>
     </div>
 
     <div class="eco-hub reveal-scale" id="ecoHub">
@@ -359,50 +361,39 @@
   </div>
 </div>
 
+{% endif %}
 <!-- 5. КОМАНДА — Эксперты и партнёры -->
-<div class="section-divider"></div>
+{% cms_visible "about" "section_5" as vis5 %}{% if vis5 %}<div class="section-divider"></div>
 <div class="section">
   <div style="max-width:1240px;margin:0 auto">
     <div class="reveal" style="text-align:center;margin-bottom:48px">
-      <div class="section-label" style="justify-content:center">Команда</div>
-      <h2 class="section-title">Эксперты и <span class="gold">партнёры</span></h2>
-      <p class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center">Практики с многолетним опытом в логистике, транспорте и цепях поставок</p>
+      <div class="section-label" style="justify-content:center">{% cms_eyebrow "about" "section_5" "Команда" %}</div>
+      {% cms_heading "about" "section_5" as h_s5 %}{% if h_s5 %}<h2 class="section-title">{{ h_s5 }}</h2>{% else %}<h2 class="section-title">Эксперты и <span class="gold">партнёры</span></h2>{% endif %}
+      <p class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center">{% cms_sub "about" "section_5" "Практики с многолетним опытом в логистике, транспорте и цепях поставок" %}</p>
     </div>
     <div class="experts-grid">
+      {% for e in experts %}
       <div class="expert-card reveal-scale">
-        <div class="avatar"><img src="https://optim.tildacdn.pro/tild3035-6432-4333-b236-383634636339/-/resize/385x/-/format/webp/man.png.webp" alt="Рустем Бисалиев"></div>
-        <h4>Рустем Бисалиев</h4>
-        <div class="expert-role">Основатель и CEO</div>
-        <p>Эксперт в стратегическом управлении цепями поставок</p>
+        <div class="avatar">
+          {% if e.image_src %}<img src="{{ e.image_src }}" alt="{{ e.title }}">
+          {% else %}<div class="avatar-initials">{{ e.data.initials }}</div>{% endif %}
+        </div>
+        <h4>{{ e.title }}</h4>
+        <div class="expert-role">{{ e.subtitle }}</div>
+        <p>{{ e.description }}</p>
       </div>
-      <div class="expert-card reveal-scale">
-        <div class="avatar"><div class="avatar-initials">АТ</div></div>
-        <h4>Айслу Тайсаринова</h4>
-        <div class="expert-role">Логистика и транспорт</div>
-        <p>Эксперт по логистике и транспортному планированию. Опыт 23+ лет</p>
-      </div>
-      <div class="expert-card reveal-scale">
-        <div class="avatar"><div class="avatar-initials">РХ</div></div>
-        <h4>Рустам Хуснутдинов</h4>
-        <div class="expert-role">Проектная логистика</div>
-        <p>Эксперт по проектной логистике и снабжению. Опыт 25+ лет</p>
-      </div>
-      <div class="expert-card reveal-scale">
-        <div class="avatar"><div class="avatar-initials">ОС</div></div>
-        <h4>Оксана Сорокина</h4>
-        <div class="expert-role">Международная логистика</div>
-        <p>Эксперт в международной логистике и авиационных перевозках. Опыт 22+ лет</p>
-      </div>
+      {% endfor %}
     </div>
   </div>
 </div>
 
+{% endif %}
 <!-- CTA BANNER -->
-<div class="cta-banner">
-  <h2>Присоединяйтесь к экосистеме TCC</h2>
-  <p>Станьте частью платформы отраслевой экспертизы в логистике Евразии</p>
-  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">СВЯЗАТЬСЯ С НАМИ</button>
-</div>
+{% cms_visible "about" "section_6" as vis6 %}{% if vis6 %}<div class="cta-banner">
+  {% cms_heading "about" "section_6" as h_s6 %}{% if h_s6 %}<h2>{{ h_s6 }}</h2>{% else %}<h2>Присоединяйтесь к экосистеме TCC</h2>{% endif %}
+  <p>{% cms_sub "about" "section_6" "Станьте частью платформы отраслевой экспертизы в логистике Евразии" %}</p>
+  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "about" "section_6" "СВЯЗАТЬСЯ С НАМИ" %}</button>
+</div>{% endif %}
 {% endblock %}
 
 {% block page_js %}

@@ -1,0 +1,34 @@
+{% extends "layouts/dashboard.html" %}
+{% block title %}Заявки — TCC Hub{% endblock %}
+{% block page_eyebrow %}Админ{% endblock %}
+{% block page_title %}Заявки <span class="ital">с сайта</span>{% endblock %}
+{% block page_sub %}<p class="cab-sub">Все обращения через контактную форму.</p>{% endblock %}
+
+{% block content %}
+<div class="cab-card" style="overflow-x:auto">
+<table style="width:100%;border-collapse:collapse;font-size:13px">
+<thead>
+<tr style="border-bottom:2px solid #D9DCE4;text-align:left">
+  <th style="padding:10px 12px;font-size:10px;font-weight:800;letter-spacing:.12em;color:#64728A;text-transform:uppercase">Дата</th>
+  <th style="padding:10px 12px;font-size:10px;font-weight:800;letter-spacing:.12em;color:#64728A;text-transform:uppercase">Имя</th>
+  <th style="padding:10px 12px;font-size:10px;font-weight:800;letter-spacing:.12em;color:#64728A;text-transform:uppercase">Телефон</th>
+  <th style="padding:10px 12px;font-size:10px;font-weight:800;letter-spacing:.12em;color:#64728A;text-transform:uppercase">Email</th>
+  <th style="padding:10px 12px;font-size:10px;font-weight:800;letter-spacing:.12em;color:#64728A;text-transform:uppercase">Сообщение</th>
+</tr>
+</thead>
+<tbody>
+{% for s in submissions %}
+<tr style="border-bottom:1px solid #eef0f4{% if not s.is_read %};background:#f6faf0{% endif %}">
+  <td style="padding:10px 12px;white-space:nowrap;color:#64728A">{{ s.created_at|date:"d.m.Y H:i" }}</td>
+  <td style="padding:10px 12px;font-weight:700;color:#0B1628">{{ s.name }}</td>
+  <td style="padding:10px 12px">{% if s.phone %}<a href="tel:{{ s.phone }}" style="color:#0B1628">{{ s.phone }}</a>{% else %}—{% endif %}</td>
+  <td style="padding:10px 12px">{% if s.email %}<a href="mailto:{{ s.email }}" style="color:#0B1628">{{ s.email }}</a>{% else %}—{% endif %}</td>
+  <td style="padding:10px 12px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.message|default:"—"|truncatechars:100 }}</td>
+</tr>
+{% empty %}
+<tr><td colspan="5" style="padding:24px;text-align:center;color:#64728A">Заявок пока нет</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

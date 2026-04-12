@@ -1,7 +1,70 @@
 from django.contrib import admin
-from unfold.admin import ModelAdmin
+from unfold.admin import ModelAdmin, TabularInline
 
-from .models import Advantage, ContactInfo, HeroSection, Metric, Partner, Testimonial
+from .models import (
+    Advantage,
+    ContactInfo,
+    ContentBlock,
+    HeroSection,
+    Metric,
+    Page,
+    PageSection,
+    Partner,
+    Testimonial,
+)
+
+
+# ═══════════════════════════════════════════════════════════════
+# CMS CORE — Page + PageSection
+# ═══════════════════════════════════════════════════════════════
+
+class PageSectionInline(TabularInline):
+    model = PageSection
+    extra = 0
+    fields = ["is_visible", "order", "block_type", "section_key", "heading"]
+    ordering = ["order", "id"]
+    show_change_link = True
+    classes = ["collapse"]
+
+
+@admin.register(Page)
+class PageAdmin(ModelAdmin):
+    list_display = ["title", "slug", "is_published", "updated_at"]
+    list_filter = ["is_published"]
+    search_fields = ["title", "slug"]
+    prepopulated_fields = {"slug": ("title",)}
+    inlines = [PageSectionInline]
+    fieldsets = (
+        ("Основное", {"fields": ("title", "slug", "is_published")}),
+        ("SEO", {"fields": ("meta_title", "meta_description")}),
+    )
+
+
+@admin.register(PageSection)
+class PageSectionAdmin(ModelAdmin):
+    list_display = ["page", "order", "block_type", "heading", "is_visible"]
+    list_filter = ["page", "block_type", "is_visible"]
+    list_editable = ["order", "is_visible"]
+    search_fields = ["heading", "eyebrow", "body", "section_key"]
+    autocomplete_fields = ["page"]
+    fieldsets = (
+        ("Привязка", {"fields": ("page", "block_type", "section_key", "order", "is_visible")}),
+        ("Текст", {"fields": ("eyebrow", "heading", "subheading", "body")}),
+        ("CTA и медиа", {"fields": ("cta_label", "cta_url", "image")}),
+        ("Структурированные данные (JSON)", {"fields": ("data",)}),
+    )
+
+
+# ═══════════════════════════════════════════════════════════════
+# Legacy CMS (кратко, для обратной совместимости)
+# ═══════════════════════════════════════════════════════════════
+
+@admin.register(ContentBlock)
+class ContentBlockAdmin(ModelAdmin):
+    list_display = ["block_type", "heading", "order", "is_visible"]
+    list_filter = ["block_type", "is_visible"]
+    list_editable = ["order", "is_visible"]
+    search_fields = ["heading", "eyebrow", "body"]
 
 
 @admin.register(HeroSection)

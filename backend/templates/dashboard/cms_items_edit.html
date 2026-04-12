@@ -1,0 +1,148 @@
+{% extends "layouts/dashboard.html" %}
+{% block title %}{% if item %}Редактировать{% else %}Добавить{% endif %} — {{ category_label }}{% endblock %}
+{% block page_eyebrow %}Админ · CMS · {{ category_label }}{% endblock %}
+{% block page_title %}{% if item %}Редактировать{% else %}Добавить{% endif %} <span class="ital">{{ category_label|lower }}</span>{% endblock %}
+
+{% block page_css %}
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+<style>
+.form-row{margin-bottom:18px}
+.form-row label{display:block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#64728A;margin-bottom:6px}
+.form-row input[type="text"],.form-row input[type="url"],.form-row input[type="number"],.form-row select,.form-row textarea{width:100%;padding:11px 14px;border:1px solid #D9DCE4;border-radius:6px;font-size:14px;font-family:inherit;background:#fff}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:none;border-color:#C6A46D}
+.form-row textarea{resize:vertical;min-height:80px}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.check-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f6f7f9;border-radius:6px;cursor:pointer}
+.check-row input{width:auto;margin:0}
+#editor{background:#fff;min-height:200px;border:1px solid #D9DCE4;border-radius:0 0 6px 6px}
+.ql-toolbar.ql-snow{border:1px solid #D9DCE4;border-radius:6px 6px 0 0;border-bottom:none}
+.ql-toolbar svg,.ql-toolbar.ql-snow svg{width:18px!important;height:18px!important;float:none}
+.ql-toolbar button{width:28px!important;height:24px!important;padding:2px!important}
+.ql-toolbar .ql-picker{font-size:13px}
+#editor .ql-editor{min-height:180px;font-size:14px}
+@media(max-width:720px){.form-grid-2{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block content %}
+{% if messages %}
+  {% for msg in messages %}
+  <div style="padding:12px 16px;margin-bottom:14px;border-radius:8px;background:{% if msg.tags == 'error' %}#fff0f0;color:#a33{% else %}#f0fff4;color:#2c5{% endif %};font-size:13px">{{ msg }}</div>
+  {% endfor %}
+{% endif %}
+
+<div style="margin-bottom:18px">
+  <a href="{% url 'dashboard_cms_items_list' category %}" style="font-size:12px;color:#64728A;text-decoration:none">← Назад к списку</a>
+</div>
+
+<form method="POST" enctype="multipart/form-data" class="cab-card" style="max-width:880px">
+  {% csrf_token %}
+
+  <div class="form-row">
+    <label>Заголовок / Название *</label>
+    <input type="text" name="title" maxlength="300" required value="{{ item.title|default:'' }}">
+  </div>
+
+  <div class="form-row">
+    <label>Подзаголовок</label>
+    <input type="text" name="subtitle" maxlength="300" value="{{ item.subtitle|default:'' }}">
+  </div>
+
+  {% if subcats %}
+  <div class="form-row">
+    <label>Подкатегория</label>
+    <select name="subcategory">
+      <option value="">—</option>
+      {% for key, label in subcats %}
+      <option value="{{ key }}" {% if item and item.subcategory == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% endif %}
+
+  <div class="form-row">
+    <label>Краткое описание</label>
+    <textarea name="description" maxlength="1500" rows="3">{{ item.description|default:'' }}</textarea>
+  </div>
+
+  <div class="form-row">
+    <label>Полный текст (для статей/отчётов)</label>
+    <div id="editor">{{ item.body|default:''|safe }}</div>
+    <input type="hidden" name="body" id="body-input">
+  </div>
+
+  <div class="form-grid-2">
+    <div class="form-row">
+      <label>Загрузить изображение</label>
+      <input type="file" name="image" accept="image/*">
+      {% if item and item.image %}<div style="margin-top:8px"><img src="{{ item.image.url }}" style="max-width:160px;border-radius:6px;border:1px solid #D9DCE4"></div>{% endif %}
+    </div>
+    <div class="form-row">
+      <label>URL изображения</label>
+      <input type="url" name="image_url" maxlength="1000" value="{{ item.image_url|default:'' }}" placeholder="https://...">
+    </div>
+  </div>
+
+  <div class="form-grid-2">
+    <div class="form-row">
+      <label>Внешняя ссылка</label>
+      <input type="url" name="link_url" maxlength="1000" value="{{ item.link_url|default:'' }}" placeholder="https://...">
+    </div>
+    <div class="form-row">
+      <label>Slug (для URL статей)</label>
+      <input type="text" name="slug" maxlength="200" value="{{ item.slug|default:'' }}">
+    </div>
+  </div>
+
+  <div class="form-grid-2">
+    <div class="form-row">
+      <label>Тег/бейдж (напр. «Статья», «Отчёт»)</label>
+      <input type="text" name="tag" maxlength="80" value="{{ item.tag|default:'' }}">
+    </div>
+    <div class="form-row">
+      <label>Статус (напр. «Активный»)</label>
+      <input type="text" name="status" maxlength="40" value="{{ item.status|default:'' }}">
+    </div>
+  </div>
+
+  <div class="form-row">
+    <label>Метрики (через |, напр. «4.5 млн т|EUR 18.5 млрд»)</label>
+    <input type="text" name="metrics" value="{% if item and item.data.metrics %}{% for m in item.data.metrics %}{{ m }}{% if not forloop.last %}|{% endif %}{% endfor %}{% endif %}">
+  </div>
+
+  <div class="form-grid-2">
+    <label class="check-row">
+      <input type="checkbox" name="is_published" {% if not item or item.is_published %}checked{% endif %}>
+      <span>Опубликовано</span>
+    </label>
+    <div class="form-row" style="margin:0">
+      <label>Порядок</label>
+      <input type="number" name="order" value="{{ item.order|default:0 }}" min="0">
+    </div>
+  </div>
+
+  <div style="display:flex;gap:12px;margin-top:22px;padding-top:22px;border-top:1px solid #eef0f4">
+    <button type="submit" style="padding:14px 28px;background:#0B1628;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">Сохранить</button>
+    <a href="{% url 'dashboard_cms_items_list' category %}" style="padding:14px 28px;color:#64728A;text-decoration:none;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">Отмена</a>
+  </div>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+<script>
+const quill = new Quill('#editor', {
+  theme: 'snow',
+  modules: {
+    toolbar: [
+      [{header: [2, 3, false]}],
+      ['bold','italic','underline','link'],
+      [{list:'ordered'},{list:'bullet'}],
+      ['blockquote'],
+      ['clean']
+    ]
+  }
+});
+document.querySelector('form').addEventListener('submit', function(){
+  document.getElementById('body-input').value = quill.root.innerHTML;
+});
+</script>
+{% endblock %}

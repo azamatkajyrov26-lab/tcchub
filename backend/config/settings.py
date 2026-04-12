@@ -33,30 +33,16 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_spectacular",
     "django_celery_beat",
-    # Local apps
+    # Local apps — public site only
     "apps.web",
     "apps.accounts",
-    "apps.courses",
-    "apps.content",
-    "apps.quizzes",
-    "apps.assignments",
-    "apps.grades",
-    "apps.forums",
-    "apps.notifications",
-    "apps.messaging",
-    "apps.certificates",
-    "apps.badges",
-    "apps.calendar",
-    "apps.analytics",
     "apps.landing",
-    # TCC Analytics Platform
+    # TCC Analytics data backends (used by tools & reports catalog)
     "apps.tcc_core",
     "apps.tcc_data",
     "apps.tcc_intelligence",
-    "apps.tcc_emulator",
     "apps.tcc_reports",
     "apps.tcc_commerce",
-    "apps.tcc_alerts",
 ]
 
 MIDDLEWARE = [
@@ -200,14 +186,6 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.tcc_intelligence.tasks.recalculate_all_route_scores",
         "schedule": 21600,  # 6 hours
     },
-    "update-emulated-daily": {
-        "task": "apps.tcc_emulator.tasks.update_emulated_data",
-        "schedule": 86400,
-    },
-    "check-alerts-hourly": {
-        "task": "apps.tcc_alerts.tasks.check_and_generate_alerts",
-        "schedule": 3600,  # 1 hour
-    },
 }
 
 # --- drf-spectacular ---
@@ -228,6 +206,10 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() in ("true", "1")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@tcchub.kz")
+
+# --- Telegram bot notifications ---
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 
 # --- File upload limits ---
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
@@ -263,130 +245,33 @@ UNFOLD = {
     },
     "SIDEBAR": {
         "show_search": True,
-        "show_all_applications": True,
+        "show_all_applications": False,
         "navigation": [
             {
-                "title": "Навигация",
+                "title": "Главное",
                 "separator": True,
                 "items": [
-                    {
-                        "title": "Панель управления",
-                        "icon": "dashboard",
-                        "link": "/admin/",
-                    },
+                    {"title": "Панель управления", "icon": "dashboard", "link": "/admin/"},
+                    {"title": "Все страницы сайта", "icon": "web", "link": "/admin/landing/page/"},
+                    {"title": "Все блоки страниц", "icon": "view_agenda", "link": "/admin/landing/pagesection/"},
                 ],
             },
             {
-                "title": "Обучение",
+                "title": "Страницы сайта",
                 "separator": True,
-                "collapsible": True,
+                "collapsible": False,
                 "items": [
-                    {
-                        "title": "Категории",
-                        "icon": "category",
-                        "link": "/admin/courses/category/",
-                    },
-                    {
-                        "title": "Курсы",
-                        "icon": "menu_book",
-                        "link": "/admin/courses/course/",
-                    },
-                    {
-                        "title": "Секции / Модули",
-                        "icon": "view_list",
-                        "link": "/admin/courses/section/",
-                    },
-                    {
-                        "title": "Активности",
-                        "icon": "assignment",
-                        "link": "/admin/content/activity/",
-                    },
-                    {
-                        "title": "Ресурсы / Файлы",
-                        "icon": "attach_file",
-                        "link": "/admin/content/resource/",
-                    },
-                    {
-                        "title": "Папки",
-                        "icon": "folder",
-                        "link": "/admin/content/folder/",
-                    },
-                ],
-            },
-            {
-                "title": "Оценивание",
-                "separator": True,
-                "collapsible": True,
-                "items": [
-                    {
-                        "title": "Тесты",
-                        "icon": "quiz",
-                        "link": "/admin/quizzes/quiz/",
-                    },
-                    {
-                        "title": "Вопросы",
-                        "icon": "help_outline",
-                        "link": "/admin/quizzes/question/",
-                    },
-                    {
-                        "title": "Задания",
-                        "icon": "task",
-                        "link": "/admin/assignments/assignment/",
-                    },
-                    {
-                        "title": "Работы студентов",
-                        "icon": "upload_file",
-                        "link": "/admin/assignments/submission/",
-                    },
-                    {
-                        "title": "Журнал оценок",
-                        "icon": "grade",
-                        "link": "/admin/grades/grade/",
-                    },
-                ],
-            },
-            {
-                "title": "Коммуникации",
-                "separator": True,
-                "collapsible": True,
-                "items": [
-                    {
-                        "title": "Форумы",
-                        "icon": "forum",
-                        "link": "/admin/forums/forum/",
-                    },
-                    {
-                        "title": "Сообщения",
-                        "icon": "chat",
-                        "link": "/admin/messaging/message/",
-                    },
-                    {
-                        "title": "Уведомления",
-                        "icon": "notifications",
-                        "link": "/admin/notifications/notification/",
-                    },
-                ],
-            },
-            {
-                "title": "Достижения",
-                "separator": True,
-                "collapsible": True,
-                "items": [
-                    {
-                        "title": "Сертификаты",
-                        "icon": "workspace_premium",
-                        "link": "/admin/certificates/issuedcertificate/",
-                    },
-                    {
-                        "title": "Шаблоны сертификатов",
-                        "icon": "description",
-                        "link": "/admin/certificates/certificatetemplate/",
-                    },
-                    {
-                        "title": "Значки",
-                        "icon": "military_tech",
-                        "link": "/admin/badges/badge/",
-                    },
+                    {"title": "Главная", "icon": "home", "link": "/admin/landing/page/?q=landing"},
+                    {"title": "О платформе", "icon": "info", "link": "/admin/landing/page/?q=about"},
+                    {"title": "Аналитика", "icon": "trending_up", "link": "/admin/landing/page/?q=analytics"},
+                    {"title": "Отчёты", "icon": "article", "link": "/admin/landing/page/?q=reports"},
+                    {"title": "Медиа", "icon": "play_circle", "link": "/admin/landing/page/?q=media"},
+                    {"title": "Решения для бизнеса", "icon": "work", "link": "/admin/landing/page/?q=solutions"},
+                    {"title": "Проекты", "icon": "grid_view", "link": "/admin/landing/page/?q=projects"},
+                    {"title": "Партнёры", "icon": "handshake", "link": "/admin/landing/page/?q=partners"},
+                    {"title": "Образование", "icon": "school", "link": "/admin/landing/page/?q=education"},
+                    {"title": "Контакты", "icon": "contact_page", "link": "/admin/landing/page/?q=contacts"},
+                    {"title": "Вики Логист", "icon": "menu_book", "link": "/admin/landing/page/?q=wiki"},
                 ],
             },
             {
@@ -394,197 +279,45 @@ UNFOLD = {
                 "separator": True,
                 "collapsible": True,
                 "items": [
-                    {
-                        "title": "Пользователи",
-                        "icon": "people",
-                        "link": "/admin/accounts/customuser/",
-                    },
-                    {
-                        "title": "Записи на курсы",
-                        "icon": "how_to_reg",
-                        "link": "/admin/courses/enrollment/",
-                    },
-                    {
-                        "title": "Группы",
-                        "icon": "groups",
-                        "link": "/admin/auth/group/",
-                    },
+                    {"title": "Пользователи", "icon": "people", "link": "/admin/accounts/customuser/"},
+                    {"title": "Группы доступа", "icon": "groups", "link": "/admin/auth/group/"},
                 ],
             },
             {
-                "title": "Лендинг",
+                "title": "Отчёты и заказы",
                 "separator": True,
                 "collapsible": True,
                 "items": [
-                    {
-                        "title": "Hero секция",
-                        "icon": "web",
-                        "link": "/admin/landing/herosection/",
-                    },
-                    {
-                        "title": "Метрики",
-                        "icon": "bar_chart",
-                        "link": "/admin/landing/metric/",
-                    },
-                    {
-                        "title": "Партнёры",
-                        "icon": "handshake",
-                        "link": "/admin/landing/partner/",
-                    },
-                    {
-                        "title": "Отзывы",
-                        "icon": "rate_review",
-                        "link": "/admin/landing/testimonial/",
-                    },
-                    {
-                        "title": "Преимущества",
-                        "icon": "star",
-                        "link": "/admin/landing/advantage/",
-                    },
-                    {
-                        "title": "Контакты",
-                        "icon": "contact_page",
-                        "link": "/admin/landing/contactinfo/",
-                    },
+                    {"title": "Отчёты (каталог)", "icon": "article", "link": "/admin/tcc_reports/report/"},
+                    {"title": "Шаблоны отчётов", "icon": "description", "link": "/admin/tcc_reports/reporttemplate/"},
+                    {"title": "Продукты", "icon": "shopping_cart", "link": "/admin/tcc_commerce/product/"},
+                    {"title": "Заказы клиентов", "icon": "receipt_long", "link": "/admin/tcc_commerce/order/"},
+                    {"title": "Доступы к отчётам", "icon": "key", "link": "/admin/tcc_commerce/reportaccess/"},
                 ],
             },
             {
-                "title": "TCC Платформа",
+                "title": "Данные платформы",
                 "separator": True,
                 "collapsible": True,
                 "items": [
-                    {
-                        "title": "Коридоры",
-                        "icon": "route",
-                        "link": "/admin/tcc_core/tradecorridor/",
-                    },
-                    {
-                        "title": "Узлы маршрутов",
-                        "icon": "location_on",
-                        "link": "/admin/tcc_core/routenode/",
-                    },
-                    {
-                        "title": "Страны",
-                        "icon": "flag",
-                        "link": "/admin/tcc_core/country/",
-                    },
-                    {
-                        "title": "Регионы",
-                        "icon": "public",
-                        "link": "/admin/tcc_core/region/",
-                    },
-                    {
-                        "title": "Источники данных",
-                        "icon": "cloud_sync",
-                        "link": "/admin/tcc_data/datasource/",
-                    },
-                    {
-                        "title": "Санкционные списки",
-                        "icon": "gavel",
-                        "link": "/admin/tcc_data/sanctionentry/",
-                    },
-                    {
-                        "title": "Логи синхронизации",
-                        "icon": "sync",
-                        "link": "/admin/tcc_data/synclog/",
-                    },
-                    {
-                        "title": "Торговые потоки",
-                        "icon": "swap_horiz",
-                        "link": "/admin/tcc_data/tradeflow/",
-                    },
-                    {
-                        "title": "Новости",
-                        "icon": "newspaper",
-                        "link": "/admin/tcc_data/newsitem/",
-                    },
-                    {
-                        "title": "Риск-факторы",
-                        "icon": "warning",
-                        "link": "/admin/tcc_intelligence/riskfactor/",
-                    },
-                    {
-                        "title": "Скоры маршрутов",
-                        "icon": "speed",
-                        "link": "/admin/tcc_intelligence/routescore/",
-                    },
-                    {
-                        "title": "Сценарии",
-                        "icon": "alt_route",
-                        "link": "/admin/tcc_intelligence/scenario/",
-                    },
-                    {
-                        "title": "Эмуляторы",
-                        "icon": "science",
-                        "link": "/admin/tcc_emulator/emulateddatasource/",
-                    },
-                    {
-                        "title": "Шаблоны отчётов",
-                        "icon": "description",
-                        "link": "/admin/tcc_reports/reporttemplate/",
-                    },
-                    {
-                        "title": "Отчёты",
-                        "icon": "article",
-                        "link": "/admin/tcc_reports/report/",
-                    },
-                    {
-                        "title": "Продукты",
-                        "icon": "shopping_cart",
-                        "link": "/admin/tcc_commerce/product/",
-                    },
-                    {
-                        "title": "Заказы",
-                        "icon": "receipt_long",
-                        "link": "/admin/tcc_commerce/order/",
-                    },
-                    {
-                        "title": "Доступы к отчётам",
-                        "icon": "key",
-                        "link": "/admin/tcc_commerce/reportaccess/",
-                    },
-                    {
-                        "title": "Оповещения",
-                        "icon": "campaign",
-                        "link": "/admin/tcc_alerts/alert/",
-                    },
-                    {
-                        "title": "Подписки на оповещения",
-                        "icon": "notifications_active",
-                        "link": "/admin/tcc_alerts/alertsubscription/",
-                    },
-                ],
-            },
-            {
-                "title": "Аналитика",
-                "separator": True,
-                "collapsible": True,
-                "items": [
-                    {
-                        "title": "Действия пользователей",
-                        "icon": "analytics",
-                        "link": "/admin/analytics/useractivity/",
-                    },
-                    {
-                        "title": "Отчёты по курсам",
-                        "icon": "assessment",
-                        "link": "/admin/analytics/coursereport/",
-                    },
-                    {
-                        "title": "Логи входов",
-                        "icon": "login",
-                        "link": "/admin/analytics/loginlog/",
-                    },
-                    {
-                        "title": "Календарь",
-                        "icon": "calendar_month",
-                        "link": "/admin/calendar/event/",
-                    },
+                    {"title": "Коридоры", "icon": "route", "link": "/admin/tcc_core/tradecorridor/"},
+                    {"title": "Узлы маршрутов", "icon": "location_on", "link": "/admin/tcc_core/routenode/"},
+                    {"title": "Страны", "icon": "flag", "link": "/admin/tcc_core/country/"},
+                    {"title": "Регионы", "icon": "public", "link": "/admin/tcc_core/region/"},
+                    {"title": "Торговые потоки", "icon": "swap_horiz", "link": "/admin/tcc_data/tradeflow/"},
+                    {"title": "Санкции", "icon": "gavel", "link": "/admin/tcc_data/sanctionentry/"},
+                    {"title": "Новости", "icon": "newspaper", "link": "/admin/tcc_data/newsitem/"},
+                    {"title": "Риск-факторы", "icon": "warning", "link": "/admin/tcc_intelligence/riskfactor/"},
+                    {"title": "Скоры маршрутов", "icon": "speed", "link": "/admin/tcc_intelligence/routescore/"},
+                    {"title": "Сценарии", "icon": "alt_route", "link": "/admin/tcc_intelligence/scenario/"},
+                    {"title": "Источники данных", "icon": "cloud_sync", "link": "/admin/tcc_data/datasource/"},
+                    {"title": "Логи синхронизации", "icon": "sync", "link": "/admin/tcc_data/synclog/"},
                 ],
             },
         ],
     },
 }
+
 
 
 # ─── Production Security (active when DEBUG=False) ───

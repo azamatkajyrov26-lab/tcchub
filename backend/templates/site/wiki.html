@@ -1,5 +1,6 @@
 {% extends "layouts/site.html" %}
 {% load static %}
+{% load cms %}
 
 {% block title %}Вики Логист — TransCaspian Cargo{% endblock %}
 
@@ -161,20 +162,20 @@ a{color:inherit;text-decoration:none}
 {% block content %}
 <!-- NAV -->
 <!-- HERO -->
-<section class="wiki-hero">
+{% cms_visible "wiki" "section_1" as vis1 %}{% if vis1 %}<section class="wiki-hero">
   <div class="wiki-hero-inner">
     <div class="wiki-badge">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
-      <span>Справочник логиста</span>
+      <span>{% cms_eyebrow "wiki" "hero" "Справочник логиста" %}</span>
     </div>
-    <h1 class="wiki-title">Wiki<span class="gold">Логист</span><br>энциклопедия логистики</h1>
-    <p class="wiki-subtitle">270+ терминов · Законы РК · Документы · Конвенции · Ресурсы</p>
+    <h1 class="wiki-title">{% cms_heading "wiki" "hero" "WikiЛогист — энциклопедия логистики" %}</h1>
+    <p class="wiki-subtitle">{% cms_sub "wiki" "hero" "270+ терминов · Законы РК · Документы · Конвенции · Ресурсы" %}</p>
     <div class="wiki-powered">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
       Powered by TransCaspian Cargo
     </div>
   </div>
-</section>
+</section>{% endif %}
 
 <!-- MAIN TABS -->
 <div style="max-width:100%;margin:0 auto;padding:16px 40px 0;display:flex;gap:4px">

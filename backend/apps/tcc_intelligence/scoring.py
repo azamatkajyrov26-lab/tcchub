@@ -79,23 +79,6 @@ def _calc_infrastructure_score(corridor):
     if not nodes:
         return 0.0
     scores = [status_map.get(n.status, 0) for n in nodes]
-
-    # Also consider emulated statuses
-    from apps.tcc_emulator.models import EmulatedNodeStatus
-
-    for node in nodes:
-        latest = (
-            EmulatedNodeStatus.objects.filter(node=node)
-            .order_by("-date")
-            .first()
-        )
-        if latest:
-            # High utilization (>90%) = higher risk
-            if latest.throughput_percent > 90:
-                scores.append(0.6)
-            elif latest.throughput_percent > 75:
-                scores.append(0.3)
-
     return sum(scores) / len(scores) if scores else 0.0
 
 

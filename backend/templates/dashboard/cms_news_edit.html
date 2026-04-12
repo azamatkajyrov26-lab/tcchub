@@ -1,0 +1,130 @@
+{% extends "layouts/dashboard.html" %}
+{% block title %}{% if item %}Редактировать новость{% else %}Новая новость{% endif %} — CMS{% endblock %}
+{% block page_eyebrow %}Админ · CMS · Новости{% endblock %}
+{% block page_title %}{% if item %}Редактировать <span class="ital">новость</span>{% else %}Новая <span class="ital">новость</span>{% endif %}{% endblock %}
+{% block page_sub %}<p class="cab-sub">Заголовок, обложка и дата обязательны. Полный текст — по желанию.</p>{% endblock %}
+
+{% block page_css %}
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+<style>
+.form-row{margin-bottom:18px}
+.form-row label{display:block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#64728A;margin-bottom:6px}
+.form-row input[type="text"],.form-row input[type="url"],.form-row input[type="date"],.form-row input[type="number"],.form-row select,.form-row textarea{width:100%;padding:11px 14px;border:1px solid #D9DCE4;border-radius:6px;font-size:14px;font-family:inherit;background:#fff}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:none;border-color:#C6A46D}
+.form-row textarea{resize:vertical;min-height:80px}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.check-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f6f7f9;border-radius:6px;cursor:pointer}
+.check-row input{width:auto;margin:0}
+#editor{background:#fff;min-height:260px;border:1px solid #D9DCE4;border-radius:0 0 6px 6px}
+.ql-toolbar.ql-snow{border:1px solid #D9DCE4;border-radius:6px 6px 0 0;border-bottom:none}
+.ql-toolbar svg,.ql-toolbar.ql-snow svg{width:18px!important;height:18px!important;float:none}
+.ql-toolbar button{width:28px!important;height:24px!important;padding:2px!important}
+.ql-toolbar .ql-picker{font-size:13px}
+#editor .ql-editor{min-height:180px;font-size:14px}
+@media(max-width:720px){.form-grid-2{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block content %}
+{% if messages %}
+  {% for msg in messages %}
+  <div style="padding:12px 16px;margin-bottom:14px;border-radius:8px;background:{% if msg.tags == 'error' %}#fff0f0;color:#a33{% else %}#f0fff4;color:#2c5{% endif %};font-size:13px">{{ msg }}</div>
+  {% endfor %}
+{% endif %}
+
+<div style="margin-bottom:18px">
+  <a href="{% url 'dashboard_cms_news_list' %}" style="font-size:12px;color:#64728A;text-decoration:none">← Назад к списку новостей</a>
+</div>
+
+<form method="POST" enctype="multipart/form-data" class="cab-card" style="max-width:880px">
+  {% csrf_token %}
+
+  <div class="form-row">
+    <label>Заголовок *</label>
+    <input type="text" name="title" maxlength="300" required value="{{ item.title|default:'' }}">
+  </div>
+
+  <div class="form-grid-2">
+    <div class="form-row">
+      <label>Тип материала</label>
+      <select name="kind">
+        {% for k, label in kinds %}
+        <option value="{{ k }}" {% if item and item.kind == k %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Дата публикации *</label>
+      <input type="date" name="published_at" required value="{{ item.published_at|date:'Y-m-d' }}">
+    </div>
+  </div>
+
+  <div class="form-row">
+    <label>Краткое описание</label>
+    <textarea name="excerpt" maxlength="600" rows="3">{{ item.excerpt|default:'' }}</textarea>
+  </div>
+
+  <div class="form-row">
+    <label>Полный текст</label>
+    <div id="editor">{{ item.body|default:''|safe }}</div>
+    <input type="hidden" name="body" id="body-input">
+  </div>
+
+  <div class="form-grid-2">
+    <div class="form-row">
+      <label>Обложка (загрузить)</label>
+      <input type="file" name="cover" accept="image/*">
+      {% if item and item.cover %}<div style="margin-top:8px"><img src="{{ item.cover.url }}" style="max-width:160px;border-radius:6px;border:1px solid #D9DCE4"></div>{% endif %}
+    </div>
+    <div class="form-row">
+      <label>URL обложки (если не загружена)</label>
+      <input type="url" name="cover_url" maxlength="1000" value="{{ item.cover_url|default:'' }}" placeholder="https://...">
+    </div>
+  </div>
+
+  <div class="form-row">
+    <label>Внешняя ссылка (опц.)</label>
+    <input type="url" name="external_url" maxlength="1000" value="{{ item.external_url|default:'' }}" placeholder="https://...">
+  </div>
+
+  <div class="form-grid-2">
+    <label class="check-row">
+      <input type="checkbox" name="is_published" {% if not item or item.is_published %}checked{% endif %}>
+      <span>Опубликовано</span>
+    </label>
+    <label class="check-row">
+      <input type="checkbox" name="show_on_landing" {% if item and item.show_on_landing %}checked{% endif %}>
+      <span>★ Показывать на главной</span>
+    </label>
+  </div>
+
+  <div class="form-row" style="margin-top:18px">
+    <label>Порядок сортировки</label>
+    <input type="number" name="order" value="{{ item.order|default:0 }}" min="0" style="max-width:140px">
+  </div>
+
+  <div style="display:flex;gap:12px;margin-top:22px;padding-top:22px;border-top:1px solid #eef0f4">
+    <button type="submit" style="padding:14px 28px;background:#0B1628;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">Сохранить</button>
+    <a href="{% url 'dashboard_cms_news_list' %}" style="padding:14px 28px;color:#64728A;text-decoration:none;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">Отмена</a>
+  </div>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+<script>
+const quill = new Quill('#editor', {
+  theme: 'snow',
+  modules: {
+    toolbar: [
+      [{header: [2, 3, false]}],
+      ['bold','italic','underline','link'],
+      [{list:'ordered'},{list:'bullet'}],
+      ['blockquote'],
+      ['clean']
+    ]
+  }
+});
+document.querySelector('form').addEventListener('submit', function(){
+  document.getElementById('body-input').value = quill.root.innerHTML;
+});
+</script>
+{% endblock %}

@@ -1,6 +1,5 @@
 from django.urls import path, re_path
 from django.http import HttpResponse
-from django.views.generic import TemplateView
 
 from . import views
 
@@ -37,7 +36,8 @@ def sitemap_xml(request):
 urlpatterns = [
     path("robots.txt", robots_txt, name="robots_txt"),
     path("sitemap.xml", sitemap_xml, name="sitemap_xml"),
-    # Main site pages
+
+    # Public pages
     path("", views.landing_view, name="landing"),
     path("about/", views.about_view, name="about"),
     path("analytics/", views.site_analytics_view, name="site_analytics"),
@@ -47,75 +47,51 @@ urlpatterns = [
     path("press/", views.site_media_view, name="site_media"),
     path("partners/", views.site_partners_view, name="site_partners"),
     path("contacts/", views.contacts_view, name="contacts"),
+    path("contacts/submit/", views.contact_submit_view, name="contact_submit"),
     path("wiki/", views.wiki_view, name="wiki"),
+    path("kz-logistics-laws/", views.kz_logistics_laws_view, name="kz_logistics_laws"),
+    path("analytics/<slug:slug>/", views.article_detail_view, name="article_detail"),
+
+    # Tools (gated by login)
     path("corridor/", views.corridor_view, name="corridor"),
-    path("live-data/", views.live_data_view, name="live_data"),
     path("corridor-map/", views.corridor_map_view, name="corridor_map"),
+    path("live-data/", views.live_data_view, name="live_data"),
     path("monitoring/", views.monitoring_view, name="monitoring"),
 
-    # Data exports (CSV)
+    # Data exports (login required)
     path("export/route-scores/", views.export_route_scores_view, name="export_route_scores"),
     path("export/risk-factors/", views.export_risk_factors_view, name="export_risk_factors"),
     path("export/trade-flows/", views.export_trade_flows_view, name="export_trade_flows"),
     path("export/sanctions/", views.export_sanctions_view, name="export_sanctions"),
-    path("kz-logistics-laws/", views.kz_logistics_laws_view, name="kz_logistics_laws"),
-    path("analytics/<slug:slug>/", views.article_detail_view, name="article_detail"),
 
     # Reports catalog & commerce
     path("reports/", views.reports_catalog_view, name="reports_catalog"),
     re_path(r"^reports/(?P<slug>[^/]+)/$", views.report_detail_view, name="report_detail"),
     re_path(r"^reports/(?P<slug>[^/]+)/buy/$", views.buy_report_view, name="buy_report"),
 
-    # Client dashboard — reports & orders
-    path("dashboard/my-reports/", views.dashboard_my_reports_view, name="dashboard_my_reports"),
-    path("dashboard/my-orders/", views.dashboard_my_orders_view, name="dashboard_my_orders"),
-
     # Auth
     path("login/", views.login_view, name="login"),
     path("register/", views.register_view, name="register"),
     path("logout/", views.logout_view, name="logout"),
 
-    # Dashboard
+    # Client cabinet
     path("dashboard/", views.dashboard_view, name="dashboard"),
-
-    # Courses
-    path("courses/", views.courses_view, name="courses"),
-    path("courses/<slug:slug>/", views.course_detail_view, name="course_detail"),
-    path("courses/<slug:slug>/enroll/", views.enroll_view, name="enroll"),
-    path("courses/<slug:slug>/activity/<int:activity_id>/", views.activity_detail_view, name="activity_detail"),
-    path("courses/<slug:slug>/activity/<int:activity_id>/complete/", views.complete_activity_view, name="complete_activity"),
-    path("courses/<slug:slug>/activity/<int:activity_id>/video-progress/", views.save_video_progress_view, name="save_video_progress"),
-
-    # Quizzes
-    path("quiz/<int:quiz_id>/", views.quiz_start_view, name="quiz_start"),
-    path("quiz/<int:quiz_id>/take/<int:attempt_id>/", views.quiz_take_view, name="quiz_take"),
-    path("quiz/<int:quiz_id>/take/<int:attempt_id>/submit/", views.quiz_submit_view, name="quiz_submit"),
-    path("quiz/<int:quiz_id>/results/<int:attempt_id>/", views.quiz_results_view, name="quiz_results"),
-
-    # Assignments
-    path("assignment/<int:assignment_id>/", views.assignment_detail_view, name="assignment_detail"),
-    path("assignment/<int:assignment_id>/submit/", views.assignment_submit_view, name="assignment_submit"),
-
-    # Grades
-    path("grades/", views.grades_view, name="grades"),
-
-    # Certificates
-    path("certificates/", views.certificates_view, name="certificates"),
-
-    # Messages
-    path("messages/", views.messages_view, name="messages"),
-    path("messages/<int:conversation_id>/", views.conversation_view, name="conversation"),
-    path("messages/<int:conversation_id>/send/", views.send_message_view, name="send_message"),
-
-    # Notifications
-    path("notifications/", views.notifications_view, name="notifications"),
-    path("notifications/<int:notification_id>/read/", views.mark_notification_read, name="mark_notification_read"),
-    path("notifications/read-all/", views.mark_all_notifications_read, name="mark_all_notifications_read"),
-
-    # Calendar
-    path("calendar/", views.calendar_view, name="calendar"),
-
-    # Profile
+    path("dashboard/my-reports/", views.dashboard_my_reports_view, name="dashboard_my_reports"),
+    path("dashboard/my-orders/", views.dashboard_my_orders_view, name="dashboard_my_orders"),
+    path("dashboard/submissions/", views.dashboard_submissions_list, name="dashboard_submissions"),
+    path("dashboard/cms/help/", views.dashboard_cms_help, name="dashboard_cms_help"),
+    path("dashboard/cms/request/", views.dashboard_cms_request, name="dashboard_cms_request"),
+    path("dashboard/cms/news/", views.dashboard_cms_news_list, name="dashboard_cms_news_list"),
+    path("dashboard/cms/news/new/", views.dashboard_cms_news_edit, name="dashboard_cms_news_new"),
+    path("dashboard/cms/news/<int:news_id>/", views.dashboard_cms_news_edit, name="dashboard_cms_news_edit"),
+    path("dashboard/cms/news/<int:news_id>/delete/", views.dashboard_cms_news_delete, name="dashboard_cms_news_delete"),
+    path("dashboard/cms/items/<str:category>/", views.dashboard_cms_items_list, name="dashboard_cms_items_list"),
+    path("dashboard/cms/items/<str:category>/new/", views.dashboard_cms_items_edit, name="dashboard_cms_items_new"),
+    path("dashboard/cms/items/<str:category>/<int:item_id>/", views.dashboard_cms_items_edit, name="dashboard_cms_items_edit"),
+    path("dashboard/cms/items/<str:category>/<int:item_id>/delete/", views.dashboard_cms_items_delete, name="dashboard_cms_items_delete"),
+    path("dashboard/cms/", views.dashboard_cms_list, name="dashboard_cms_list"),
+    path("dashboard/cms/<slug:slug>/", views.dashboard_cms_page, name="dashboard_cms_page"),
+    path("dashboard/cms/toggle/<int:section_id>/", views.dashboard_cms_toggle, name="dashboard_cms_toggle"),
     path("profile/", views.profile_view, name="profile"),
     path("profile/password/", views.change_password_view, name="change_password"),
 ]

@@ -1,5 +1,6 @@
 {% extends "layouts/site.html" %}
 {% load static %}
+{% load cms %}
 
 {% block title %}Решения для бизнеса — TCC HUB{% endblock %}
 
@@ -90,12 +91,12 @@
 
 {% block content %}
 <!-- HERO -->
-<section class="sol-hero">
+{% cms_visible "solutions" "section_1" as vis1 %}{% if vis1 %}<section class="sol-hero">
   <div class="sol-hero-wrap">
     <div>
-      <div class="sol-eyebrow"><span class="bar"></span>Решения для бизнеса</div>
-      <h1 class="sol-title">Стратегическое<br><em>сопровождение бизнеса</em></h1>
-      <p class="sol-lead">TCC помогает организациям анализировать цепи поставок, выявлять уязвимости, находить устойчивые маршруты и адаптироваться к быстро меняющимся условиям логистики Евразии.</p>
+      <div class="sol-eyebrow"><span class="bar"></span>{% cms_eyebrow "solutions" "hero" "Решения для бизнеса" %}</div>
+      <h1 class="sol-title">{% cms_heading "solutions" "hero" "Стратегическое сопровождение бизнеса" %}</h1>
+      <p class="sol-lead">{% cms_sub "solutions" "hero" "TCC помогает организациям анализировать цепи поставок, выявлять уязвимости, находить устойчивые маршруты и адаптироваться к быстро меняющимся условиям логистики Евразии." %}</p>
     </div>
     <div class="sol-hero-stats">
       <div class="sol-hs"><div class="sol-hs-num">5</div><div class="sol-hs-lab">Направлений работы</div></div>
@@ -104,87 +105,42 @@
       <div class="sol-hs"><div class="sol-hs-num">10<span style="font-size:.5em;color:rgba(255,255,255,.45);font-weight:600">+</span></div><div class="sol-hs-lab">Лет экспертизы</div></div>
     </div>
   </div>
-</section>
+</section>{% endif %}
 
 <!-- BENTO -->
-<section class="sol-section">
+{% cms_visible "solutions" "section_2" as vis2 %}{% if vis2 %}<section class="sol-section">
   <div class="sol-section-head">
-    <h2>Направления практической<br><em>работы TCC</em></h2>
-    <div class="sub">От стратегии до выхода на новые рынки — комплексное сопровождение бизнеса</div>
+    {% cms_heading "solutions" "section_2" as h_s2 %}{% if h_s2 %}<h2>{{ h_s2 }}</h2>{% else %}<h2>Направления практической<br><em>работы TCC</em></h2>{% endif %}
+    <div class="sub">{% cms_sub "solutions" "section_2" "От стратегии до выхода на новые рынки — комплексное сопровождение бизнеса" %}</div>
   </div>
 
   <div class="sol-bento">
-
-    <div class="sol-card hl c1 reveal">
-      <div class="num">01</div>
-      <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-      <h3>Стратегические сессии для компаний</h3>
-      <p class="desc">Экспертное сопровождение, оценка цепей поставок, моделирование сценариев и разработка решений для повышения устойчивости.</p>
+    {% for s in solutions_list %}
+    <div class="sol-card {% if forloop.first %}hl {% endif %}{{ s.data.css_class|default:'c1' }} reveal">
+      <div class="num">{{ forloop.counter|stringformat:"02d" }}</div>
+      <div class="icon">
+        {% if forloop.counter == 1 %}<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        {% elif forloop.counter == 2 %}<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+        {% elif forloop.counter == 3 %}<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        {% elif forloop.counter == 4 %}<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        {% else %}<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>{% endif %}
+      </div>
+      <h3>{{ s.title }}</h3>
+      <p class="desc">{{ s.description }}</p>
       <ul>
-        <li>Стратегические сессии и экспертное сопровождение</li>
-        <li>Моделирование сценариев цепей поставок</li>
-        <li>Решения для инфраструктурных и международных проектов</li>
+        {% for b in s.data.bullets %}<li>{{ b }}</li>{% endfor %}
       </ul>
     </div>
-
-    <div class="sol-card c2 reveal">
-      <div class="num">02</div>
-      <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div>
-      <h3>Анализ цепей поставок</h3>
-      <p class="desc">Комплексный аудит supply chain — от поставщиков до конечного потребителя. Узкие места, оптимизация, эффективность.</p>
-      <ul>
-        <li>Аудит цепи и ключевых звеньев</li>
-        <li>Оценка стоимости, сроков, надёжности</li>
-        <li>Бенчмаркинг с лучшими практиками отрасли</li>
-        <li>Рекомендации по снижению затрат</li>
-      </ul>
-    </div>
-
-    <div class="sol-card c3 reveal">
-      <div class="num">03</div>
-      <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-      <h3>Логистические риски</h3>
-      <p class="desc">Карта рисков по каждому звену: санкции, геополитика, инфраструктура, зависимость от контрагентов.</p>
-      <ul>
-        <li>Карта рисков по звеньям</li>
-        <li>Санкционный скрининг</li>
-        <li>Планы митигации</li>
-      </ul>
-    </div>
-
-    <div class="sol-card c4 reveal">
-      <div class="num">04</div>
-      <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
-      <h3>Альтернативные маршруты</h3>
-      <p class="desc">Средний коридор, Север-Юг, мультимодальные схемы — проектирование и оценка маршрутов.</p>
-      <ul>
-        <li>Сравнение маршрутов</li>
-        <li>Готовность инфраструктуры</li>
-        <li>Сценарии перемаршрутизации</li>
-      </ul>
-    </div>
-
-    <div class="sol-card c5 reveal">
-      <div class="num">05</div>
-      <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-      <h3>Выход на новые рынки</h3>
-      <p class="desc">Сопровождение при выходе на рынки ЦА, Каспия, Китая и Европы. От анализа до B2B-связей.</p>
-      <ul>
-        <li>Анализ ёмкости и барьеров</li>
-        <li>Регуляторика и таможня</li>
-        <li>B2B-встречи, поиск партнёров</li>
-      </ul>
-    </div>
-
+    {% endfor %}
   </div>
-</section>
+</section>{% endif %}
 
 <!-- PROCESS -->
-<div class="sol-process-wrap">
+{% cms_visible "solutions" "section_3" as vis3 %}{% if vis3 %}<div class="sol-process-wrap">
   <div class="sol-process-inner">
     <div class="sol-section-head" style="margin-bottom:0">
-      <h2>Как мы<br><em>работаем</em></h2>
-      <div class="sub">Четыре этапа от первичной диагностики до внедрения решений</div>
+      {% cms_heading "solutions" "section_3" as h_s3 %}{% if h_s3 %}<h2>{{ h_s3 }}</h2>{% else %}<h2>Как мы<br><em>работаем</em></h2>{% endif %}
+      <div class="sub">{% cms_sub "solutions" "section_3" "Четыре этапа от первичной диагностики до внедрения решений" %}</div>
     </div>
     <div class="sol-process-grid">
       <div class="sol-step reveal">
@@ -211,9 +167,10 @@
   </div>
 </div>
 
-<div class="cta-banner">
-  <h2>Запросить стратегическую сессию</h2>
-  <p>Получите экспертную оценку ваших цепей поставок и моделирование сценариев от специалистов TCC</p>
-  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">СВЯЗАТЬСЯ С ЭКСПЕРТОМ</button>
-</div>
+{% endif %}
+{% cms_visible "solutions" "cta" as viscta %}{% if viscta %}<div class="cta-banner">
+  {% cms_heading "solutions" "cta" as h_cta %}{% if h_cta %}<h2>{{ h_cta }}</h2>{% else %}<h2>Запросить стратегическую сессию</h2>{% endif %}
+  <p>{% cms_sub "solutions" "cta" "Получите экспертную оценку ваших цепей поставок и моделирование сценариев от специалистов TCC" %}</p>
+  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "solutions" "cta" "СВЯЗАТЬСЯ С ЭКСПЕРТОМ" %}</button>
+</div>{% endif %}
 {% endblock %}

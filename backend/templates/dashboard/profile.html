@@ -1,217 +1,84 @@
 {% extends "layouts/dashboard.html" %}
-{% block title %}Профиль — TCC HUB{% endblock %}
-{% block page_title %}Профиль{% endblock %}
+{% block title %}Профиль — TCC Hub{% endblock %}
+{% block page_eyebrow %}Аккаунт{% endblock %}
+{% block page_title %}Ваш <span class="ital">профиль</span>{% endblock %}
 
-{% block extra_head %}
+{% block content %}
 <style>
-.pf-card{background:#fff;border:1px solid #E6E8EE;padding:32px}
-.pf-card+.pf-card{margin-top:20px}
-.pf-eyebrow{display:inline-flex;align-items:center;gap:14px;margin-bottom:20px}
-.pf-eyebrow::before{content:"";width:28px;height:2px;background:#C6A46D}
-.pf-eyebrow-label{font-size:11px;font-weight:800;letter-spacing:.18em;color:#C6A46D;text-transform:uppercase}
-.pf-hero{position:relative;background:#1B2A4A;padding:40px 36px;overflow:hidden;margin-bottom:20px}
-.pf-hero::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at 80% 20%,#000 20%,transparent 70%);-webkit-mask-image:radial-gradient(ellipse at 80% 20%,#000 20%,transparent 70%)}
-.pf-hero::after{content:"";position:absolute;right:-80px;top:-80px;width:320px;height:320px;background:radial-gradient(circle,rgba(198,164,109,.22),transparent 65%)}
-.pf-hero>*{position:relative;z-index:1}
-.pf-avatar{width:88px;height:88px;border:2px solid #C6A46D;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(198,164,109,.12)}
-.pf-avatar img{width:100%;height:100%;object-fit:cover}
-.pf-avatar-initial{font-family:Montserrat,sans-serif;font-size:36px;font-weight:900;color:#C6A46D}
-.pf-name{font-family:Montserrat,sans-serif;font-size:clamp(24px,3vw,36px);font-weight:900;color:#fff;line-height:1.05;letter-spacing:-.02em}
-.pf-email{color:rgba(198,164,109,.9);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-top:8px}
 .pf-label{display:block;font-size:10px;font-weight:800;letter-spacing:.16em;color:#8a92a6;text-transform:uppercase;margin-bottom:8px}
-.pf-input{width:100%;padding:14px 0;background:transparent;border:none;border-bottom:1px solid #E6E8EE;color:#1B2A4A;font-size:15px;font-weight:700;transition:border-color .2s}
+.pf-input{width:100%;padding:14px 0;background:transparent;border:none;border-bottom:1px solid #E6E8EE;color:#0B1628;font-size:15px;font-weight:700;transition:border-color .2s}
 .pf-input:focus{outline:none;border-bottom-color:#C6A46D}
 .pf-input:disabled{color:#8a92a6;cursor:not-allowed}
-.pf-btn{display:inline-flex;align-items:center;gap:12px;padding:16px 32px;background:#1B2A4A;color:#C6A46D;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border:none;cursor:pointer;transition:background .2s}
-.pf-btn:hover{background:#243559}
-.pf-btn.gold{background:#C6A46D;color:#1B2A4A}
+.pf-btn{display:inline-flex;align-items:center;gap:12px;padding:16px 32px;background:#0F1D35;color:#C6A46D;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border:none;cursor:pointer;transition:background .2s}
+.pf-btn:hover{background:#1B2A4A}
+.pf-btn.gold{background:#C6A46D;color:#0F1D35}
 .pf-btn.gold:hover{background:#b3935d}
-.pf-btn.danger{background:#fff;color:#b91c1c;border:1px solid #fecaca;width:100%;justify-content:center}
-.pf-btn.danger:hover{background:#fef2f2;border-color:#b91c1c}
-.pf-avatar-upload{display:inline-flex;align-items:center;gap:10px;padding:12px 20px;border:1px solid #E6E8EE;color:#3D5070;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s}
-.pf-avatar-upload:hover{border-color:#C6A46D;color:#C6A46D}
-.pf-section-title{font-family:Montserrat,sans-serif;font-size:22px;font-weight:900;color:#1B2A4A;letter-spacing:-.015em;margin-bottom:4px}
-.pf-section-title .accent{color:#C6A46D;font-weight:300;font-style:italic}
-.pf-stat{padding:20px;border:1px solid #E6E8EE;position:relative}
-.pf-stat::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:#C6A46D}
-.pf-stat-num{font-family:Montserrat,sans-serif;font-size:30px;font-weight:900;color:#1B2A4A;letter-spacing:-.02em;line-height:1}
-.pf-stat-label{font-size:10px;font-weight:800;letter-spacing:.14em;color:#8a92a6;text-transform:uppercase;margin-top:8px}
-.pf-stat-num-badge{position:absolute;top:12px;right:16px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;color:#C6A46D;letter-spacing:.04em}
+.pf-section-title{font-family:Montserrat;font-size:22px;font-weight:900;color:#0B1628;letter-spacing:-.015em;margin-bottom:4px}
+.pf-section-title .ital{color:#C6A46D;font-weight:300;font-style:italic}
+.pf-eyebrow{display:inline-flex;align-items:center;gap:12px;margin-bottom:16px}
+.pf-eyebrow::before{content:"";width:28px;height:2px;background:#C6A46D}
+.pf-eyebrow-label{font-size:10px;font-weight:800;letter-spacing:.22em;color:#C6A46D;text-transform:uppercase}
 .pf-info-row{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #F0F1F5;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
 .pf-info-row:last-child{border-bottom:none}
 .pf-info-label{color:#8a92a6;font-weight:700}
-.pf-info-value{color:#1B2A4A;font-weight:800}
+.pf-info-value{color:#0B1628;font-weight:800}
 </style>
-{% endblock %}
 
-{% block content %}
-<div class="grid lg:grid-cols-3 gap-6">
-    <!-- Main Column -->
-    <div class="lg:col-span-2">
-        <!-- Editorial Hero -->
-        <div class="pf-hero">
-            <div style="display:inline-flex;align-items:center;gap:14px;margin-bottom:16px">
-                <span style="width:36px;height:2px;background:#C6A46D;display:inline-block"></span>
-                <span style="font-size:11px;font-weight:800;letter-spacing:.18em;color:#C6A46D;text-transform:uppercase">Ваш профиль</span>
-            </div>
-            <div class="flex items-center gap-6 flex-wrap">
-                <div class="pf-avatar">
-                    {% if request.user.avatar %}
-                        <img src="{{ request.user.avatar.url }}" alt="">
-                    {% else %}
-                        <span class="pf-avatar-initial">{{ request.user.first_name|first|default:"U" }}</span>
-                    {% endif %}
-                </div>
-                <div>
-                    <h2 class="pf-name">{{ request.user.get_full_name|default:request.user.email }}</h2>
-                    <div class="pf-email">{{ request.user.email }}</div>
-                </div>
-            </div>
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;align-items:start">
+  <div>
+    <div class="cab-card">
+      <div class="pf-eyebrow"><span class="pf-eyebrow-label">01 · Личные данные</span></div>
+      <h2 class="pf-section-title">Ваша <span class="ital">информация</span></h2>
+      <form method="post" action="{% url 'profile' %}" enctype="multipart/form-data" style="margin-top:28px">
+        {% csrf_token %}
+        <div style="display:flex;align-items:center;gap:20px;margin-bottom:28px">
+          <div style="width:64px;height:64px;border-radius:50%;background:#C6A46D;color:#0F1D35;display:flex;align-items:center;justify-content:center;font-family:Montserrat;font-weight:900;font-size:22px;overflow:hidden">
+            {% if request.user.avatar %}<img src="{{ request.user.avatar.url }}" alt="" style="width:100%;height:100%;object-fit:cover">
+            {% else %}{{ request.user.first_name|first|default:"U"|upper }}{% endif %}
+          </div>
+          <label style="display:inline-flex;align-items:center;gap:10px;padding:12px 20px;border:1px solid #E6E8EE;color:#64728A;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer">
+            Изменить фото
+            <input type="file" name="avatar" accept="image/*" style="display:none">
+          </label>
         </div>
-
-        <!-- Personal Data -->
-        <div class="pf-card">
-            <div class="pf-eyebrow"><span class="pf-eyebrow-label">01 · Личные данные</span></div>
-            <h2 class="pf-section-title">Ваша <span class="accent">информация</span></h2>
-            <form method="post" action="{% url 'profile' %}" enctype="multipart/form-data" class="mt-7">
-                {% csrf_token %}
-                <div class="flex items-center gap-5 mb-8">
-                    <div class="pf-avatar" style="width:64px;height:64px;border-width:1px">
-                        {% if request.user.avatar %}
-                            <img src="{{ request.user.avatar.url }}" alt="">
-                        {% else %}
-                            <span class="pf-avatar-initial" style="font-size:24px">{{ request.user.first_name|first|default:"U" }}</span>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <label class="pf-avatar-upload">
-                            <span class="material-icons-round text-base">photo_camera</span>
-                            Изменить фото
-                            <input type="file" name="avatar" accept="image/*" class="hidden">
-                        </label>
-                        <p style="color:#8a92a6;font-size:11px;margin-top:6px;letter-spacing:.04em">JPG, PNG — макс. 5 МБ</p>
-                    </div>
-                </div>
-
-                <div class="grid sm:grid-cols-2 gap-x-8 gap-y-6">
-                    <div>
-                        <label class="pf-label">Имя</label>
-                        <input type="text" name="first_name" value="{{ request.user.first_name }}" class="pf-input">
-                    </div>
-                    <div>
-                        <label class="pf-label">Фамилия</label>
-                        <input type="text" name="last_name" value="{{ request.user.last_name }}" class="pf-input">
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label class="pf-label">Email (нельзя изменить)</label>
-                        <input type="email" value="{{ request.user.email }}" disabled class="pf-input">
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label class="pf-label">Телефон</label>
-                        <input type="text" name="phone" value="{{ request.user.phone }}" class="pf-input" placeholder="+7 (___) ___-__-__">
-                    </div>
-                    <div>
-                        <label class="pf-label">Город</label>
-                        <input type="text" name="city" value="{{ request.user.city }}" class="pf-input">
-                    </div>
-                    <div>
-                        <label class="pf-label">Страна</label>
-                        <input type="text" name="country" value="{{ request.user.country }}" class="pf-input">
-                    </div>
-                </div>
-
-                <div class="mt-10">
-                    <button type="submit" class="pf-btn gold">
-                        Сохранить изменения →
-                    </button>
-                </div>
-            </form>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px 32px">
+          <div><label class="pf-label">Имя</label><input type="text" name="first_name" value="{{ request.user.first_name }}" class="pf-input"></div>
+          <div><label class="pf-label">Фамилия</label><input type="text" name="last_name" value="{{ request.user.last_name }}" class="pf-input"></div>
+          <div style="grid-column:1/-1"><label class="pf-label">Email (нельзя изменить)</label><input type="email" value="{{ request.user.email }}" disabled class="pf-input"></div>
+          <div style="grid-column:1/-1"><label class="pf-label">Телефон</label><input type="text" name="phone" value="{{ request.user.phone }}" class="pf-input" placeholder="+7 (___) ___-__-__"></div>
+          <div><label class="pf-label">Город</label><input type="text" name="city" value="{{ request.user.city }}" class="pf-input"></div>
+          <div><label class="pf-label">Страна</label><input type="text" name="country" value="{{ request.user.country }}" class="pf-input"></div>
         </div>
-
-        <!-- Change Password -->
-        <div class="pf-card">
-            <div class="pf-eyebrow"><span class="pf-eyebrow-label">02 · Безопасность</span></div>
-            <h2 class="pf-section-title">Изменить <span class="accent">пароль</span></h2>
-            <form method="post" action="{% url 'change_password' %}" class="mt-7">
-                {% csrf_token %}
-                <div class="grid gap-6">
-                    <div>
-                        <label class="pf-label">Текущий пароль</label>
-                        <input type="password" name="old_password" required class="pf-input">
-                    </div>
-                    <div>
-                        <label class="pf-label">Новый пароль</label>
-                        <input type="password" name="new_password" required class="pf-input">
-                    </div>
-                    <div>
-                        <label class="pf-label">Подтвердите новый пароль</label>
-                        <input type="password" name="new_password_confirm" required class="pf-input">
-                    </div>
-                </div>
-                <div class="mt-10">
-                    <button type="submit" class="pf-btn">
-                        Изменить пароль →
-                    </button>
-                </div>
-            </form>
+        <div style="margin-top:36px">
+          <button type="submit" class="pf-btn gold">Сохранить изменения →</button>
         </div>
+      </form>
     </div>
 
-    <!-- Sidebar -->
+    <div class="cab-card">
+      <div class="pf-eyebrow"><span class="pf-eyebrow-label">02 · Безопасность</span></div>
+      <h2 class="pf-section-title">Изменить <span class="ital">пароль</span></h2>
+      <form method="post" action="{% url 'change_password' %}" style="margin-top:28px">
+        {% csrf_token %}
+        <div style="display:grid;gap:24px;max-width:440px">
+          <div><label class="pf-label">Текущий пароль</label><input type="password" name="old_password" required class="pf-input"></div>
+          <div><label class="pf-label">Новый пароль</label><input type="password" name="new_password" required class="pf-input"></div>
+          <div><label class="pf-label">Подтвердите новый пароль</label><input type="password" name="new_password_confirm" required class="pf-input"></div>
+        </div>
+        <div style="margin-top:32px">
+          <button type="submit" class="pf-btn">Изменить пароль →</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="cab-card">
+    <div class="pf-eyebrow"><span class="pf-eyebrow-label">Аккаунт</span></div>
     <div>
-        <!-- Statistics -->
-        <div class="pf-card">
-            <div class="pf-eyebrow"><span class="pf-eyebrow-label">Статистика</span></div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="pf-stat">
-                    <span class="pf-stat-num-badge">01</span>
-                    <div class="pf-stat-num">{{ stats.enrolled }}</div>
-                    <div class="pf-stat-label">Курсов</div>
-                </div>
-                <div class="pf-stat">
-                    <span class="pf-stat-num-badge">02</span>
-                    <div class="pf-stat-num">{{ stats.completed }}</div>
-                    <div class="pf-stat-label">Завершено</div>
-                </div>
-                <div class="pf-stat">
-                    <span class="pf-stat-num-badge">03</span>
-                    <div class="pf-stat-num">{{ stats.certificates }}</div>
-                    <div class="pf-stat-label">Сертификатов</div>
-                </div>
-                <div class="pf-stat">
-                    <span class="pf-stat-num-badge">04</span>
-                    <div class="pf-stat-num">{{ stats.badges }}</div>
-                    <div class="pf-stat-label">Значков</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Account Info -->
-        <div class="pf-card">
-            <div class="pf-eyebrow"><span class="pf-eyebrow-label">Аккаунт</span></div>
-            <div>
-                <div class="pf-info-row">
-                    <span class="pf-info-label">Роль</span>
-                    <span class="pf-info-value">{{ request.user.get_role_display }}</span>
-                </div>
-                <div class="pf-info-row">
-                    <span class="pf-info-label">Регистрация</span>
-                    <span class="pf-info-value">{{ request.user.date_joined|date:"d.m.Y" }}</span>
-                </div>
-                <div class="pf-info-row">
-                    <span class="pf-info-label">Последний вход</span>
-                    <span class="pf-info-value">{{ request.user.last_login|date:"d.m.Y H:i"|default:"---" }}</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Logout -->
-        <form method="post" action="{% url 'logout' %}" style="margin-top:20px">
-            {% csrf_token %}
-            <button type="submit" class="pf-btn danger">
-                Выйти из аккаунта →
-            </button>
-        </form>
+      <div class="pf-info-row"><span class="pf-info-label">Роль</span><span class="pf-info-value">{{ request.user.get_role_display|default:"Пользователь" }}</span></div>
+      <div class="pf-info-row"><span class="pf-info-label">Регистрация</span><span class="pf-info-value">{{ request.user.date_joined|date:"d.m.Y" }}</span></div>
+      <div class="pf-info-row"><span class="pf-info-label">Последний вход</span><span class="pf-info-value">{{ request.user.last_login|date:"d.m.Y H:i"|default:"---" }}</span></div>
     </div>
+  </div>
 </div>
 {% endblock %}

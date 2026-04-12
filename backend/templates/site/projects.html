@@ -1,5 +1,6 @@
 {% extends "layouts/site.html" %}
 {% load static %}
+{% load cms %}
 
 {% block title %}Проекты — TransCaspian Cargo{% endblock %}
 
@@ -62,12 +63,12 @@
 
 {% block content %}
 <!-- HERO -->
-<section class="prj-hero">
+{% cms_visible "projects" "section_1" as vis1 %}{% if vis1 %}<section class="prj-hero">
   <div class="prj-hero-wrap">
     <div>
-      <div class="prj-eyebrow"><span class="bar"></span>Отраслевые проекты</div>
-      <h1 class="prj-title">Инициативы,<br>которые <em>меняют</em> логистику Евразии</h1>
-      <p class="prj-lead">Проекты TCC объединяют экспертизу, аналитику и партнёрство для развития Среднего коридора, международных перевозок и исследовательских программ.</p>
+      <div class="prj-eyebrow"><span class="bar"></span>{% cms_eyebrow "projects" "hero" "Отраслевые проекты" %}</div>
+      <h1 class="prj-title">{% cms_heading "projects" "hero" "Инициативы, которые меняют логистику Евразии" %}</h1>
+      <p class="prj-lead">{% cms_sub "projects" "hero" "Проекты TCC объединяют экспертизу, аналитику и партнёрство для развития Среднего коридора, международных перевозок и исследовательских программ." %}</p>
     </div>
     <div class="prj-hero-stats reveal-right">
       <h4>— Активность платформы</h4>
@@ -77,9 +78,9 @@
       <div class="prj-hero-stat"><span class="lab">Партнёров</span><span class="val">25<span>+</span></span></div>
     </div>
   </div>
-</section>
+</section>{% endif %}
 
-<section class="prj-section">
+{% cms_visible "projects" "section_2" as vis2 %}{% if vis2 %}<section class="prj-section">
 
   <!-- BLOCK 01 -->
   <div class="prj-block reveal">
@@ -93,30 +94,16 @@
       <span class="prj-block-tag">3 проекта</span>
     </div>
     <div class="prj-list">
+      {% for p in projects_mc %}
       <div class="prj-item reveal-scale">
-        <div class="prj-item-num">01</div>
+        <div class="prj-item-num">{{ forloop.counter|stringformat:"02d" }}</div>
         <div class="prj-item-content">
-          <h4>Развитие Транскаспийского маршрута (ТМТМ)</h4>
-          <p>Экспертная поддержка инфраструктуры Среднего коридора. Грузопоток вырос в 5 раз за 7 лет до 4.5 млн тонн. ЕС выделил €12 млрд на связность Центральной Азии.</p>
+          <h4>{{ p.title }}</h4>
+          <p>{{ p.description }}</p>
         </div>
-        <span class="prj-item-status active">Активный</span>
+        <span class="prj-item-status {% if p.status == 'Активный' %}active{% else %}dev{% endif %}">{{ p.status }}</span>
       </div>
-      <div class="prj-item reveal-scale">
-        <div class="prj-item-num">02</div>
-        <div class="prj-item-content">
-          <h4>Аналитика маршрутов Каспийского региона</h4>
-          <p>Мониторинг и анализ грузопотоков через порты Актау и Курык. Оценка пропускной способности и узких мест транскаспийского транзита.</p>
-        </div>
-        <span class="prj-item-status active">Активный</span>
-      </div>
-      <div class="prj-item reveal-scale">
-        <div class="prj-item-num">03</div>
-        <div class="prj-item-content">
-          <h4>Карта коридоров Центральной Азии</h4>
-          <p>Визуализация и аналитика основных транспортных маршрутов: железнодорожные, автомобильные, морские и мультимодальные коридоры региона.</p>
-        </div>
-        <span class="prj-item-status dev">В разработке</span>
-      </div>
+      {% endfor %}
     </div>
   </div>
 
@@ -132,30 +119,16 @@
       <span class="prj-block-tag">3 проекта</span>
     </div>
     <div class="prj-list">
+      {% for p in projects_intl %}
       <div class="prj-item reveal-scale">
-        <div class="prj-item-num">04</div>
+        <div class="prj-item-num">{{ forloop.counter|add:3|stringformat:"02d" }}</div>
         <div class="prj-item-content">
-          <h4>Партнёрство с EUCA Alliance</h4>
-          <p>Сотрудничество с объединением ведущих логистических компаний Евразии для развития международных транспортных коридоров.</p>
+          <h4>{{ p.title }}</h4>
+          <p>{{ p.description }}</p>
         </div>
-        <span class="prj-item-status active">Активный</span>
+        <span class="prj-item-status {% if p.status == 'Активный' %}active{% else %}dev{% endif %}">{{ p.status }}</span>
       </div>
-      <div class="prj-item reveal-scale">
-        <div class="prj-item-num">05</div>
-        <div class="prj-item-content">
-          <h4>Интеграция логистических платформ Евразии</h4>
-          <p>Создание единой информационной среды для участников логистической цепи в Центральной Азии и на Кавказе.</p>
-        </div>
-        <span class="prj-item-status active">Активный</span>
-      </div>
-      <div class="prj-item reveal-scale">
-        <div class="prj-item-num">06</div>
-        <div class="prj-item-content">
-          <h4>Развитие мультимодальных перевозок</h4>
-          <p>Проектирование оптимальных мультимодальных маршрутов с учётом тарифов, сроков доставки и инфраструктурных ограничений региона.</p>
-        </div>
-        <span class="prj-item-status dev">В разработке</span>
-      </div>
+      {% endfor %}
     </div>
   </div>
 
@@ -171,38 +144,24 @@
       <span class="prj-block-tag">3 программы</span>
     </div>
     <div class="prj-list">
+      {% for p in projects_research %}
       <div class="prj-item reveal-scale">
-        <div class="prj-item-num">07</div>
+        <div class="prj-item-num">{{ forloop.counter|add:6|stringformat:"02d" }}</div>
         <div class="prj-item-content">
-          <h4>Исследование логистики Евразии</h4>
-          <p>Комплексная аналитическая программа: торговые коридоры, инфраструктурные проекты, логистические тренды. Регулярные отчёты и экспертные обзоры.</p>
+          <h4>{{ p.title }}</h4>
+          <p>{{ p.description }}</p>
         </div>
-        <span class="prj-item-status active">Активный</span>
+        <span class="prj-item-status {% if p.status == 'Активный' %}active{% else %}dev{% endif %}">{{ p.status }}</span>
       </div>
-      <div class="prj-item reveal-scale">
-        <div class="prj-item-num">08</div>
-        <div class="prj-item-content">
-          <h4>BRI Logistics Research</h4>
-          <p>Исследование влияния инициативы «Пояс и путь» на логистическую инфраструктуру Центральной Азии. Сценарии развития до 2035 года.</p>
-        </div>
-        <span class="prj-item-status active">Активный</span>
-      </div>
-      <div class="prj-item reveal-scale">
-        <div class="prj-item-num">09</div>
-        <div class="prj-item-content">
-          <h4>Санкционная аналитика и адаптация маршрутов</h4>
-          <p>Мониторинг санкционных режимов и их влияния на логистические цепочки. Разработка альтернативных маршрутов и стратегий адаптации.</p>
-        </div>
-        <span class="prj-item-status active">Активный</span>
-      </div>
+      {% endfor %}
     </div>
   </div>
-</section>
+</section>{% endif %}
 
 <!-- CTA -->
-<div class="cta-banner">
-  <h2>Стать участником проекта</h2>
-  <p>Присоединяйтесь к отраслевым инициативам TransCaspian Cargo</p>
-  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">СВЯЗАТЬСЯ С НАМИ</button>
-</div>
+{% cms_visible "projects" "cta" as viscta %}{% if viscta %}<div class="cta-banner">
+  {% cms_heading "projects" "cta" as h_cta %}{% if h_cta %}<h2>{{ h_cta }}</h2>{% else %}<h2>Стать участником проекта</h2>{% endif %}
+  <p>{% cms_sub "projects" "cta" "Присоединяйтесь к отраслевым инициативам TransCaspian Cargo" %}</p>
+  <button class="btn-white" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "projects" "cta" "СВЯЗАТЬСЯ С НАМИ" %}</button>
+</div>{% endif %}
 {% endblock %}

@@ -1,0 +1,172 @@
+{% extends "layouts/dashboard.html" %}
+{% block title %}Инструкция — TCC Hub{% endblock %}
+{% block page_eyebrow %}Справка · Как редактировать сайт{% endblock %}
+{% block page_title %}Инструкция <span class="ital">для администратора</span>{% endblock %}
+{% block page_sub %}<p class="cab-sub">Пошаговое руководство по редактированию текстов и блоков на сайте TCC Hub.</p>{% endblock %}
+
+{% block content %}
+<style>
+.hlp-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.hlp-nav a{padding:10px 16px;border:1px solid #D9DCE4;background:#fff;color:#0B1628;text-decoration:none;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;transition:all .2s}
+.hlp-nav a:hover{border-color:#C6A46D;color:#C6A46D}
+.hlp-step{display:flex;gap:20px;padding:24px 0;border-top:1px solid #E6E8EE}
+.hlp-step:first-of-type{border-top:none;padding-top:0}
+.hlp-num{flex-shrink:0;width:44px;height:44px;background:#0F1D35;color:#C6A46D;display:flex;align-items:center;justify-content:center;font-family:Montserrat;font-weight:900;font-size:16px}
+.hlp-body h3{font-family:Montserrat;font-size:18px;font-weight:900;color:#0B1628;letter-spacing:-.01em;margin:4px 0 10px}
+.hlp-body p{font-size:14px;color:#4A566E;line-height:1.6;margin:0 0 10px}
+.hlp-body code{background:#F4F5F8;padding:2px 8px;border:1px solid #E6E8EE;font-size:12px;color:#0F1D35;font-family:ui-monospace,monospace}
+.hlp-body ul{font-size:14px;color:#4A566E;line-height:1.7;padding-left:20px;margin:0 0 10px}
+.hlp-body strong{color:#0B1628;font-weight:800}
+.hlp-tip{background:#FCFAF5;border-left:3px solid #C6A46D;padding:14px 18px;margin:12px 0;font-size:13px;color:#0B1628}
+.hlp-warn{background:#fef2f2;border-left:3px solid #dc2626;padding:14px 18px;margin:12px 0;font-size:13px;color:#7f1d1d}
+h2.hlp-section{font-family:Montserrat;font-size:26px;font-weight:900;color:#0B1628;letter-spacing:-.02em;margin:0 0 6px}
+.hlp-eyebrow{display:inline-flex;align-items:center;gap:12px;margin-bottom:14px}
+.hlp-eyebrow::before{content:"";width:28px;height:2px;background:#C6A46D}
+.hlp-eyebrow-label{font-size:10px;font-weight:800;letter-spacing:.22em;color:#C6A46D;text-transform:uppercase}
+</style>
+
+<div class="hlp-nav">
+  <a href="#basics">01 · Основы</a>
+  <a href="#edit-text">02 · Редактировать текст</a>
+  <a href="#hide-block">03 · Скрыть блок</a>
+  <a href="#seo">04 · SEO</a>
+  <a href="#faq">05 · Частые вопросы</a>
+</div>
+
+<div class="cab-card" id="basics">
+  <div class="hlp-eyebrow"><span class="hlp-eyebrow-label">01 · Основы</span></div>
+  <h2 class="hlp-section">С чего <span style="color:#C6A46D;font-weight:300;font-style:italic">начать</span></h2>
+  <div class="hlp-step">
+    <div class="hlp-num">1</div>
+    <div class="hlp-body">
+      <h3>Войдите в кабинет</h3>
+      <p>Откройте <code>/login/</code>, введите email и пароль администратора. После входа вы попадёте в свой кабинет.</p>
+    </div>
+  </div>
+  <div class="hlp-step">
+    <div class="hlp-num">2</div>
+    <div class="hlp-body">
+      <h3>Откройте «Редактор сайта»</h3>
+      <p>В левом меню кабинета нажмите <strong>«Редактор сайта»</strong>. Вы увидите плитки всех страниц сайта: Главная, О платформе, Аналитика, Отчёты, Медиа, Решения, Проекты, Партнёры, Образование, Контакты, Вики Логист.</p>
+      <div class="hlp-tip">💡 Пункт «Редактор сайта» виден только пользователям с правами администратора.</div>
+    </div>
+  </div>
+  <div class="hlp-step">
+    <div class="hlp-num">3</div>
+    <div class="hlp-body">
+      <h3>Выберите страницу</h3>
+      <p>Нажмите на плитку нужной страницы — откроется полностраничный редактор со всеми её блоками.</p>
+    </div>
+  </div>
+</div>
+
+<div class="cab-card" id="edit-text">
+  <div class="hlp-eyebrow"><span class="hlp-eyebrow-label">02 · Тексты</span></div>
+  <h2 class="hlp-section">Как изменить <span style="color:#C6A46D;font-weight:300;font-style:italic">текст</span></h2>
+  <div class="hlp-step">
+    <div class="hlp-num">1</div>
+    <div class="hlp-body">
+      <h3>Найдите нужный блок</h3>
+      <p>В редакторе каждой страницы есть список блоков. У каждого блока подпись вида <code>#1 · hero</code>, <code>#2 · features</code> и т.д. — это ключ блока на странице.</p>
+    </div>
+  </div>
+  <div class="hlp-step">
+    <div class="hlp-num">2</div>
+    <div class="hlp-body">
+      <h3>У каждого блока есть поля</h3>
+      <ul>
+        <li><strong>Eyebrow</strong> — маленькая надпись над заголовком (например «Eurasia · TMTM · BRI»).</li>
+        <li><strong>Heading</strong> — основной заголовок блока.</li>
+        <li><strong>Subheading</strong> — подзаголовок под основным.</li>
+        <li><strong>Body</strong> — длинный текст / описание.</li>
+        <li><strong>CTA label</strong> — текст на кнопке (например «Узнать больше»).</li>
+        <li><strong>CTA url</strong> — куда ведёт кнопка.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="hlp-step">
+    <div class="hlp-num">3</div>
+    <div class="hlp-body">
+      <h3>Сохраните изменения</h3>
+      <p>Внизу страницы нажмите <strong>«Сохранить всё →»</strong>. Изменения сразу применятся к сайту.</p>
+      <div class="hlp-tip">💡 Кнопка <strong>«Открыть страницу на сайте ↗»</strong> рядом с «Сохранить» откроет публичную страницу в новой вкладке — удобно для проверки.</div>
+    </div>
+  </div>
+</div>
+
+<div class="cab-card" id="hide-block">
+  <div class="hlp-eyebrow"><span class="hlp-eyebrow-label">03 · Видимость</span></div>
+  <h2 class="hlp-section">Как скрыть <span style="color:#C6A46D;font-weight:300;font-style:italic">блок</span></h2>
+  <div class="hlp-step">
+    <div class="hlp-num">1</div>
+    <div class="hlp-body">
+      <h3>Найдите галочку «Показывать на сайте»</h3>
+      <p>У каждого блока справа сверху есть чекбокс <strong>«Показывать на сайте»</strong>. Когда он включён — блок виден на сайте; выключен — блок скрыт.</p>
+    </div>
+  </div>
+  <div class="hlp-step">
+    <div class="hlp-num">2</div>
+    <div class="hlp-body">
+      <h3>Снимите галочку</h3>
+      <p>Кликните по чекбоксу, чтобы выключить блок. Затем нажмите <strong>«Сохранить всё →»</strong>.</p>
+      <div class="hlp-tip">💡 Скрытие не удаляет блок — вы можете в любой момент вернуть его, поставив галочку обратно.</div>
+      <div class="hlp-warn">⚠ Не скрывайте блок «hero» на главной — это первый экран, без него страница будет выглядеть пустой.</div>
+    </div>
+  </div>
+</div>
+
+<div class="cab-card" id="seo">
+  <div class="hlp-eyebrow"><span class="hlp-eyebrow-label">04 · SEO</span></div>
+  <h2 class="hlp-section">Поисковая <span style="color:#C6A46D;font-weight:300;font-style:italic">оптимизация</span></h2>
+  <div class="hlp-step">
+    <div class="hlp-num">1</div>
+    <div class="hlp-body">
+      <h3>Meta title и Meta description</h3>
+      <p>В самом верху редактора каждой страницы есть поля <strong>Meta title</strong> и <strong>Meta description</strong>. Это то, что видят поисковики (Google, Yandex) и пользователи в выдаче.</p>
+      <ul>
+        <li><strong>Meta title</strong> — до 60 символов, главный ключевой запрос страницы.</li>
+        <li><strong>Meta description</strong> — до 160 символов, краткое описание страницы.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="cab-card" id="faq">
+  <div class="hlp-eyebrow"><span class="hlp-eyebrow-label">05 · FAQ</span></div>
+  <h2 class="hlp-section">Частые <span style="color:#C6A46D;font-weight:300;font-style:italic">вопросы</span></h2>
+  <div class="hlp-step">
+    <div class="hlp-num">?</div>
+    <div class="hlp-body">
+      <h3>Я изменил текст, но на сайте ничего не поменялось</h3>
+      <p>Проверьте: 1) нажали ли вы «Сохранить всё →»; 2) обновите публичную страницу (Ctrl+F5 / Cmd+Shift+R). Если текст всё ещё старый — возможно, этот блок пока не подключён к редактору (захардкожен в шаблоне). Свяжитесь с разработчиком.</p>
+    </div>
+  </div>
+  <div class="hlp-step">
+    <div class="hlp-num">?</div>
+    <div class="hlp-body">
+      <h3>Хочу добавить новый блок на страницу</h3>
+      <p>Добавление новых блоков требует подключения к шаблону страницы на стороне кода. Напишите разработчику, какой блок и на какой странице нужен.</p>
+    </div>
+  </div>
+  <div class="hlp-step">
+    <div class="hlp-num">?</div>
+    <div class="hlp-body">
+      <h3>Как добавить нового администратора</h3>
+      <p>Откройте <code>/admin/accounts/customuser/</code>, создайте пользователя, поставьте галочку <strong>«Staff status»</strong> и сохраните. После входа у него появится пункт «Редактор сайта».</p>
+    </div>
+  </div>
+  <div class="hlp-step">
+    <div class="hlp-num">?</div>
+    <div class="hlp-body">
+      <h3>Я забыл пароль</h3>
+      <p>Откройте раздел <strong>«Профиль»</strong> в левом меню, раздел «Безопасность» → введите старый и новый пароль.</p>
+    </div>
+  </div>
+</div>
+
+<div class="cab-card" style="text-align:center">
+  <div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:#C6A46D;text-transform:uppercase;margin-bottom:10px">Нужна помощь?</div>
+  <p style="font-size:14px;color:#4A566E;margin:0 0 16px">Если что-то не работает или нужна доработка — свяжитесь с разработчиком проекта.</p>
+  <a href="{% url 'dashboard_cms_list' %}" style="display:inline-block;padding:14px 28px;background:#C6A46D;color:#0F1D35;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;text-decoration:none">Перейти в редактор →</a>
+</div>
+{% endblock %}

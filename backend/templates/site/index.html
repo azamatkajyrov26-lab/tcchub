@@ -573,8 +573,8 @@
       </div>
     </div>
 
-    <div class="dark-map reveal" style="border-radius:24px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.06)">
-      <img src="{% static 'img/map.png' %}" alt="Транскаспийский маршрут ТМТМ — Middle Corridor" style="width:100%;height:auto;display:block;border-radius:24px">
+    <div class="dark-map reveal" style="border-radius:24px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.06);background:#0F1D35;aspect-ratio:16/9">
+      <canvas id="tmtmGlobe" style="width:100%;height:100%;display:block;cursor:grab"></canvas>
     </div>
 
     <div class="reveal" style="text-align:center;margin-top:40px">
@@ -905,6 +905,7 @@
 
 </script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://unpkg.com/topojson-client@3"></script>
 <script>
 // ======= INTERACTIVE D3 GLOBE =======
 (function(){
@@ -1132,5 +1133,195 @@ window.tccGlobe = {
 })();
 
 // Lang switch (handled by layout script)
+</script>
+
+<script>
+// ======= TMTM SECTION 2D MAP =======
+(function(){
+const canvas=document.getElementById('tmtmGlobe');
+if(!canvas)return;
+const ctx=canvas.getContext('2d');
+const wrap=canvas.parentElement;
+
+let W,H;
+function resize(){
+  const dpr=Math.min(devicePixelRatio||1,2);
+  W=wrap.clientWidth; H=wrap.clientHeight;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+resize();
+window.addEventListener('resize',()=>{resize();drawStatic()});
+
+// Mercator projection fitted to corridor region (lon -5..130, lat 20..60)
+const proj=d3.geoMercator().center([60,42]).fitSize([W,H],{type:'Feature',geometry:{type:'Polygon',coordinates:[[[-5,18],[130,18],[130,62],[-5,62],[-5,18]]]}});
+
+const path=d3.geoPath().projection(proj).context(ctx);
+
+const cities=[
+  {n:'Шанхай',lo:121.5,la:31.2,t:'origin',en:'Shanghai'},
+  {n:'Сиань',lo:109,la:34.3,t:'corridor',en:"Xi'an"},
+  {n:'Урумчи',lo:87.6,la:43.8,t:'corridor',en:'Urumqi'},
+  {n:'Хоргос',lo:80.3,la:44.2,t:'port',en:'Khorgos'},
+  {n:'Алматы',lo:76.9,la:43.2,t:'corridor',en:'Almaty'},
+  {n:'Астана',lo:71.4,la:51.1,t:'corridor',en:'Astana'},
+  {n:'Атырау',lo:51.9,la:47.1,t:'hub',en:'Atyrau'},
+  {n:'Актау',lo:51.1,la:43.6,t:'port',en:'Aktau'},
+  {n:'Баку',lo:49.9,la:40.4,t:'port',en:'Baku'},
+  {n:'Тбилиси',lo:44.8,la:41.7,t:'corridor',en:'Tbilisi'},
+  {n:'Стамбул',lo:29,la:41,t:'corridor',en:'Istanbul'},
+  {n:'Роттердам',lo:4.5,la:51.9,t:'dest',en:'Rotterdam'},
+];
+const route=[0,1,2,3,4,5,6,7,8,9,10,11];
+const seaSegs=[[7,8]]; // Aktau→Baku = sea
+
+const corridorIds=new Set(['398','156','031','268','792','642']); // KZ,CN,AZ,GE,TR,RO
+let land=null, started=false, t=0;
+
+fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+.then(r=>r.json()).then(world=>{
+  land=topojson.feature(world, world.objects.countries).features;
+  if(started) drawStatic();
+});
+
+function isSea(a,b){return seaSegs.some(s=>(s[0]===a&&s[1]===b)||(s[0]===b&&s[1]===a))}
+
+function drawStatic(){
+  if(!land)return;
+  // Refit projection on resize
+  proj.fitSize([W,H],{type:'Feature',geometry:{type:'Polygon',coordinates:[[[-5,18],[130,18],[130,62],[-5,62],[-5,18]]]}});
+
+  ctx.clearRect(0,0,W,H);
+
+  // Background gradient
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#0F1D35');bg.addColorStop(1,'#0a1628');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+  // Graticule
+  const grat=d3.geoGraticule().step([10,10]);
+  ctx.beginPath();path(grat());ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=.5;ctx.stroke();
+
+  // Land
+  land.forEach(f=>{
+    ctx.beginPath();path(f);
+    const cid=String(f.id);
+    if(corridorIds.has(cid)){
+      ctx.fillStyle='rgba(198,164,109,.1)';ctx.fill();
+      ctx.strokeStyle='rgba(198,164,109,.3)';ctx.lineWidth=.8;ctx.stroke();
+    } else {
+      ctx.fillStyle='rgba(255,255,255,.03)';ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=.4;ctx.stroke();
+    }
+  });
+
+  // Route lines
+  const pts=cities.map(c=>proj([c.lo,c.la]));
+  for(let i=0;i<route.length-1;i++){
+    const a=route[i],b=route[i+1];
+    const p1=pts[a],p2=pts[b];
+    if(!p1||!p2)continue;
+    const sea=isSea(a,b);
+
+    // Glow
+    ctx.save();
+    ctx.shadowColor=sea?'rgba(6,182,212,.4)':'rgba(198,164,109,.4)';
+    ctx.shadowBlur=8;
+    ctx.beginPath();ctx.moveTo(p1[0],p1[1]);ctx.lineTo(p2[0],p2[1]);
+    ctx.strokeStyle=sea?'rgba(6,182,212,.5)':'rgba(198,164,109,.45)';
+    ctx.lineWidth=sea?2:2.5;
+    ctx.lineCap='round';
+    if(sea){ctx.setLineDash([6,4])} else {ctx.setLineDash([])}
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  t+=.004;
+  drawStatic();
+
+  const pts=cities.map(c=>proj([c.lo,c.la]));
+
+  // Animated flow dots along route
+  for(let i=0;i<route.length-1;i++){
+    const a=route[i],b=route[i+1];
+    const p1=pts[a],p2=pts[b];
+    if(!p1||!p2)continue;
+    const sea=isSea(a,b);
+    const color=sea?'#06B6D4':'#C6A46D';
+
+    // 2 dots per segment
+    for(let d=0;d<2;d++){
+      const tt=((t*.4+i*.07+d*.5)%1);
+      const x=p1[0]+(p2[0]-p1[0])*tt;
+      const y=p1[1]+(p2[1]-p1[1])*tt;
+      ctx.shadowColor=color;ctx.shadowBlur=6;
+      ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();
+      ctx.shadowBlur=0;
+    }
+  }
+
+  // Cities
+  pts.forEach((p,i)=>{
+    if(!p)return;
+    const c=cities[i];
+    const isHub=c.t==='hub';
+    const isPort=c.t==='port';
+    const isOrigin=c.t==='origin';
+    const isDest=c.t==='dest';
+
+    if(isHub){
+      const pulse=(Math.sin(t*4)+1)/2;
+      ctx.strokeStyle=`rgba(198,164,109,${.15+pulse*.2})`;ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.arc(p[0],p[1],10+pulse*5,0,Math.PI*2);ctx.stroke();
+      ctx.shadowColor='rgba(198,164,109,.7)';ctx.shadowBlur=12;
+      ctx.fillStyle='#C6A46D';ctx.beginPath();ctx.arc(p[0],p[1],5,0,Math.PI*2);ctx.fill();
+      ctx.shadowBlur=0;
+    } else if(isPort){
+      ctx.fillStyle='#06B6D4';ctx.shadowColor='rgba(6,182,212,.5)';ctx.shadowBlur=4;
+      ctx.beginPath();ctx.arc(p[0],p[1],3.5,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+    } else if(isOrigin||isDest){
+      ctx.fillStyle='#fff';ctx.shadowColor='rgba(255,255,255,.4)';ctx.shadowBlur=4;
+      ctx.beginPath();ctx.arc(p[0],p[1],4,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+    } else {
+      ctx.fillStyle='rgba(198,164,109,.6)';
+      ctx.beginPath();ctx.arc(p[0],p[1],2.5,0,Math.PI*2);ctx.fill();
+    }
+
+    // Labels
+    const fs=isHub?9:(isOrigin||isDest)?8:7;
+    const fw=isHub?'800':(isOrigin||isDest)?'700':'500';
+    ctx.font=`${fw} ${fs}px Montserrat,sans-serif`;
+    ctx.textAlign='center';
+    ctx.fillStyle=isHub?'#C6A46D':(isOrigin||isDest)?'rgba(255,255,255,.85)':isPort?'rgba(6,182,212,.7)':'rgba(198,164,109,.55)';
+    const labelY=p[1]-(isHub?10:7);
+    ctx.fillText(c.n,p[0],labelY);
+  });
+
+  // Legend (bottom-left)
+  const lx=16,ly=H-50;
+  ctx.font='600 9px Montserrat,sans-serif';
+  ctx.textAlign='left';
+  // Rail
+  ctx.fillStyle='#C6A46D';ctx.fillRect(lx,ly,16,2);
+  ctx.fillStyle='rgba(198,164,109,.7)';ctx.fillText('Железная дорога',lx+22,ly+4);
+  // Sea
+  ctx.strokeStyle='#06B6D4';ctx.lineWidth=2;ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.moveTo(lx,ly+16);ctx.lineTo(lx+16,ly+16);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(6,182,212,.7)';ctx.fillText('Морской / Паром',lx+22,ly+19);
+  // Hub
+  ctx.fillStyle='#C6A46D';ctx.beginPath();ctx.arc(lx+7,ly+31,3.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(198,164,109,.7)';ctx.fillText('TCC Hub',lx+22,ly+34);
+}
+
+// Start when visible
+const obs=new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting){started=true;obs.disconnect();animate()}
+},{threshold:.1});
+obs.observe(canvas);
+})();
 </script>
 {% endblock %}

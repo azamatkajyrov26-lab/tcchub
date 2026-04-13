@@ -5,22 +5,18 @@
 {% block page_sub %}<p class="cab-sub">Заголовок, обложка и дата обязательны. Полный текст — по желанию.</p>{% endblock %}
 
 {% block page_css %}
-<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
 <style>
 .form-row{margin-bottom:18px}
 .form-row label{display:block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#64728A;margin-bottom:6px}
-.form-row input[type="text"],.form-row input[type="url"],.form-row input[type="date"],.form-row input[type="number"],.form-row select,.form-row textarea{width:100%;padding:11px 14px;border:1px solid #D9DCE4;border-radius:6px;font-size:14px;font-family:inherit;background:#fff}
-.form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:none;border-color:#C6A46D}
+.form-row input[type="text"],.form-row input[type="url"],.form-row input[type="date"],.form-row input[type="number"],.form-row select,.form-row textarea{width:100%;padding:11px 14px;border:1px solid #D9DCE4;border-radius:6px;font-size:14px;font-family:inherit;background:#fff;color:#1B2A4A}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:none;border-color:#C6A46D;box-shadow:0 0 0 3px rgba(198,164,109,.1)}
 .form-row textarea{resize:vertical;min-height:80px}
 .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .check-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f6f7f9;border-radius:6px;cursor:pointer}
 .check-row input{width:auto;margin:0}
-#editor{background:#fff;min-height:260px;border:1px solid #D9DCE4;border-radius:0 0 6px 6px}
-.ql-toolbar.ql-snow{border:1px solid #D9DCE4;border-radius:6px 6px 0 0;border-bottom:none}
-.ql-toolbar svg,.ql-toolbar.ql-snow svg{width:18px!important;height:18px!important;float:none}
-.ql-toolbar button{width:28px!important;height:24px!important;padding:2px!important}
-.ql-toolbar .ql-picker{font-size:13px}
-#editor .ql-editor{min-height:180px;font-size:14px}
+.body-textarea{min-height:220px;font-family:'Courier New',monospace;font-size:13px;line-height:1.6;white-space:pre-wrap}
+.img-preview{max-width:180px;border-radius:8px;border:1px solid #D9DCE4;margin-top:8px}
+.hint{font-size:11px;color:#94A3B8;margin-top:4px}
 @media(max-width:720px){.form-grid-2{grid-template-columns:1fr}}
 </style>
 {% endblock %}
@@ -65,20 +61,23 @@
   </div>
 
   <div class="form-row">
-    <label>Полный текст</label>
-    <div id="editor">{{ item.body|default:''|safe }}</div>
-    <input type="hidden" name="body" id="body-input">
+    <label>Полный текст (HTML)</label>
+    <textarea name="body" rows="10" class="body-textarea">{{ item.body|default:'' }}</textarea>
+    <div class="hint">Поддерживает HTML-теги: &lt;b&gt;, &lt;i&gt;, &lt;a href="..."&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;h3&gt; и т.д.</div>
   </div>
 
   <div class="form-grid-2">
     <div class="form-row">
       <label>Обложка (загрузить)</label>
       <input type="file" name="cover" accept="image/*">
-      {% if item and item.cover %}<div style="margin-top:8px"><img src="{{ item.cover.url }}" style="max-width:160px;border-radius:6px;border:1px solid #D9DCE4"></div>{% endif %}
+      {% if item and item.cover %}<div style="margin-top:8px"><img src="{{ item.cover.url }}" class="img-preview"></div>{% endif %}
     </div>
     <div class="form-row">
       <label>URL обложки (если не загружена)</label>
-      <input type="url" name="cover_url" maxlength="1000" value="{{ item.cover_url|default:'' }}" placeholder="https://...">
+      <input type="url" name="cover_url" maxlength="1000" value="{{ item.cover_url|default:'' }}" placeholder="https://..." id="coverUrlInput">
+      <div id="coverUrlPreview">
+        {% if item and item.cover_url %}<img src="{{ item.cover_url }}" class="img-preview" onerror="this.style.display='none'">{% endif %}
+      </div>
     </div>
   </div>
 
@@ -94,7 +93,7 @@
     </label>
     <label class="check-row">
       <input type="checkbox" name="show_on_landing" {% if item and item.show_on_landing %}checked{% endif %}>
-      <span>★ Показывать на главной</span>
+      <span>Показывать на главной</span>
     </label>
   </div>
 
@@ -109,22 +108,14 @@
   </div>
 </form>
 
-<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
 <script>
-const quill = new Quill('#editor', {
-  theme: 'snow',
-  modules: {
-    toolbar: [
-      [{header: [2, 3, false]}],
-      ['bold','italic','underline','link'],
-      [{list:'ordered'},{list:'bullet'}],
-      ['blockquote'],
-      ['clean']
-    ]
+document.getElementById('coverUrlInput').addEventListener('input', function(){
+  const box = document.getElementById('coverUrlPreview');
+  if (this.value) {
+    box.innerHTML = '<img src="' + this.value + '" class="img-preview" onerror="this.style.display=\'none\'">';
+  } else {
+    box.innerHTML = '';
   }
-});
-document.querySelector('form').addEventListener('submit', function(){
-  document.getElementById('body-input').value = quill.root.innerHTML;
 });
 </script>
 {% endblock %}

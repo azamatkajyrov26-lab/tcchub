@@ -67,8 +67,8 @@
 
   <div class="form-row">
     <label>Полный текст (для статей/отчётов)</label>
-    <div id="editor">{{ item.body|default:''|safe }}</div>
-    <input type="hidden" name="body" id="body-input">
+    <div id="editor"></div>
+    <input type="hidden" name="body" id="body-input" value="{{ item.body|default:'' }}">
   </div>
 
   <div class="form-grid-2">
@@ -79,7 +79,8 @@
     </div>
     <div class="form-row">
       <label>URL изображения</label>
-      <input type="url" name="image_url" maxlength="1000" value="{{ item.image_url|default:'' }}" placeholder="https://...">
+      <input type="url" name="image_url" maxlength="1000" value="{{ item.image_url|default:'' }}" placeholder="https://..." oninput="var p=this.parentElement.querySelector('.url-preview');if(this.value){p.src=this.value;p.style.display='block'}else{p.style.display='none'}">
+      {% if item and item.image_url %}<img class="url-preview" src="{{ item.image_url }}" style="max-width:160px;border-radius:6px;border:1px solid #D9DCE4;margin-top:8px;display:block" onerror="this.style.display='none'">{% else %}<img class="url-preview" style="display:none;max-width:160px;border-radius:6px;border:1px solid #D9DCE4;margin-top:8px" onerror="this.style.display='none'">{% endif %}
     </div>
   </div>
 
@@ -141,6 +142,12 @@ const quill = new Quill('#editor', {
     ]
   }
 });
+// Load existing body content safely (strip broken images/SVG)
+const savedBody = document.getElementById('body-input').value;
+if (savedBody && savedBody.trim()) {
+  const clean = savedBody.replace(/<img[^>]*>/gi, '').replace(/<svg[\s\S]*?<\/svg>/gi, '');
+  quill.root.innerHTML = clean;
+}
 document.querySelector('form').addEventListener('submit', function(){
   document.getElementById('body-input').value = quill.root.innerHTML;
 });

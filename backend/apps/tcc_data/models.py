@@ -28,7 +28,7 @@ class DataSource(models.Model):
     source_type = models.CharField(
         "Тип источника", max_length=20, choices=SOURCE_TYPES
     )
-    base_url = models.URLField("Базовый URL", blank=True)
+    base_url = models.URLField("Базовый URL", max_length=2000, blank=True)
     api_key_env = models.CharField(
         "ENV переменная API ключа", max_length=100, blank=True
     )

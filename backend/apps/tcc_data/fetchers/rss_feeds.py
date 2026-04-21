@@ -107,6 +107,15 @@ RSS_SOURCES = [
         [],  # Kazakhstan-focused, all articles relevant
     ),
     (
+        "ADB",
+        "Asian Development Bank",
+        "https://www.adb.org/rss.xml",
+        "en",
+        ["corridor", "caspian", "central asia", "kazakhstan", "transport",
+         "infrastructure", "logistics", "connectivity", "BRI", "silk road",
+         "uzbekistan", "kyrgyzstan", "tajikistan", "CAREC"],
+    ),
+    (
         "KAPITAL_KZ",
         "Kapital.kz",
         "https://kapital.kz/rss.xml",

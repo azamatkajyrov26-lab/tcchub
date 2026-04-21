@@ -21,6 +21,16 @@
 .src-btn:hover{border-color:var(--gold);color:var(--gold-dark)}
 .src-btn.active{background:var(--gold);border-color:var(--gold);color:#fff}
 
+/* Category tabs */
+.cat-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-light)}
+.cat-tab{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;border:1px solid var(--border-light);background:var(--bg-alt);color:var(--text-mid);text-decoration:none;transition:all .2s;cursor:pointer}
+.cat-tab:hover{border-color:rgba(198,164,109,.4)}
+.cat-tab.active{color:#fff}
+.cat-tab .cnt{font-size:10px;font-weight:600;opacity:.75}
+
+/* Category badge on card */
+.nf-cat-badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+
 .nf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 .nf-card{background:#fff;border:1px solid var(--border-light);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px;transition:all .4s cubic-bezier(.2,.9,.3,1.2);text-decoration:none;color:inherit}
 .nf-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,42,74,.08);border-color:rgba(198,164,109,.35)}
@@ -76,6 +86,24 @@
     </div>
   </div>
 
+  <!-- Category tabs -->
+  <div class="cat-tabs">
+    <a href="?{% if current_source %}source={{ current_source }}&{% endif %}{% if search %}q={{ search }}{% endif %}"
+       class="cat-tab {% if not current_category %}active{% endif %}"
+       style="{% if not current_category %}background:var(--navy);border-color:var(--navy){% endif %}">
+      Все направления
+      <span class="cnt">({{ total_count }})</span>
+    </a>
+    {% for cat in categories %}
+    <a href="?cat={{ cat.code }}{% if current_source %}&source={{ current_source }}{% endif %}{% if search %}&q={{ search }}{% endif %}"
+       class="cat-tab {% if current_category == cat.code %}active{% endif %}"
+       style="{% if current_category == cat.code %}background:{{ cat.color }};border-color:{{ cat.color }}{% else %}border-left:3px solid {{ cat.color }}{% endif %}">
+      {{ cat.label }}
+      {% if cat.count %}<span class="cnt">({{ cat.count }})</span>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+
   <!-- Filters -->
   <div class="nf-filters">
     <div class="nf-search">
@@ -97,6 +125,7 @@
   {% if news_items %}
   <div class="nf-grid">
     {% for item in news_items %}
+    {% with cat=cat_lookup|default_if_none:"" %}
     <a href="{{ item.url }}" target="_blank" rel="noopener" class="nf-card">
       <div class="nf-card-top">
         <div class="nf-source">
@@ -110,10 +139,13 @@
       <div class="nf-desc">{{ item.content|truncatechars:120 }}</div>
       {% endif %}
       <div class="nf-footer">
-        <span class="nf-date">{{ item.published_at|date:"H:i" }}</span>
-        <span class="nf-read">Читать →</span>
+        {% for category in categories %}{% if category.code == item._category %}
+        <span class="nf-cat-badge" style="background:{{ category.bg }};color:{{ category.color }}">{{ category.label }}</span>
+        {% endif %}{% endfor %}
+        <span class="nf-read" style="margin-left:auto">Читать →</span>
       </div>
     </a>
+    {% endwith %}
     {% endfor %}
   </div>
   {% else %}

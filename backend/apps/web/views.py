@@ -144,26 +144,135 @@ def site_analytics_view(request):
 
 
 
+# ── News categorization by keywords ──────────────────────────
+_NEWS_CATEGORIES = [
+    {
+        "code": "corridor",
+        "label": "Средний коридор",
+        "color": "#C6A46D",
+        "bg": "rgba(198,164,109,.12)",
+        "keywords": ["middle corridor", "tmtm", "тмтм", "trans-caspian",
+                     "транскаспий", "caspian", "каспи", "titr", "bri",
+                     "silk road", "шёлковый", "khorgos", "хоргос",
+                     "aktau", "актау", "kuryk", "курык", "btk", "bacu",
+                     "baku", "баку", "atyrau", "атырау"],
+    },
+    {
+        "code": "rail",
+        "label": "Железные дороги",
+        "color": "#06B6D4",
+        "bg": "rgba(6,182,212,.12)",
+        "keywords": ["railway", "railroad", "rail ", "ж/д", "железнодорожн",
+                     "ktz", "ktze", "ktj", "adya", "ady", "georgian railway",
+                     "btk", "train", "поезд", "локомотив", "вагон",
+                     "freight rail", "intermodal"],
+    },
+    {
+        "code": "shipping",
+        "label": "Порты и суда",
+        "color": "#3B82F6",
+        "bg": "rgba(59,130,246,.12)",
+        "keywords": ["port ", "shipping", "vessel", "container ship",
+                     "maritime", "seaport", "порт", "судно", "суда",
+                     "контейнер", "ferry", "паром", "суэц", "suez",
+                     "gcaptain", "tanker", "bulk carrier", "sea route"],
+    },
+    {
+        "code": "sanctions",
+        "label": "Санкции и риски",
+        "color": "#EF4444",
+        "bg": "rgba(239,68,68,.12)",
+        "keywords": ["sanction", "санкци", "risk", "риск", "ofac",
+                     "embargo", "restriction", "compliance", "blacklist",
+                     "geopolit", "геополит", "conflict", "конфликт",
+                     "war ", "война", "tariff", "тариф"],
+    },
+    {
+        "code": "trade",
+        "label": "Торговля",
+        "color": "#10B981",
+        "bg": "rgba(16,185,129,.12)",
+        "keywords": ["trade", "торговл", "export", "import", "экспорт",
+                     "импорт", "customs", "таможн", "cargo volume",
+                     "freight volume", "teu", "грузооборот", "товарооборот",
+                     "supply chain", "цепочк", "logistics hub"],
+    },
+    {
+        "code": "analytics",
+        "label": "Аналитика",
+        "color": "#8B5CF6",
+        "bg": "rgba(139,92,246,.12)",
+        "keywords": ["analysis", "research", "report", "forecast",
+                     "аналитик", "исследован", "прогноз", "отчёт",
+                     "study", "index", "индекс", "statistics", "статистик",
+                     "outlook", "review", "обзор", "adb", "world bank"],
+    },
+]
+
+_CAT_LOOKUP = {c["code"]: c for c in _NEWS_CATEGORIES}
+
+
+def _categorize_news(title, content=""):
+    """Return category code based on title+content keywords."""
+    text = (title + " " + (content or "")).lower()
+    for cat in _NEWS_CATEGORIES:
+        if any(kw in text for kw in cat["keywords"]):
+            return cat["code"]
+    return "trade"  # default
+
+
 def news_feed_view(request):
     """Public news feed page — all RSS sources aggregated."""
     from apps.tcc_data.models import NewsItem, DataSource
     source_code = request.GET.get("source", "")
+    category_code = request.GET.get("cat", "")
     search = request.GET.get("q", "").strip()
+
     qs = NewsItem.objects.select_related("source").order_by("-published_at")
     if source_code:
         qs = qs.filter(source__code=source_code)
     if search:
         qs = qs.filter(title__icontains=search)
-    news_items = qs[:60]
+
+    # Fetch all (up to 300) then filter/categorize in Python
+    all_items = list(qs[:300])
+
+    # Attach category to each item
+    for item in all_items:
+        item._category = _categorize_news(item.title, item.content)
+
+    # Filter by category if selected
+    if category_code:
+        all_items = [i for i in all_items if i._category == category_code]
+
+    news_items = all_items[:60]
+
     sources = DataSource.objects.filter(
         news_items__isnull=False
     ).distinct().order_by("name")
+
+    # Count per category and attach to category dicts
+    cat_counts = {}
+    all_fetched = list(qs[:300])
+    for item in all_fetched:
+        item._category = _categorize_news(item.title, item.content)
+        cat_counts[item._category] = cat_counts.get(item._category, 0) + 1
+
+    categories_with_counts = [
+        {**cat, "count": cat_counts.get(cat["code"], 0)}
+        for cat in _NEWS_CATEGORIES
+    ]
+
     return render(request, "site/news_feed.html", {
         "active_page": "news",
         "news_items": news_items,
         "sources": sources,
         "current_source": source_code,
+        "current_category": category_code,
         "search": search,
+        "categories": categories_with_counts,
+        "cat_lookup": _CAT_LOOKUP,
+        "total_count": len(all_fetched),
     })
 
 

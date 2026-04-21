@@ -221,8 +221,9 @@ def _categorize_news(title, content=""):
     return "trade"  # default
 
 
+@login_required
 def news_feed_view(request):
-    """Public news feed page — all RSS sources aggregated."""
+    """News feed page — login required."""
     from apps.tcc_data.models import NewsItem, DataSource
     source_code = request.GET.get("source", "")
     category_code = request.GET.get("cat", "")
@@ -272,6 +273,7 @@ def news_feed_view(request):
     })
 
 
+@login_required
 @csrf_exempt
 @require_POST
 def news_refresh_view(request):
@@ -282,6 +284,7 @@ def news_refresh_view(request):
     return JsonResponse({"ok": True, "fetch_id": str(t1.id), "translate_id": str(t2.id)})
 
 
+@login_required
 def news_status_view(request):
     """Return current news stats for progress polling."""
     from apps.tcc_data.models import NewsItem
@@ -296,8 +299,9 @@ def news_status_view(request):
     })
 
 
+@login_required
 def news_analysis_view(request):
-    """AI Analysis Report page — corridor impact dashboard."""
+    """AI Analysis Report page — login required."""
     from apps.tcc_data.models import NewsItem, DataSource
     from django.db.models import Count, Avg, Q
 
@@ -934,6 +938,7 @@ def kz_logistics_laws_view(request):
 # Tools (login required)
 # ──────────────────────────────────────────────
 
+@login_required
 def corridor_view(request):
     return render(request, "site/corridor.html", {"active_page": "corridor"})
 

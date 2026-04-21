@@ -106,6 +106,46 @@ RSS_SOURCES = [
         "en",
         [],  # Kazakhstan-focused, all articles relevant
     ),
+    # ── Дополнительные специализированные источники ──────────────────
+    (
+        "SILK_ROAD_BRIEFING",
+        "Silk Road Briefing",
+        "https://www.silkroadbriefing.com/news/feed/",
+        "en",
+        [],  # Focused on Central Asia business/logistics
+    ),
+    (
+        "TIMES_CA",
+        "Times of Central Asia",
+        "https://www.timesca.com/feed/",
+        "en",
+        ["logistics", "transport", "corridor", "freight", "railway",
+         "trade", "corridor", "Kazakhstan", "Azerbaijan", "Georgia"],
+    ),
+    (
+        "EURASIANET",
+        "EurasiaNet",
+        "https://eurasianet.org/rss.xml",
+        "en",
+        ["logistics", "transport", "corridor", "trade", "railway",
+         "Kazakhstan", "Azerbaijan", "Georgia", "China", "infrastructure"],
+    ),
+    (
+        "OILPRICE",
+        "OilPrice.com",
+        "https://oilprice.com/rss/main",
+        "en",
+        ["corridor", "caspian", "Kazakhstan", "pipeline", "transport",
+         "Aktau", "tanker", "energy route", "BTC", "BTE"],
+    ),
+    (
+        "LLOYDS_LIST",
+        "Lloyd's List",
+        "https://lloydslist.maritimeintelligence.informa.com/rss.xml",
+        "en",
+        ["caspian", "corridor", "Black Sea", "port", "container",
+         "shipping", "freight", "Kazakhstan", "Azerbaijan"],
+    ),
     # ── Google News RSS (aggregates from all news sources) ──────────
     (
         "GNEWS_CORRIDOR",

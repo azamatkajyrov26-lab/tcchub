@@ -50,6 +50,7 @@ urlpatterns = [
     path("news/", views.news_feed_view, name="news_feed"),
     path("news/refresh/", views.news_refresh_view, name="news_refresh"),
     path("news/status/", views.news_status_view, name="news_status"),
+    path("news/analysis/", views.news_analysis_view, name="news_analysis"),
     path("contacts/submit/", views.contact_submit_view, name="contact_submit"),
     path("tg/webhook/", views.telegram_webhook_view, name="telegram_webhook"),
     path("wiki/", views.wiki_view, name="wiki"),

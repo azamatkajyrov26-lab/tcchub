@@ -296,6 +296,72 @@ def news_status_view(request):
     })
 
 
+def news_analysis_view(request):
+    """AI Analysis Report page — corridor impact dashboard."""
+    from apps.tcc_data.models import NewsItem, DataSource
+    from django.db.models import Count, Avg, Q
+
+    total = NewsItem.objects.count()
+    analyzed = NewsItem.objects.filter(groq_processed=True, groq_score__isnull=False).count()
+    pending = NewsItem.objects.filter(groq_processed=False).count()
+    avg_score = NewsItem.objects.filter(groq_score__isnull=False).aggregate(
+        Avg('groq_score'))['groq_score__avg'] or 0
+
+    # Score buckets
+    critical = NewsItem.objects.filter(groq_score__gte=8).count()
+    high = NewsItem.objects.filter(groq_score__gte=6, groq_score__lt=8).count()
+    medium = NewsItem.objects.filter(groq_score__gte=4, groq_score__lt=6).count()
+    low = NewsItem.objects.filter(groq_score__gt=0, groq_score__lt=4).count()
+    irrelevant = NewsItem.objects.filter(groq_score=0).count()
+
+    # Impact types
+    impact_types = list(
+        NewsItem.objects.filter(groq_impact_type__gt='', groq_processed=True)
+        .values('groq_impact_type')
+        .annotate(count=Count('id'))
+        .order_by('-count')
+    )
+
+    # Top corridor-relevant articles
+    top_articles = NewsItem.objects.filter(
+        groq_score__gte=6
+    ).select_related('source').order_by('-groq_score', '-published_at')[:15]
+
+    # Sources stats
+    sources_stats = list(
+        NewsItem.objects.filter(groq_processed=True)
+        .values('source__name', 'source__code')
+        .annotate(count=Count('id'), avg_score=Avg('groq_score'))
+        .order_by('-avg_score')[:10]
+    )
+
+    # Recent analysis (last 24h)
+    from django.utils import timezone
+    from datetime import timedelta
+    recent = NewsItem.objects.filter(
+        groq_processed=True,
+        published_at__gte=timezone.now() - timedelta(hours=24)
+    ).count()
+
+    return render(request, "site/news_analysis.html", {
+        "active_page": "news",
+        "total": total,
+        "analyzed": analyzed,
+        "pending": pending,
+        "avg_score": round(avg_score, 1),
+        "pct_analyzed": round(analyzed / total * 100) if total else 0,
+        "critical": critical,
+        "high": high,
+        "medium": medium,
+        "low": low,
+        "irrelevant": irrelevant,
+        "impact_types": impact_types,
+        "top_articles": top_articles,
+        "sources_stats": sources_stats,
+        "recent": recent,
+    })
+
+
 def solutions_view(request):
     return render(request, "site/solutions.html", {
         "active_page": "solutions",

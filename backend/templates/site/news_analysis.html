@@ -1,0 +1,254 @@
+{% extends "layouts/site.html" %}
+{% load static %}
+
+{% block title %}AI-анализ коридора — TransCaspian Cargo{% endblock %}
+
+{% block page_css %}
+<style>
+.an-hero{background:linear-gradient(135deg,#080e1a,#0F1D35 60%,#1B2A4A);padding:100px 24px 48px;position:relative;overflow:hidden}
+.an-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 700px 400px at 50% 60%,rgba(198,164,109,.1),transparent 70%)}
+.an-hero-inner{position:relative;max-width:1280px;margin:0 auto}
+.an-hero h1{font-size:clamp(26px,3.8vw,44px);font-weight:900;color:#fff;letter-spacing:-.02em;margin-bottom:10px}
+.an-hero p{font-size:15px;color:rgba(255,255,255,.55);max-width:600px;line-height:1.7}
+.an-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:20px}
+
+.an-wrap{max-width:1280px;margin:0 auto;padding:40px 24px}
+
+/* Big stat cards */
+.an-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:40px}
+.an-stat{background:#fff;border:1px solid var(--border-light);border-radius:20px;padding:24px;text-align:center}
+.an-stat-val{font-size:36px;font-weight:900;letter-spacing:-.02em;line-height:1}
+.an-stat-lbl{font-size:11px;color:var(--text-light);text-transform:uppercase;letter-spacing:.1em;margin-top:8px}
+.an-stat-sub{font-size:12px;color:var(--text-mid);margin-top:4px}
+
+/* Score distribution */
+.score-dist{background:#fff;border:1px solid var(--border-light);border-radius:20px;padding:28px 32px;margin-bottom:24px}
+.score-dist h2{font-size:16px;font-weight:800;color:var(--navy);margin-bottom:24px}
+.score-bar-row{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.score-bar-label{width:100px;font-size:12px;font-weight:700;color:var(--text);flex-shrink:0;display:flex;align-items:center;gap:6px}
+.score-bar-track{flex:1;height:10px;background:var(--bg-alt);border-radius:5px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:5px;transition:width 1s ease}
+.score-bar-count{width:50px;text-align:right;font-size:12px;font-weight:700;color:var(--text-mid)}
+
+/* Criteria */
+.criteria-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px}
+.criteria-card{background:var(--bg-alt);border:1px solid var(--border-light);border-radius:16px;padding:20px}
+.criteria-card h3{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.criteria-card ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.criteria-card li{font-size:12px;color:var(--text-mid);padding:6px 10px;background:#fff;border-radius:8px;border-left:3px solid var(--gold)}
+
+/* Top articles */
+.top-article{display:flex;align-items:flex-start;gap:16px;padding:16px 0;border-bottom:1px solid var(--border-light)}
+.top-article:last-child{border-bottom:none}
+.score-badge{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0}
+.top-article-body{flex:1;min-width:0}
+.top-article-title{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:4px;line-height:1.4}
+.top-article-meta{font-size:11px;color:var(--text-light);margin-bottom:6px}
+.top-article-summary{font-size:12px;color:var(--text-mid);line-height:1.6}
+.impact-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-left:6px}
+
+/* Impact types */
+.impact-types{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:40px}
+.impact-type-chip{padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid var(--border-light);background:var(--bg-alt);color:var(--text)}
+.impact-type-chip span{font-size:10px;color:var(--text-light);margin-left:4px}
+
+/* Sources */
+.src-table{width:100%;border-collapse:collapse;font-size:13px}
+.src-table th{padding:10px 16px;font-size:10px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.1em;text-align:left;border-bottom:2px solid var(--border-light)}
+.src-table td{padding:10px 16px;border-bottom:1px solid var(--border-light)}
+.src-score-bar{display:inline-block;height:6px;border-radius:3px;background:var(--gold);vertical-align:middle;margin-left:8px}
+
+/* Progress ring */
+.progress-ring{width:80px;height:80px;flex-shrink:0}
+
+@media(max-width:900px){.an-stats{grid-template-columns:1fr 1fr}.criteria-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.an-stats{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="an-hero">
+  <div class="an-hero-inner">
+    <div class="an-badge" style="background:rgba(198,164,109,.15);color:var(--gold-light);border:1px solid rgba(198,164,109,.25)">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Groq Llama 3.3 70B · Средний коридор
+    </div>
+    <h1>AI-отчёт: Анализ влияния на маршрут</h1>
+    <p>Каждая статья автоматически читается и оценивается нейросетью — насколько она влияет на грузоперевозки через Транскаспийский (Средний) коридор. Отчёт обновляется каждые 2 часа.</p>
+  </div>
+</div>
+
+<div class="an-wrap">
+
+  <!-- Ключевые цифры -->
+  <div class="an-stats">
+    <div class="an-stat">
+      <div class="an-stat-val" style="color:var(--navy)">{{ total }}</div>
+      <div class="an-stat-lbl">Статей собрано</div>
+      <div class="an-stat-sub">из {{ sources_stats|length }}+ источников</div>
+    </div>
+    <div class="an-stat">
+      <div class="an-stat-val" style="color:var(--gold)">{{ analyzed }}</div>
+      <div class="an-stat-lbl">Проанализировано ИИ</div>
+      <div class="an-stat-sub">{{ pct_analyzed }}% от всех</div>
+    </div>
+    <div class="an-stat">
+      <div class="an-stat-val" style="color:#10B981">{{ avg_score }}</div>
+      <div class="an-stat-lbl">Средний балл</div>
+      <div class="an-stat-sub">из 10 возможных</div>
+    </div>
+    <div class="an-stat">
+      <div class="an-stat-val" style="color:#EF4444">{{ critical|add:high }}</div>
+      <div class="an-stat-lbl">Важных для коридора</div>
+      <div class="an-stat-sub">оценка ≥ 6/10</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:40px">
+
+    <!-- Шкала оценок -->
+    <div class="score-dist">
+      <h2>Распределение по важности</h2>
+
+      <div class="score-bar-row">
+        <div class="score-bar-label"><span style="color:#EF4444">🔴</span> Критично (8-10)</div>
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:{% widthratio critical analyzed 100 %}%;background:#EF4444"></div></div>
+        <div class="score-bar-count">{{ critical }}</div>
+      </div>
+      <div class="score-bar-row">
+        <div class="score-bar-label"><span style="color:#F59E0B">🟡</span> Высокий (6-8)</div>
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:{% widthratio high analyzed 100 %}%;background:#F59E0B"></div></div>
+        <div class="score-bar-count">{{ high }}</div>
+      </div>
+      <div class="score-bar-row">
+        <div class="score-bar-label"><span style="color:#10B981">🟢</span> Средний (4-6)</div>
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:{% widthratio medium analyzed 100 %}%;background:#10B981"></div></div>
+        <div class="score-bar-count">{{ medium }}</div>
+      </div>
+      <div class="score-bar-row">
+        <div class="score-bar-label"><span style="color:#94A3B8">⚪</span> Низкий (0-4)</div>
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:{% widthratio low analyzed 100 %}%;background:#94A3B8"></div></div>
+        <div class="score-bar-count">{{ low }}</div>
+      </div>
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
+        <div style="font-size:11px;color:var(--text-light);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Типы событий</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          {% for t in impact_types %}
+          <span style="padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;background:rgba(198,164,109,.1);border:1px solid rgba(198,164,109,.2);color:var(--gold-dark)">
+            {{ t.groq_impact_type }} <span style="opacity:.6">{{ t.count }}</span>
+          </span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Как работает анализ -->
+    <div style="background:#fff;border:1px solid var(--border-light);border-radius:20px;padding:28px 32px">
+      <h2 style="font-size:16px;font-weight:800;color:var(--navy);margin-bottom:20px">Как работает оценка</h2>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="padding:14px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:12px">
+          <div style="font-size:13px;font-weight:800;color:#EF4444;margin-bottom:4px">🔴 8–10 / Критично для маршрута</div>
+          <div style="font-size:12px;color:var(--text-mid)">Прямое влияние на транзит через Средний коридор: закрытие портов, санкции против перевозчиков, блокировка путей</div>
+        </div>
+        <div style="padding:14px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:12px">
+          <div style="font-size:13px;font-weight:800;color:#F59E0B;margin-bottom:4px">🟡 6–8 / Высокое влияние</div>
+          <div style="font-size:12px;color:var(--text-mid)">Изменения в тарифах, задержки на ключевых узлах (Актау, Баку, Хоргос), инфраструктурные новости</div>
+        </div>
+        <div style="padding:14px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:12px">
+          <div style="font-size:13px;font-weight:800;color:#10B981;margin-bottom:4px">🟢 4–6 / Умеренное влияние</div>
+          <div style="font-size:12px;color:var(--text-mid)">Региональные торговые тренды, изменения объёмов, новости партнёров коридора</div>
+        </div>
+        <div style="padding:14px;background:var(--bg-alt);border:1px solid var(--border-light);border-radius:12px">
+          <div style="font-size:13px;font-weight:800;color:var(--text-mid);margin-bottom:4px">⚪ 0–4 / Нерелевантно</div>
+          <div style="font-size:12px;color:var(--text-light)">Общие мировые новости, не связанные напрямую с Казахстаном или Средним коридором</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Топ статьи -->
+  <div style="background:#fff;border:1px solid var(--border-light);border-radius:20px;padding:28px 32px;margin-bottom:40px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <h2 style="font-size:18px;font-weight:900;color:var(--navy)">Наиболее важные для коридора</h2>
+      <span style="font-size:12px;color:var(--text-light)">оценка ≥ 6/10</span>
+    </div>
+    {% for item in top_articles %}
+    <div class="top-article">
+      {% if item.groq_score >= 8 %}
+      <div class="score-badge" style="background:rgba(239,68,68,.1);color:#EF4444">{{ item.groq_score|floatformat:0 }}</div>
+      {% elif item.groq_score >= 6 %}
+      <div class="score-badge" style="background:rgba(245,158,11,.1);color:#F59E0B">{{ item.groq_score|floatformat:0 }}</div>
+      {% else %}
+      <div class="score-badge" style="background:rgba(16,185,129,.1);color:#10B981">{{ item.groq_score|floatformat:0 }}</div>
+      {% endif %}
+      <div class="top-article-body">
+        <div class="top-article-meta">
+          <span style="font-weight:700;color:var(--gold-dark)">{{ item.source.name|default:"N/A" }}</span>
+          · {{ item.published_at|date:"d.m.Y" }}
+          <span class="impact-badge" style="background:rgba(198,164,109,.1);color:var(--gold-dark)">{{ item.groq_impact_type }}</span>
+          {% if item.groq_affected_nodes %}
+          <span style="color:var(--text-light)"> · {{ item.groq_affected_nodes|join:", " }}</span>
+          {% endif %}
+        </div>
+        <a href="{{ item.url }}" target="_blank" class="top-article-title" style="display:block;text-decoration:none;color:var(--navy)">{{ item.title }}</a>
+        {% if item.groq_summary_ru %}
+        <div class="top-article-summary">{{ item.groq_summary_ru|truncatechars:200 }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <p style="color:var(--text-light);font-size:14px;text-align:center;padding:40px">ИИ ещё анализирует статьи. Проверьте позже.</p>
+    {% endfor %}
+  </div>
+
+  <!-- Источники -->
+  <div style="background:#fff;border:1px solid var(--border-light);border-radius:20px;padding:28px 32px;margin-bottom:40px">
+    <h2 style="font-size:18px;font-weight:900;color:var(--navy);margin-bottom:20px">Источники по качеству контента</h2>
+    <p style="font-size:13px;color:var(--text-mid);margin-bottom:20px">Средний балл показывает насколько часто источник публикует материалы релевантные Среднему коридору</p>
+    <table class="src-table">
+      <thead>
+        <tr>
+          <th>Источник</th>
+          <th>Статей</th>
+          <th>Ср. балл</th>
+          <th>Релевантность</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in sources_stats %}
+        <tr>
+          <td style="font-weight:700;color:var(--navy)">{{ s.source__name|default:"N/A" }}</td>
+          <td style="color:var(--text-mid)">{{ s.count }}</td>
+          <td style="font-weight:800;color:{% if s.avg_score >= 6 %}#F59E0B{% elif s.avg_score >= 4 %}#10B981{% else %}var(--text-light){% endif %}">
+            {{ s.avg_score|floatformat:1 }}/10
+          </td>
+          <td>
+            <div class="score-bar-track" style="width:120px">
+              <div class="score-bar-fill" style="width:{% widthratio s.avg_score 10 100 %}%;background:{% if s.avg_score >= 6 %}#F59E0B{% elif s.avg_score >= 4 %}#10B981{% else %}#94A3B8{% endif %}"></div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pending -->
+  {% if pending > 0 %}
+  <div style="background:rgba(198,164,109,.06);border:1px solid rgba(198,164,109,.2);border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:16px">
+    <div style="width:40px;height:40px;border-radius:10px;background:rgba(198,164,109,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    </div>
+    <div>
+      <div style="font-size:14px;font-weight:800;color:var(--navy)">В очереди на анализ: {{ pending }} статей</div>
+      <div style="font-size:12px;color:var(--text-mid)">Groq ИИ обрабатывает до 20 статей каждые 2 часа. Следующий запуск — автоматически.</div>
+    </div>
+    <a href="/news/" style="margin-left:auto;padding:10px 20px;background:var(--navy);color:#fff;border-radius:10px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">Лента новостей</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

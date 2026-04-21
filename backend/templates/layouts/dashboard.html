@@ -22,22 +22,22 @@ html.dark body, body{background:#EEF0F4 !important;color:#0B1628 !important}
 @media (max-width:1023px){.cab-shell{grid-template-columns:1fr}}
 
 /* Sidebar */
-.cab-side{background:var(--cab-navy);color:#fff;padding:28px 22px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:28px}
-@media (max-width:1023px){.cab-side{position:static;height:auto}}
-.cab-brand{display:flex;align-items:center;gap:12px;padding-bottom:24px;border-bottom:1px solid rgba(255,255,255,.08)}
+.cab-side{background:var(--cab-navy);color:#fff;padding:28px 22px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:0;overflow:hidden}
+@media (max-width:1023px){.cab-side{position:static;height:auto;overflow:visible}}
+.cab-brand{display:flex;align-items:center;gap:12px;padding-bottom:24px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
 .cab-brand img{height:34px;width:auto}
 .cab-brand-text{display:flex;flex-direction:column;line-height:1}
 .cab-brand-eyebrow{font-size:9px;font-weight:800;letter-spacing:.22em;color:var(--cab-gold);text-transform:uppercase}
 .cab-brand-name{font-family:Montserrat;font-size:17px;font-weight:900;color:#fff;margin-top:4px;letter-spacing:-.01em}
 .cab-brand-name span{color:var(--cab-gold);font-weight:300;font-style:italic}
 
-.cab-user{display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:2px}
+.cab-user{display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:2px;margin-top:20px;flex-shrink:0}
 .cab-avatar{width:42px;height:42px;border-radius:50%;background:var(--cab-gold);color:var(--cab-navy);display:flex;align-items:center;justify-content:center;font-family:Montserrat;font-weight:900;font-size:16px;overflow:hidden;flex-shrink:0}
 .cab-avatar img{width:100%;height:100%;object-fit:cover}
 .cab-user-name{font-size:13px;font-weight:700;color:#fff;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cab-user-email{font-size:10px;color:rgba(255,255,255,.5);margin-top:3px;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.cab-nav{display:flex;flex-direction:column;gap:2px;flex:1}
+.cab-nav{display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto;overflow-x:hidden;margin:16px -22px 0;padding:0 22px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
 .cab-nav-label{font-size:9px;font-weight:800;letter-spacing:.22em;color:rgba(255,255,255,.35);text-transform:uppercase;margin:14px 10px 8px}
 .cab-nav-item{display:flex;align-items:center;gap:14px;padding:12px 14px;color:rgba(255,255,255,.7);font-size:13px;font-weight:600;letter-spacing:.01em;border-left:2px solid transparent;transition:all .18s;text-decoration:none}
 .cab-nav-item svg{width:18px;height:18px;flex-shrink:0;opacity:.7}
@@ -45,7 +45,7 @@ html.dark body, body{background:#EEF0F4 !important;color:#0B1628 !important}
 .cab-nav-item.is-active{color:#fff;background:rgba(198,164,109,.08);border-left-color:var(--cab-gold)}
 .cab-nav-item.is-active svg{opacity:1;color:var(--cab-gold)}
 
-.cab-side-foot{border-top:1px solid rgba(255,255,255,.08);padding-top:18px;display:flex;flex-direction:column;gap:4px}
+.cab-side-foot{border-top:1px solid rgba(255,255,255,.08);padding-top:18px;display:flex;flex-direction:column;gap:4px;flex-shrink:0;margin-top:auto}
 .cab-side-foot a, .cab-side-foot button{display:flex;align-items:center;gap:12px;padding:10px 14px;color:rgba(255,255,255,.55);font-size:12px;font-weight:600;letter-spacing:.02em;background:none;border:none;cursor:pointer;text-align:left;width:100%}
 .cab-side-foot a:hover, .cab-side-foot button:hover{color:#fff}
 .cab-side-foot .danger{color:#ff8a8a}

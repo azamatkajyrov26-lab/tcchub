@@ -1,0 +1,128 @@
+{% extends "layouts/site.html" %}
+{% load static %}
+
+{% block title %}Лента новостей — TransCaspian Cargo{% endblock %}
+
+{% block page_css %}
+<style>
+.news-hero{background:linear-gradient(135deg,#080e1a 0%,#0F1D35 60%,#1B2A4A 100%);padding:100px 24px 56px;text-align:center;position:relative;overflow:hidden}
+.news-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 800px 400px at 50% 60%,rgba(198,164,109,.08),transparent 70%)}
+.news-hero h1{font-size:clamp(28px,4vw,48px);font-weight:900;color:#fff;letter-spacing:-.02em;margin-bottom:12px;position:relative}
+.news-hero p{font-size:15px;color:rgba(255,255,255,.55);max-width:540px;margin:0 auto;position:relative;line-height:1.7}
+
+.nf-wrap{max-width:1280px;margin:0 auto;padding:40px 24px}
+.nf-filters{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:32px}
+.nf-search{flex:1;min-width:200px;position:relative}
+.nf-search input{width:100%;padding:10px 16px 10px 40px;border:1px solid var(--border-light);border-radius:12px;background:var(--bg-alt);font-family:inherit;font-size:13px;color:var(--text);outline:none;transition:border .2s}
+.nf-search input:focus{border-color:rgba(198,164,109,.4)}
+.nf-search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-light)}
+.nf-sources{display:flex;gap:8px;flex-wrap:wrap}
+.src-btn{padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid var(--border-light);background:var(--bg-alt);color:var(--text-mid);cursor:pointer;transition:all .2s;text-decoration:none;letter-spacing:.03em}
+.src-btn:hover{border-color:var(--gold);color:var(--gold-dark)}
+.src-btn.active{background:var(--gold);border-color:var(--gold);color:#fff}
+
+.nf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.nf-card{background:#fff;border:1px solid var(--border-light);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px;transition:all .4s cubic-bezier(.2,.9,.3,1.2);text-decoration:none;color:inherit}
+.nf-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,42,74,.08);border-color:rgba(198,164,109,.35)}
+.nf-card-top{display:flex;align-items:center;justify-content:space-between}
+.nf-source{display:flex;align-items:center;gap:6px}
+.nf-source-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.nf-source-name{font-size:10px;font-weight:800;color:var(--gold-dark);text-transform:uppercase;letter-spacing:.1em}
+.nf-date{font-size:10px;color:var(--text-light)}
+.nf-title{font-size:14px;font-weight:700;color:var(--text);line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+.nf-desc{font-size:12px;color:var(--text-mid);line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nf-footer{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border-light);margin-top:auto}
+.nf-read{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.06em;text-transform:uppercase}
+.nf-empty{text-align:center;padding:80px 24px;color:var(--text-light)}
+.nf-empty svg{width:48px;height:48px;margin:0 auto 16px;opacity:.3}
+
+.nf-stats{display:flex;gap:24px;margin-bottom:24px;padding:16px 20px;background:var(--bg-alt);border-radius:14px;border:1px solid var(--border-light)}
+.nf-stat{text-align:center}
+.nf-stat-val{font-size:22px;font-weight:900;color:var(--gold)}
+.nf-stat-lbl{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+
+@media(max-width:900px){.nf-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.nf-grid{grid-template-columns:1fr}.nf-stats{gap:16px}.nf-stat-val{font-size:18px}}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="news-hero">
+  <div style="position:relative">
+    <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);border-radius:20px;padding:5px 14px">
+      <span style="width:6px;height:6px;border-radius:50%;background:#dc2626;animation:pulse 2s infinite;display:inline-block"></span>
+      <span style="font-size:10px;font-weight:800;color:#dc2626;letter-spacing:.1em;text-transform:uppercase">24/7 LIVE</span>
+    </div>
+    <h1>Лента новостей отрасли</h1>
+    <p>Агрегатор новостей по логистике, транспорту и Транскаспийскому коридору из международных источников</p>
+  </div>
+</div>
+
+<div class="nf-wrap">
+  <!-- Stats -->
+  <div class="nf-stats">
+    <div class="nf-stat">
+      <div class="nf-stat-val">{{ news_items|length }}</div>
+      <div class="nf-stat-lbl">Показано</div>
+    </div>
+    <div class="nf-stat">
+      <div class="nf-stat-val">{{ sources|length }}</div>
+      <div class="nf-stat-lbl">Источников</div>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-mid)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Обновляется каждые 6 часов
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="nf-filters">
+    <div class="nf-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <form method="get" style="display:contents">
+        {% if current_source %}<input type="hidden" name="source" value="{{ current_source }}">{% endif %}
+        <input type="text" name="q" value="{{ search }}" placeholder="Поиск по заголовку..." onchange="this.form.submit()">
+      </form>
+    </div>
+    <div class="nf-sources">
+      <a href="?{% if search %}q={{ search }}{% endif %}" class="src-btn {% if not current_source %}active{% endif %}">Все</a>
+      {% for src in sources %}
+      <a href="?source={{ src.code }}{% if search %}&q={{ search }}{% endif %}" class="src-btn {% if current_source == src.code %}active{% endif %}">{{ src.name }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- News Grid -->
+  {% if news_items %}
+  <div class="nf-grid">
+    {% for item in news_items %}
+    <a href="{{ item.url }}" target="_blank" rel="noopener" class="nf-card">
+      <div class="nf-card-top">
+        <div class="nf-source">
+          <div class="nf-source-dot"></div>
+          <span class="nf-source-name">{{ item.source.name|default:"News" }}</span>
+        </div>
+        <span class="nf-date">{{ item.published_at|date:"d.m.Y" }}</span>
+      </div>
+      <div class="nf-title">{{ item.title }}</div>
+      {% if item.content %}
+      <div class="nf-desc">{{ item.content|truncatechars:120 }}</div>
+      {% endif %}
+      <div class="nf-footer">
+        <span class="nf-date">{{ item.published_at|date:"H:i" }}</span>
+        <span class="nf-read">Читать →</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="nf-empty">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10l6 6v8a2 2 0 0 1-2 2z"/><path d="M17 20v-8H7v8M7 4v4h8"/></svg>
+    <p style="font-size:15px;font-weight:600;margin-bottom:8px">Новостей не найдено</p>
+    <p style="font-size:13px">Попробуйте изменить фильтр или поисковый запрос</p>
+  </div>
+  {% endif %}
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+{% endblock %}

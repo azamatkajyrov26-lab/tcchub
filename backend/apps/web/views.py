@@ -144,6 +144,29 @@ def site_analytics_view(request):
 
 
 
+def news_feed_view(request):
+    """Public news feed page — all RSS sources aggregated."""
+    from apps.tcc_data.models import NewsItem, DataSource
+    source_code = request.GET.get("source", "")
+    search = request.GET.get("q", "").strip()
+    qs = NewsItem.objects.select_related("source").order_by("-published_at")
+    if source_code:
+        qs = qs.filter(source__code=source_code)
+    if search:
+        qs = qs.filter(title__icontains=search)
+    news_items = qs[:60]
+    sources = DataSource.objects.filter(
+        newsitem__isnull=False
+    ).distinct().order_by("name")
+    return render(request, "site/news_feed.html", {
+        "active_page": "news",
+        "news_items": news_items,
+        "sources": sources,
+        "current_source": source_code,
+        "search": search,
+    })
+
+
 def solutions_view(request):
     return render(request, "site/solutions.html", {
         "active_page": "solutions",

@@ -47,6 +47,7 @@ urlpatterns = [
     path("press/", views.site_media_view, name="site_media"),
     path("partners/", views.site_partners_view, name="site_partners"),
     path("contacts/", views.contacts_view, name="contacts"),
+    path("news/", views.news_feed_view, name="news_feed"),
     path("contacts/submit/", views.contact_submit_view, name="contact_submit"),
     path("tg/webhook/", views.telegram_webhook_view, name="telegram_webhook"),
     path("wiki/", views.wiki_view, name="wiki"),

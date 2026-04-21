@@ -218,6 +218,19 @@ class NewsItem(models.Model):
     )
     ai_summary_ru = models.TextField("AI резюме (RU)", blank=True)
     ai_is_relevant = models.BooleanField("AI релевантна", null=True)
+    # Groq AI analysis fields
+    full_content = models.TextField("Полный текст статьи", blank=True)
+    groq_score = models.FloatField("Groq: релевантность коридору (0-10)", null=True, blank=True)
+    groq_impact_type = models.CharField(
+        "Groq: тип влияния", max_length=100, blank=True,
+        help_text="задержка/инфраструктура/тариф/санкция/объём/прочее"
+    )
+    groq_summary_ru = models.TextField("Groq: вывод на русском", blank=True)
+    groq_affected_nodes = models.JSONField(
+        "Groq: затронутые узлы", default=list, blank=True,
+        help_text="['Актау', 'Баку', 'Хоргос', ...]"
+    )
+    groq_processed = models.BooleanField("Groq обработано", default=False)
     created_at = models.DateTimeField("Создана", auto_now_add=True)
 
     class Meta:

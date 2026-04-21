@@ -190,6 +190,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.tcc_data.tasks.translate_news_to_russian",
         "schedule": 3600,  # every hour — translates up to 50 new items
     },
+    "groq-analyze-news-2h": {
+        "task": "apps.tcc_data.tasks.scrape_and_analyze_with_groq",
+        "schedule": 7200,  # every 2 hours — Groq free tier is 14400/day
+    },
     "recalculate-scores-6h": {
         "task": "apps.tcc_intelligence.tasks.recalculate_all_route_scores",
         "schedule": 21600,  # 6 hours
@@ -216,6 +220,7 @@ EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() in ("true", "1")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@tcchub.kz")
 
 # --- Telegram bot notifications ---
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 TELEGRAM_ADMIN_IDS = os.getenv("TELEGRAM_ADMIN_IDS", TELEGRAM_CHAT_ID)

@@ -260,6 +260,180 @@ def fetch_rss_news(self):
         raise self.retry(exc=exc)
 
 
+@shared_task(bind=True, max_retries=2, default_retry_delay=120)
+def scrape_and_analyze_with_groq(self):
+    """
+    1. Scrape full article text (newspaper4k)
+    2. Analyze with Groq Llama 3 — corridor impact score, type, Russian summary
+    3. Export analyzed articles to Obsidian vault (.md files)
+    Processes up to 20 articles per run to stay within Groq free limits.
+    """
+    import os, json, re, pathlib
+    from .models import NewsItem
+
+    groq_key = os.getenv("GROQ_API_KEY", "")
+    if not groq_key:
+        logger.warning("GROQ_API_KEY not set, skipping Groq analysis")
+        return {"analyzed": 0, "skipped": 0, "reason": "no_api_key"}
+
+    try:
+        from groq import Groq
+        groq_client = Groq(api_key=groq_key)
+    except ImportError:
+        logger.warning("groq package not installed")
+        return {"analyzed": 0, "skipped": 0}
+
+    # newspaper4k for scraping full text
+    try:
+        import newspaper
+        HAS_NEWSPAPER = True
+    except ImportError:
+        HAS_NEWSPAPER = False
+        logger.warning("newspaper4k not installed, will use existing content")
+
+    # Obsidian vault directory
+    vault_dir = pathlib.Path("/opt/tcchub/obsidian-vault/Новости")
+    vault_dir.mkdir(parents=True, exist_ok=True)
+
+    # Find unprocessed items with a URL
+    items = NewsItem.objects.filter(
+        groq_processed=False,
+        url__startswith="http",
+    ).order_by("-published_at")[:20]
+
+    analyzed = 0
+    skipped = 0
+
+    SYSTEM_PROMPT = """Ты — аналитик логистики Транскаспийского (Среднего) коридора.
+Твоя задача: оценить как новость влияет на грузовые перевозки через Средний коридор
+(Казахстан → Каспий → Азербайджан → Грузия → Турция/Европа).
+
+Верни JSON со следующими полями:
+- score: число 0-10 (0=нерелевантно, 10=критически важно для коридора)
+- impact_type: один из [задержка, инфраструктура, тариф, санкция, объём, риск, прочее]
+- affected_nodes: массив из названий затронутых узлов ["Актау", "Баку", "Хоргос" и т.д.]
+- summary_ru: 2-3 предложения на русском — что произошло и как это влияет на Средний коридор
+- is_relevant: true если score >= 4, false если нет
+
+Отвечай ТОЛЬКО JSON без дополнительного текста."""
+
+    for item in items:
+        try:
+            # Step 1: Get full article text
+            article_text = item.content or ""
+            if HAS_NEWSPAPER and item.url and len(article_text) < 500:
+                try:
+                    art = newspaper.Article(item.url, language="en")
+                    art.download()
+                    art.parse()
+                    if art.text and len(art.text) > 100:
+                        article_text = art.text
+                        item.full_content = article_text[:20000]
+                except Exception as e:
+                    logger.debug("Newspaper scrape failed for %s: %s", item.url, e)
+
+            # Limit text for Groq
+            text_for_groq = (item.title + "\n\n" + article_text)[:3000]
+
+            # Step 2: Groq analysis
+            response = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": f"Заголовок: {item.title}\n\nТекст: {article_text[:2500]}"}
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.3,
+                max_tokens=400,
+            )
+
+            raw = response.choices[0].message.content
+            data = json.loads(raw)
+
+            item.groq_score = float(data.get("score", 0))
+            item.groq_impact_type = str(data.get("impact_type", "прочее"))[:100]
+            item.groq_affected_nodes = data.get("affected_nodes", [])
+            item.groq_summary_ru = str(data.get("summary_ru", ""))[:2000]
+            item.ai_is_relevant = bool(data.get("is_relevant", item.groq_score >= 4))
+            item.groq_processed = True
+            item.save(update_fields=[
+                "full_content", "groq_score", "groq_impact_type",
+                "groq_affected_nodes", "groq_summary_ru", "ai_is_relevant", "groq_processed"
+            ])
+
+            # Step 3: Write to Obsidian vault
+            if item.groq_score and item.groq_score >= 4:
+                _write_obsidian_note(item, vault_dir)
+
+            analyzed += 1
+
+        except json.JSONDecodeError as e:
+            logger.warning("Groq JSON parse error for #%s: %s", item.pk, e)
+            item.groq_processed = True
+            item.save(update_fields=["groq_processed"])
+            skipped += 1
+        except Exception as e:
+            logger.warning("Groq analysis error for #%s: %s", item.pk, e)
+            skipped += 1
+
+    logger.info("Groq analysis: %d analyzed, %d skipped", analyzed, skipped)
+    return {"analyzed": analyzed, "skipped": skipped}
+
+
+def _write_obsidian_note(item, vault_dir):
+    """Write a NewsItem to Obsidian vault as a markdown note."""
+    import re, pathlib
+    from django.utils.timezone import localtime
+
+    safe_title = re.sub(r'[\\/*?"<>|:]', '', item.title)[:80].strip()
+    date_str = localtime(item.published_at).strftime("%Y-%m-%d")
+    filename = f"{date_str}-{safe_title}.md"
+    filepath = vault_dir / filename
+
+    score = item.groq_score or 0
+    score_bar = "🟢" if score >= 7 else "🟡" if score >= 4 else "🔴"
+    nodes = ", ".join(f"[[{n}]]" for n in (item.groq_affected_nodes or []))
+
+    content = f"""---
+title: "{item.title}"
+date: {date_str}
+source: {item.source.name if item.source else "Unknown"}
+url: "{item.url}"
+corridor_score: {score:.1f}
+impact_type: {item.groq_impact_type or "прочее"}
+affected_nodes: {item.groq_affected_nodes or []}
+tags:
+  - новость
+  - {item.groq_impact_type or "прочее"}
+  - средний-коридор
+---
+
+## {item.title}
+
+> **{score_bar} Влияние на Средний коридор: {score:.0f}/10** — {item.groq_impact_type}
+
+**Источник:** [{item.source.name if item.source else "N/A"}]({item.url})
+**Дата:** {date_str}
+
+{f"**Затронутые узлы:** {nodes}" if nodes else ""}
+
+### Вывод ИИ
+
+{item.groq_summary_ru or "Анализ не выполнен"}
+
+---
+
+### Оригинальный текст
+
+{item.full_content or item.content or "Полный текст недоступен"}
+"""
+    try:
+        filepath.write_text(content, encoding="utf-8")
+        logger.debug("Obsidian note written: %s", filename)
+    except Exception as e:
+        logger.warning("Failed to write Obsidian note: %s", e)
+
+
 @shared_task(bind=True, max_retries=2, default_retry_delay=60)
 def translate_news_to_russian(self):
     """

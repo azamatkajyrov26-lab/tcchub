@@ -402,13 +402,16 @@ def report_generate_view(request):
     report_type = request.GET.get("type", "")
     selected = REPORT_TYPES.get(report_type)
 
+    import json as _json
     context = {
         "active_page": "news",
         "report_types": REPORT_TYPES,
+        "report_types_json": _json.dumps({k: {"name": v["name"], "days": v["days"], "standard": v["standard"], "desc": v["desc"]} for k, v in REPORT_TYPES.items()}),
         "selected_type": report_type,
         "selected": selected,
         "total_news": NewsItem.objects.count(),
         "analyzed_news": NewsItem.objects.filter(groq_processed=True).count(),
+        "sources_count": 12,
     }
 
     if report_type and selected and request.method == "POST":

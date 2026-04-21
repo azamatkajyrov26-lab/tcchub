@@ -82,12 +82,16 @@
 
 <div class="rg-wrap">
 
-  <!-- Выбор типа -->
-  <div style="margin-bottom:24px">
-    <div style="font-size:11px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px">Выберите тип отчёта</div>
+  <!-- STEP 1: Выбор типа -->
+  <div id="step1" style="margin-bottom:24px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex-shrink:0">1</div>
+      <div style="font-size:15px;font-weight:800;color:var(--navy)">Выберите тип отчёта</div>
+    </div>
     <div class="type-grid">
       {% for code, cfg in report_types.items %}
-      <a href="?type={{ code }}&generate=1" class="type-card {% if selected_type == code %}active{% endif %}">
+      <div onclick="selectType('{{ code }}','{{ cfg.name }}','{{ cfg.standard }}',{{ cfg.days }},'{{ cfg.desc }}')"
+           class="type-card {% if selected_type == code %}active{% endif %}" style="cursor:pointer">
         <div class="type-card-icon">
           {% if code == "digest" %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
           {% elif code == "analytical" %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
@@ -98,8 +102,100 @@
         <div class="type-card-name">{{ cfg.name }}</div>
         <div class="type-card-desc">{{ cfg.desc }}</div>
         <div class="type-card-std">{{ cfg.standard }}</div>
-      </a>
+      </div>
       {% endfor %}
+    </div>
+  </div>
+
+  <!-- STEP 2: Параметры и подтверждение -->
+  <div id="step2" style="display:none;margin-bottom:32px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex-shrink:0">2</div>
+      <div style="font-size:15px;font-weight:800;color:var(--navy)">Параметры отчёта</div>
+    </div>
+    <div style="background:#fff;border:2px solid var(--gold);border-radius:20px;padding:28px 32px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+        <div>
+          <div style="font-size:11px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Тип отчёта</div>
+          <div id="param-name" style="font-size:18px;font-weight:900;color:var(--navy)"></div>
+          <div id="param-std" style="font-size:10px;color:var(--gold-dark);font-weight:700;margin-top:4px;text-transform:uppercase;letter-spacing:.06em"></div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Период данных</div>
+          <div id="param-days" style="font-size:18px;font-weight:900;color:var(--navy)"></div>
+          <div style="font-size:12px;color:var(--text-mid);margin-top:4px">{{ total_news }} статей в базе · {{ analyzed_news }} проанализировано ИИ</div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-alt);border-radius:14px;padding:18px 20px;margin-bottom:20px">
+        <div style="font-size:11px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">На основе каких данных</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;color:var(--text-mid)">
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0"></span>Статьи из {{ sources_count|default:"12" }}+ источников (RSS-лента)</div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0"></span>AI-оценка Groq Llama 3.3 70B (0-10)</div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0"></span>Бенчмарки ТМТМ 2024: 4.5 млн т, 18-23 дня</div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0"></span>Стандарты: ADB CAREC, World Bank LPI</div>
+        </div>
+        <div id="param-desc" style="margin-top:10px;font-size:12px;color:var(--text-mid);font-style:italic"></div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span style="font-size:13px;color:var(--text-mid)">Ожидаемое время генерации: <strong id="param-time" style="color:var(--navy)">~30 секунд</strong></span>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button onclick="document.getElementById('step2').style.display='none';document.getElementById('step1').style.display='block'" style="padding:12px 20px;border:1px solid var(--border-light);background:var(--bg-alt);border-radius:10px;font-size:13px;font-weight:700;color:var(--text-mid);cursor:pointer;font-family:inherit">← Назад</button>
+          <button id="generateBtn" onclick="startGeneration()" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--navy);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .2s">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9-14 9V3z"/></svg>
+            Генерировать отчёт
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Progress bar (показывается во время генерации) -->
+  <div id="step3" style="display:none;margin-bottom:32px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex-shrink:0">3</div>
+      <div style="font-size:15px;font-weight:800;color:var(--navy)">Генерация отчёта</div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border-light);border-radius:20px;padding:36px 32px;text-align:center">
+      <div style="font-size:18px;font-weight:800;color:var(--navy);margin-bottom:8px" id="progressLabel">Анализируем данные...</div>
+      <div style="font-size:13px;color:var(--text-mid);margin-bottom:24px" id="progressSub">Читаем статьи за период</div>
+
+      <!-- Progress bar -->
+      <div style="height:8px;background:var(--bg-alt);border-radius:4px;overflow:hidden;margin-bottom:16px;position:relative">
+        <div id="progressFill" style="height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:4px;width:0%;transition:width .8s ease;position:relative">
+          <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.4) 50%,transparent 100%);animation:shimmer 1.5s infinite"></div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text-light)" id="progressPct">0%</div>
+
+      <!-- Steps timeline -->
+      <div style="display:flex;justify-content:space-between;margin-top:28px;position:relative">
+        <div style="position:absolute;top:12px;left:10%;right:10%;height:2px;background:var(--border-light)"></div>
+        <div id="ps1" class="pstep pstep-active" style="display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1;width:18%">
+          <div class="pstep-dot" style="width:24px;height:24px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+          <div style="font-size:10px;font-weight:700;color:var(--gold);text-align:center">Сбор<br>данных</div>
+        </div>
+        <div id="ps2" class="pstep" style="display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1;width:18%">
+          <div class="pstep-dot" style="width:24px;height:24px;border-radius:50%;background:var(--border-light);display:flex;align-items:center;justify-content:center"><span style="font-size:9px;font-weight:800;color:var(--text-light)">2</span></div>
+          <div style="font-size:10px;font-weight:700;color:var(--text-light);text-align:center">Отбор<br>статей</div>
+        </div>
+        <div id="ps3" class="pstep" style="display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1;width:18%">
+          <div class="pstep-dot" style="width:24px;height:24px;border-radius:50%;background:var(--border-light);display:flex;align-items:center;justify-content:center"><span style="font-size:9px;font-weight:800;color:var(--text-light)">3</span></div>
+          <div style="font-size:10px;font-weight:700;color:var(--text-light);text-align:center">Groq AI<br>анализ</div>
+        </div>
+        <div id="ps4" class="pstep" style="display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1;width:18%">
+          <div class="pstep-dot" style="width:24px;height:24px;border-radius:50%;background:var(--border-light);display:flex;align-items:center;justify-content:center"><span style="font-size:9px;font-weight:800;color:var(--text-light)">4</span></div>
+          <div style="font-size:10px;font-weight:700;color:var(--text-light);text-align:center">Форматиро-<br>вание</div>
+        </div>
+        <div id="ps5" class="pstep" style="display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1;width:18%">
+          <div class="pstep-dot" style="width:24px;height:24px;border-radius:50%;background:var(--border-light);display:flex;align-items:center;justify-content:center"><span style="font-size:9px;font-weight:800;color:var(--text-light)">5</span></div>
+          <div style="font-size:10px;font-weight:700;color:var(--text-light);text-align:center">Готово!</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -149,22 +245,27 @@
   {% with g=report.groq %}
 
   <!-- Executive Summary -->
-  {% if g.executive_summary or g.executive_brief %}
+  {% with summary=g.executive_summary|default:"" %}{% with brief=g.executive_brief|default:"" %}
+  {% if summary or brief %}
   <div class="rp-section">
     <h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Executive Summary</h2>
-    <p style="font-size:15px;color:var(--text);line-height:1.8;font-weight:500">{{ g.executive_summary|default:g.executive_brief }}</p>
+    <p style="font-size:15px;color:var(--text);line-height:1.8;font-weight:500">{% if summary %}{{ summary }}{% else %}{{ brief }}{% endif %}</p>
 
-    {% if g.risk_level or g.corridor_status or g.corridor_investment_climate %}
+    {% with rlevel=g.risk_level|default:"" cstatus=g.corridor_status|default:"" climate=g.corridor_investment_climate|default:"" %}
+    {% if rlevel or cstatus or climate %}
+    {% with rval=rlevel|default:cstatus|default:climate %}
     <div style="margin-top:16px;padding:14px 20px;border-radius:12px;display:inline-flex;align-items:center;gap:10px;
-      {% if g.risk_level == 'ВЫСОКИЙ' or g.corridor_status == 'КРИТИЧЕСКИЙ' or g.corridor_investment_climate == 'НЕБЛАГОПРИЯТНЫЙ' %}background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)
-      {% elif g.risk_level == 'СРЕДНИЙ' or g.corridor_status == 'НАПРЯЖЁННЫЙ' or g.corridor_investment_climate == 'НЕЙТРАЛЬНЫЙ' %}background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2)
+      {% if rval == 'ВЫСОКИЙ' or rval == 'КРИТИЧЕСКИЙ' or rval == 'НЕБЛАГОПРИЯТНЫЙ' %}background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)
+      {% elif rval == 'СРЕДНИЙ' or rval == 'НАПРЯЖЁННЫЙ' or rval == 'НЕЙТРАЛЬНЫЙ' %}background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2)
       {% else %}background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2){% endif %}">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{% if g.risk_level == 'ВЫСОКИЙ' or g.corridor_status == 'КРИТИЧЕСКИЙ' %}#EF4444{% elif g.risk_level == 'СРЕДНИЙ' %}#F59E0B{% else %}#10B981{% endif %}" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <span style="font-size:13px;font-weight:800">Уровень риска коридора: {{ g.risk_level|default:g.corridor_status|default:g.corridor_investment_climate }}</span>
+      <span style="font-size:13px;font-weight:800">Уровень риска коридора: {{ rval }}</span>
     </div>
+    {% endwith %}
     {% endif %}
+    {% endwith %}
   </div>
   {% endif %}
+  {% endwith %}{% endwith %}
 
   <!-- Main content sections based on report type -->
   {% if g.situation %}
@@ -292,4 +393,86 @@
   {% endif %}
 
 </div>
+
+<style>
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.pstep-done .pstep-dot{background:var(--gold)!important}
+</style>
+<script>
+var selectedType = '{{ selected_type|default:"" }}';
+var etimes = {digest:30, analytical:50, event:20, investment:60};
+
+function selectType(code, name, std, days, desc) {
+  selectedType = code;
+  // Highlight selected card
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  // Fill params
+  document.getElementById('param-name').textContent = name;
+  document.getElementById('param-std').textContent = std;
+  document.getElementById('param-days').textContent = 'Последние ' + days + ' дней';
+  document.getElementById('param-desc').textContent = desc;
+  document.getElementById('param-time').textContent = '~' + (etimes[code]||30) + ' секунд';
+  // Show step 2
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = 'block';
+}
+
+{% if selected_type %}
+// Auto-show step 2 if type already selected
+document.addEventListener('DOMContentLoaded', function() {
+  var types = {{ report_types_json|safe|default:"{}" }};
+  // Already generated — scroll to report
+  {% if report %}
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = 'none';
+  {% endif %}
+});
+{% endif %}
+
+function startGeneration() {
+  var btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step3').style.display = 'block';
+
+  var steps = [
+    {pct:15, label:'Сбор данных за период...', sub:'Запрашиваем статьи из базы', step:1},
+    {pct:30, label:'Отбор релевантных статей...', sub:'Фильтруем по влиянию на коридор', step:2},
+    {pct:55, label:'Groq AI генерирует анализ...', sub:'Llama 3.3 70B читает события и пишет отчёт', step:3},
+    {pct:80, label:'Форматирование отчёта...', sub:'Структурируем по международным стандартам', step:4},
+    {pct:95, label:'Финальная проверка...', sub:'Почти готово!', step:5},
+  ];
+
+  var i = 0;
+  function runStep() {
+    if (i >= steps.length) return;
+    var s = steps[i++];
+    document.getElementById('progressFill').style.width = s.pct + '%';
+    document.getElementById('progressPct').textContent = s.pct + '%';
+    document.getElementById('progressLabel').textContent = s.label;
+    document.getElementById('progressSub').textContent = s.sub;
+    // Activate step dot
+    for (var j = 1; j <= s.step; j++) {
+      var dot = document.getElementById('ps' + j);
+      if (dot) {
+        dot.querySelector('.pstep-dot').style.background = 'var(--gold)';
+        dot.querySelector('div:last-child').style.color = 'var(--gold)';
+        dot.querySelector('.pstep-dot').innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
+      }
+    }
+    setTimeout(runStep, (etimes[selectedType]||30) * 1000 / steps.length);
+  }
+  runStep();
+
+  // Actually submit
+  var et = etimes[selectedType] || 30;
+  setTimeout(function() {
+    document.getElementById('progressFill').style.width = '100%';
+    document.getElementById('progressPct').textContent = '100%';
+    document.getElementById('progressLabel').textContent = 'Готово! Открываем отчёт...';
+    window.location.href = '/reports/generate/?type=' + selectedType + '&generate=1';
+  }, (et - 2) * 1000);
+}
+</script>
 {% endblock %}

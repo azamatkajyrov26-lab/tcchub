@@ -240,7 +240,7 @@
   .hero-btns{display:none!important}
   .hero-badges{padding:0;gap:8px}
   .hero-badges .hero-badge{padding:6px 10px;font-size:10px}
-  .globe-wrap{position:absolute!important;bottom:0!important;left:50%!important;transform:translateX(-50%) translateY(45%)!important;width:90vw!important;max-width:400px!important;aspect-ratio:1!important}
+  .globe-wrap{position:absolute!important;bottom:0!important;left:50%!important;transform:translateX(-50%) translateY(20%)!important;width:105vw!important;aspect-ratio:1!important}
   .hero-fade{height:80px!important}
   .mobile-map{display:none!important}
   .mobile-cta{display:flex!important}
@@ -302,7 +302,7 @@
   .hero-content{padding:72px 12px 180px}
   .partners-grid{grid-template-columns:repeat(2,1fr)!important}
   .dark-map{min-height:180px!important}
-  .globe-wrap{width:85vw!important;transform:translateX(-50%) translateY(48%)!important}
+  .globe-wrap{width:100vw!important;transform:translateX(-50%) translateY(22%)!important}
 }
 </style>
 {% endblock %}
@@ -1195,7 +1195,7 @@ const canvas=document.getElementById('globe');
 if(!canvas)return;
 const ctx=canvas.getContext('2d');
 const isMobile=window.innerWidth<=640;
-const W=900,H=900,R=isMobile?380:420;
+const W=900,H=900,R=isMobile?430:420;
 const dpr=Math.min(devicePixelRatio||1,2);
 canvas.width=W*dpr;canvas.height=H*dpr;
 canvas.style.width='100%';canvas.style.height='100%';

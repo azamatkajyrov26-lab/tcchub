@@ -131,30 +131,70 @@ table.aircraft-table tbody tr:hover{background:rgba(198,164,109,.03)}
   .bar-chart{gap:8px}
   .news-feed{grid-template-columns:1fr 1fr}
 }
+@media(max-width:768px){
+  /* ── iOS Mobile Live Data ── */
+  .page-hero{padding:90px 16px 36px!important}
+  .page-hero h1{font-size:clamp(28px,5vw,42px)}
+
+  .data-tabs{
+    display:flex;flex-wrap:nowrap;gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;-ms-overflow-style:none;border-radius:14px;max-width:100%
+  }
+  .data-tabs::-webkit-scrollbar{display:none}
+  .data-tab{flex-shrink:0;padding:10px 16px;font-size:11px;white-space:nowrap;min-height:40px;border-radius:10px}
+
+  .section-wrap{padding:24px 16px}
+  .counter-card{padding:28px 16px;border-radius:16px;margin-bottom:20px}
+  .counter-num{font-size:clamp(40px,8vw,56px)}
+
+  /* Tables: horizontal scroll wrapper */
+  .aircraft-table-wrap{border-radius:14px}
+  table.aircraft-table thead th{padding:10px 12px;font-size:9px}
+  table.aircraft-table tbody td{padding:10px 12px;font-size:11px}
+
+  .data-cards{grid-template-columns:1fr;gap:12px}
+  .data-card{padding:18px;border-radius:14px}
+  .data-card-value{font-size:28px}
+  .data-card-label{font-size:9px}
+
+  .bar-chart{flex-wrap:nowrap;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:24px 0}
+  .bar-col{min-width:50px;flex-shrink:0}
+
+  .freight-cards{grid-template-columns:1fr;gap:12px}
+  .freight-card{padding:20px;border-radius:14px}
+  .freight-card:hover{transform:none}
+  .freight-card:active{transform:scale(.98)}
+  .freight-rate{font-size:28px}
+
+  .news-feed{grid-template-columns:1fr;gap:10px}
+  .news-item{padding:16px;border-radius:14px}
+  .news-item:hover{transform:none}
+  .news-item:active{transform:scale(.98)}
+
+  .trade-bars{max-width:100%}
+  .trade-row{flex-direction:column;align-items:flex-start;gap:4px}
+  .trade-country{min-width:auto;font-size:12px}
+  .trade-bar-wrap{width:100%;height:28px}
+
+  .dark-section{padding:32px 16px}
+}
 @media(max-width:640px){
   .data-tabs{gap:2px}
   .data-tab{padding:8px 12px;font-size:10px}
-  .section-wrap{padding:32px 16px}
-  .bar-chart{flex-wrap:wrap;gap:12px}
-  .bar-col{min-width:60px}
-  .news-feed{grid-template-columns:1fr}
-  .freight-cards{grid-template-columns:1fr}
-  .trade-row{flex-direction:column;align-items:flex-start;gap:6px}
-  .trade-country{min-width:auto}
-  .trade-bar-wrap{width:100%}
+  .section-wrap{padding:20px 14px}
+  .bar-col{min-width:48px}
+  .counter-card{padding:24px 14px}
 }
 @media(max-width:480px){
-  .section-wrap{padding:24px 12px}
-  .data-tab{padding:6px 10px;font-size:9px}
+  .section-wrap{padding:16px 12px}
+  .data-tab{padding:6px 10px;font-size:10px}
   .data-tabs{gap:2px;padding:3px}
-  .data-card{padding:20px}
-  .data-card-value{font-size:28px}
-  .data-card-label{font-size:9px}
-  .counter-card{padding:28px 20px}
-  .freight-card{padding:20px}
-  .freight-rate{font-size:26px}
-  .freight-route{font-size:10px}
-  .news-item{padding:18px}
+  .data-card{padding:16px}
+  .data-card-value{font-size:26px}
+  .counter-card{padding:20px 12px}
+  .freight-card{padding:16px}
+  .freight-rate{font-size:24px}
+  .news-item{padding:14px}
   .news-title{font-size:13px}
   .news-desc{font-size:11px}
 }

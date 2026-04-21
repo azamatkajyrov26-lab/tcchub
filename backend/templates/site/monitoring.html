@@ -72,7 +72,46 @@
 .mn-empty{text-align:center;padding:50px 20px;color:var(--text-light);font-size:13px}
 
 @media(max-width:1024px){.mn-main{grid-template-columns:1fr}.mn-stats{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:640px){.mn-hero{padding:100px 20px 0}.mn-hero-wrap{padding-bottom:80px}.mn-stats-wrap{padding:0 20px}.mn-stats{grid-template-columns:1fr}.mn-main{padding:0 20px 80px}.mn-nodes{grid-template-columns:1fr;padding:18px}}
+@media(max-width:768px){
+  /* ── iOS Mobile Monitoring ── */
+  .mn-hero{padding:85px 16px 0}
+  .mn-hero-wrap{padding-bottom:70px}
+  .mn-title{font-size:clamp(28px,5vw,42px)}
+  .mn-lead{font-size:13px}
+  .mn-head{flex-direction:column;align-items:flex-start;gap:20px}
+  .mn-refresh{width:100%;justify-content:center;border-radius:14px;min-height:44px}
+  .mn-refresh-meta{text-align:center}
+
+  .mn-stats-wrap{padding:0 16px;margin-top:-40px}
+  .mn-stats{grid-template-columns:1fr 1fr;border-radius:14px}
+  .mn-stat{padding:16px 14px}
+  .mn-stat-num{font-size:28px}
+  .mn-stat-lab{font-size:9px}
+  .mn-stat-sub{font-size:10px}
+  /* Last stat spans full width if odd */
+  .mn-stat:last-child:nth-child(odd){grid-column:1/-1}
+
+  .mn-main{padding:0 16px 40px;gap:16px}
+  .mn-block{border-radius:16px}
+  .mn-block-head{padding:16px;gap:10px;flex-direction:column;align-items:flex-start}
+  .mn-block-head h2{font-size:16px}
+  .mn-filters{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;display:flex;flex-wrap:nowrap;gap:6px}
+  .mn-filters::-webkit-scrollbar{display:none}
+  .mn-filter{flex-shrink:0;min-height:36px;font-size:10px}
+
+  .mn-nodes{grid-template-columns:1fr;padding:12px;gap:10px}
+  .mn-node{padding:14px;border-radius:12px}
+  .mn-node:hover{transform:none;box-shadow:none}
+  .mn-node:active{transform:scale(.98)}
+  .mn-node-name{font-size:13px}
+
+  .mn-alerts{padding:8px 16px 16px;max-height:400px}
+  .mn-alert{padding:14px 0;gap:10px}
+  .mn-alert-icon{width:34px;height:34px;border-radius:10px;font-size:14px}
+  .mn-alert-title{font-size:12px}
+  .mn-alert-desc{font-size:11px}
+}
+@media(max-width:640px){.mn-hero{padding:80px 14px 0}.mn-hero-wrap{padding-bottom:60px}.mn-stats-wrap{padding:0 14px}.mn-stats{grid-template-columns:1fr 1fr}.mn-main{padding:0 14px 40px}.mn-nodes{grid-template-columns:1fr;padding:10px}}
 </style>
 {% endblock %}
 

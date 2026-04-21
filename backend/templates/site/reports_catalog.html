@@ -56,7 +56,37 @@
 .rep-empty p{font-size:14px;color:var(--text-light)}
 
 @media(max-width:900px){.rep-kpis{grid-template-columns:1fr 1fr}}
-@media(max-width:560px){.rep-toolbar{padding:36px 20px 0}.rep-grid-wrap{padding:24px 20px 80px}}
+@media(max-width:768px){
+  /* ── iOS Mobile Reports ── */
+  .rep-hero{padding:90px 16px 40px}
+  .rep-title{font-size:clamp(28px,5vw,42px)}
+  .rep-lead{font-size:14px}
+  .rep-kpis{grid-template-columns:1fr 1fr;gap:1px;margin-top:32px;border-radius:14px}
+  .rep-kpi{padding:18px 16px}
+  .rep-kpi-num{font-size:28px}
+  .rep-kpi-lab{font-size:9px;margin-top:6px}
+
+  .rep-toolbar{padding:24px 16px 0;gap:12px}
+  .rep-chips{
+    display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;-ms-overflow-style:none;padding-bottom:4px;width:100%
+  }
+  .rep-chips::-webkit-scrollbar{display:none}
+  .rep-chip{flex-shrink:0;padding:8px 14px;border-radius:20px;font-size:11px;white-space:nowrap;min-height:36px;display:inline-flex;align-items:center}
+  .rep-count-info{width:100%;text-align:center}
+
+  .rep-grid-wrap{padding:20px 16px 40px}
+  .rep-grid{grid-template-columns:1fr;gap:14px}
+  .rep-card{border-radius:16px}
+  .rep-card:hover{transform:none;box-shadow:none}
+  .rep-card:active{transform:scale(.98)}
+  .rep-card-cover{height:140px}
+  .rep-card-body{padding:16px;gap:10px}
+  .rep-card-title{font-size:15px}
+  .rep-card-sub{font-size:12px}
+  .rep-card-meta{font-size:10px;padding-top:10px}
+}
+@media(max-width:560px){.rep-toolbar{padding:20px 16px 0}.rep-grid-wrap{padding:16px 16px 40px}.rep-kpis{grid-template-columns:1fr 1fr}}
 </style>
 {% endblock %}
 

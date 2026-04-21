@@ -59,13 +59,28 @@
 {% block content %}
 <!-- Hero -->
 <div class="news-hero">
-  <div style="position:relative">
-    <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);border-radius:20px;padding:5px 14px">
-      <span style="width:6px;height:6px;border-radius:50%;background:#dc2626;animation:pulse 2s infinite;display:inline-block"></span>
-      <span style="font-size:10px;font-weight:800;color:#dc2626;letter-spacing:.1em;text-transform:uppercase">24/7 LIVE</span>
+  <div style="position:relative;max-width:1280px;margin:0 auto">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:24px">
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);border-radius:20px;padding:5px 14px">
+          <span style="width:6px;height:6px;border-radius:50%;background:#dc2626;animation:pulse 2s infinite;display:inline-block"></span>
+          <span style="font-size:10px;font-weight:800;color:#dc2626;letter-spacing:.1em;text-transform:uppercase">24/7 LIVE</span>
+        </div>
+        <h1 style="text-align:left">Лента новостей отрасли</h1>
+        <p style="text-align:left;margin:0">Агрегатор новостей по логистике, транспорту и Транскаспийскому коридору из международных источников</p>
+      </div>
+      <!-- Quick nav to related pages -->
+      <div style="display:flex;flex-direction:column;gap:10px;flex-shrink:0;padding-top:8px">
+        <a href="/news/analysis/" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:rgba(198,164,109,.15);border:1px solid rgba(198,164,109,.3);border-radius:12px;font-size:12px;font-weight:700;color:var(--gold-light);text-decoration:none;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='rgba(198,164,109,.25)'" onmouseout="this.style.background='rgba(198,164,109,.15)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+          AI-анализ коридора
+        </a>
+        <a href="/reports/generate/" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;font-size:12px;font-weight:700;color:#fff;text-decoration:none;white-space:nowrap;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.14)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Генератор отчётов
+        </a>
+      </div>
     </div>
-    <h1>Лента новостей отрасли</h1>
-    <p>Агрегатор новостей по логистике, транспорту и Транскаспийскому коридору из международных источников</p>
   </div>
 </div>
 

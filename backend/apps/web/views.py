@@ -156,7 +156,7 @@ def news_feed_view(request):
         qs = qs.filter(title__icontains=search)
     news_items = qs[:60]
     sources = DataSource.objects.filter(
-        newsitem__isnull=False
+        news_items__isnull=False
     ).distinct().order_by("name")
     return render(request, "site/news_feed.html", {
         "active_page": "news",

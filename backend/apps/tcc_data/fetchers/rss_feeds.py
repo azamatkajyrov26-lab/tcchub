@@ -107,20 +107,20 @@ RSS_SOURCES = [
         [],  # Kazakhstan-focused, all articles relevant
     ),
     (
-        "TREND_AZ",
-        "Trend.az",
-        "https://en.trend.az/rss.xml",
-        "en",
-        ["corridor", "caspian", "logistics", "transport", "freight",
-         "TMTM", "baku", "port", "railway", "trade", "transit"],
-    ),
-    (
-        "INTERFAX_KZ",
-        "Interfax Kazakhstan",
-        "https://www.interfax.kz/rss.xml",
+        "KAPITAL_KZ",
+        "Kapital.kz",
+        "https://kapital.kz/rss.xml",
         "ru",
         ["логистик", "транспорт", "коридор", "груз", "железнодорож",
-         "порт", "КТЖ", "Актау", "Курык", "транзит", "ТМТМ", "маршрут"],
+         "порт", "КТЖ", "Актау", "транзит", "ТМТМ", "маршрут", "экспорт"],
+    ),
+    (
+        "KAZPRAVDA",
+        "Казахстанская правда",
+        "https://www.kazpravda.kz/rss/",
+        "ru",
+        ["логистик", "транспорт", "коридор", "груз", "железнодорож",
+         "порт", "КТЖ", "транзит", "ТМТМ", "экспорт", "торговл"],
     ),
 ]
 

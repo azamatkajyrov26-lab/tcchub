@@ -116,6 +116,15 @@ RSS_SOURCES = [
          "uzbekistan", "kyrgyzstan", "tajikistan", "CAREC"],
     ),
     (
+        "TENGRINEWS",
+        "Tengrinews.kz",
+        "http://en.tengrinews.kz/news.rss",
+        "en",
+        ["logistics", "transport", "corridor", "freight", "railway",
+         "port", "trade", "KTZ", "Aktau", "transit", "BRI", "TMTM",
+         "infrastructure", "cargo", "supply chain"],
+    ),
+    (
         "KAPITAL_KZ",
         "Kapital.kz",
         "https://kapital.kz/rss.xml",

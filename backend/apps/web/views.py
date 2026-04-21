@@ -676,6 +676,29 @@ def _generate_report(report_type, config):
         except Exception as e:
             groq_result = {"error": str(e)}
 
+    # Normalize groq_result — fill all possible keys so templates don't crash
+    _all_keys = [
+        "executive_summary", "executive_brief", "situation", "complication",
+        "key_insight", "risk_level", "corridor_status", "corridor_investment_climate",
+        "risk_rationale", "climate_rationale", "top_events", "recommendation",
+        "kpi_watch", "corridor_assessment", "infrastructure_findings", "trade_flow_impact",
+        "lpi_dimension_assessment", "risk_matrix", "key_findings", "policy_recommendations",
+        "outlook", "data_quality_note", "key_event_title", "key_event_summary",
+        "corridor_nodes_affected", "immediate_impact", "tcd_impact", "secondary_effects",
+        "route_diversion_risk", "stakeholder_implications", "urgent_actions",
+        "monitoring_indicators", "precedent_analysis", "market_sizing", "opportunities",
+        "investment_barriers", "risks_for_investors", "infrastructure_gaps_and_capex",
+        "financial_metrics", "strategic_recommendations", "due_diligence_checklist",
+        "disclaimer", "affected_segments", "comparison",
+    ]
+    for k in _all_keys:
+        if k not in groq_result:
+            groq_result[k] = [] if k in ["top_events","key_findings","policy_recommendations",
+                "risk_matrix","opportunities","urgent_actions","monitoring_indicators",
+                "corridor_nodes_affected","affected_segments","strategic_recommendations",
+                "due_diligence_checklist","infrastructure_gaps_and_capex","kpi_watch",
+                "investment_barriers","risks_for_investors"] else ""
+
     return {
         "type": report_type,
         "config": config,

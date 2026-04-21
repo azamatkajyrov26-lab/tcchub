@@ -234,16 +234,14 @@ def news_feed_view(request):
     if search:
         qs = qs.filter(title__icontains=search)
 
-    # Fetch all (up to 300) then filter/categorize in Python
+    # Fetch and categorize (use public attr — Django templates block _underscore attrs)
     all_items = list(qs[:300])
-
-    # Attach category to each item
     for item in all_items:
-        item._category = _categorize_news(item.title, item.content)
+        item.news_category = _categorize_news(item.title, item.content)
 
     # Filter by category if selected
     if category_code:
-        all_items = [i for i in all_items if i._category == category_code]
+        all_items = [i for i in all_items if i.news_category == category_code]
 
     news_items = all_items[:60]
 
@@ -251,12 +249,10 @@ def news_feed_view(request):
         news_items__isnull=False
     ).distinct().order_by("name")
 
-    # Count per category and attach to category dicts
+    # Count per category for tab badges
     cat_counts = {}
-    all_fetched = list(qs[:300])
-    for item in all_fetched:
-        item._category = _categorize_news(item.title, item.content)
-        cat_counts[item._category] = cat_counts.get(item._category, 0) + 1
+    for item in all_items:
+        cat_counts[item.news_category] = cat_counts.get(item.news_category, 0) + 1
 
     categories_with_counts = [
         {**cat, "count": cat_counts.get(cat["code"], 0)}
@@ -272,7 +268,7 @@ def news_feed_view(request):
         "search": search,
         "categories": categories_with_counts,
         "cat_lookup": _CAT_LOOKUP,
-        "total_count": len(all_fetched),
+        "total_count": len(all_items),
     })
 
 

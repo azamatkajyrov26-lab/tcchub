@@ -125,7 +125,6 @@
   {% if news_items %}
   <div class="nf-grid">
     {% for item in news_items %}
-    {% with cat=cat_lookup|default_if_none:"" %}
     <a href="{{ item.url }}" target="_blank" rel="noopener" class="nf-card">
       <div class="nf-card-top">
         <div class="nf-source">
@@ -139,13 +138,12 @@
       <div class="nf-desc">{{ item.content|truncatechars:120 }}</div>
       {% endif %}
       <div class="nf-footer">
-        {% for category in categories %}{% if category.code == item._category %}
+        {% for category in categories %}{% if category.code == item.news_category %}
         <span class="nf-cat-badge" style="background:{{ category.bg }};color:{{ category.color }}">{{ category.label }}</span>
         {% endif %}{% endfor %}
         <span class="nf-read" style="margin-left:auto">Читать →</span>
       </div>
     </a>
-    {% endwith %}
     {% endfor %}
   </div>
   {% else %}

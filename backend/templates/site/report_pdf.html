@@ -2,10 +2,31 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ report.config.name }} — TCC Analytics</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Montserrat', Arial, sans-serif; font-size: 11pt; color: #1B2A4A; background: #fff; }
+body { font-family: 'Montserrat', Arial, sans-serif; font-size: 11pt; color: #1B2A4A; background: #f8f9fb; }
+
+/* Print bar (hidden on print) */
+.print-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 999; background: #1B2A4A; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; }
+.print-bar-title { color: rgba(255,255,255,.7); font-size: 12px; font-weight: 600; }
+.print-bar-actions { display: flex; gap: 10px; }
+.btn-print { display: inline-flex; align-items: center; gap: 6px; padding: 8px 20px; background: #C6A46D; color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; }
+.btn-back { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.2); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; font-family: inherit; }
+.report-wrap { max-width: 900px; margin: 60px auto 40px; background: #fff; box-shadow: 0 4px 40px rgba(0,0,0,.12); border-radius: 12px; overflow: hidden; }
+
+@media print {
+  .print-bar { display: none !important; }
+  body { background: #fff; }
+  .report-wrap { margin: 0; box-shadow: none; border-radius: 0; max-width: 100%; }
+  .page-break { page-break-before: always; }
+}
+
+@media (max-width: 700px) {
+  .print-bar-title { display: none; }
+}
 
 /* Cover */
 .cover { background: linear-gradient(135deg, #080e1a, #0F1D35 60%, #1B2A4A); color: #fff; padding: 60px 56px; min-height: 280px; position: relative; }
@@ -59,6 +80,20 @@ td { padding: 10px 12px; border-bottom: 1px solid #eef0f4; vertical-align: top; 
 </style>
 </head>
 <body>
+
+<!-- Print toolbar -->
+<div class="print-bar">
+  <div class="print-bar-title">{% if report.config %}{{ report.config.name }}{% endif %} — TCC Analytics</div>
+  <div class="print-bar-actions">
+    <a href="javascript:history.back()" class="btn-back">← Назад к отчёту</a>
+    <button class="btn-print" onclick="window.print()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Сохранить PDF (Ctrl+P)
+    </button>
+  </div>
+</div>
+
+<div class="report-wrap">
 
 {% with r=report g=report.groq %}
 
@@ -190,6 +225,8 @@ td { padding: 10px 12px; border-bottom: 1px solid #eef0f4; vertical-align: top; 
 {% endwith %}
 
 <div class="footer">TransCaspian Cargo · tc-cargo.kz · {{ report.generated_at|date:"d.m.Y" }} · Сгенерировано автоматически системой TCC AI Analytics</div>
+
+</div><!-- /report-wrap -->
 
 </body>
 </html>

@@ -725,19 +725,11 @@ def report_detail_view_custom(request, report_id):
 
 
 def report_pdf_view(request, report_id):
-    """Generate PDF from report data."""
-    from weasyprint import HTML
-    from django.http import HttpResponse
+    """Render print-optimized HTML page — user prints to PDF via browser."""
     report_type = request.GET.get("type", "digest")
     selected = REPORT_TYPES.get(report_type, REPORT_TYPES["digest"])
     report_data = _generate_report(report_type, selected)
-    html_string = render(request, "site/report_pdf.html", {"report": report_data}).content.decode()
-    pdf = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf()
-    response = HttpResponse(pdf, content_type="application/pdf")
-    from django.utils import timezone
-    fname = f"TCC-Report-{report_type}-{timezone.now().strftime('%Y%m%d')}.pdf"
-    response["Content-Disposition"] = f'attachment; filename="{fname}"'
-    return response
+    return render(request, "site/report_pdf.html", {"report": report_data})
 
 
 def solutions_view(request):

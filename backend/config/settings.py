@@ -233,6 +233,9 @@ UNFOLD = {
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
     "THEME": "dark",
+    "STYLES": [
+        lambda request: "/static/css/admin_custom.css",
+    ],
     "COLORS": {
         "primary": {
             "50": "#fdf8ef",

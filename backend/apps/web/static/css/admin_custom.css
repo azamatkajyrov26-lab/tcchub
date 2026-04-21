@@ -1,0 +1,15 @@
+/* Fix sidebar scroll in Unfold admin */
+aside nav,
+[data-sidebar] nav,
+.sidebar nav,
+aside > div > nav,
+aside [class*="navigation"],
+aside [class*="overflow"] {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+aside,
+[data-sidebar] {
+    overflow-y: auto !important;
+}

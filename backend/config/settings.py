@@ -182,6 +182,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.tcc_data.tasks.parse_and_annotate_news",
         "schedule": 7200,  # 2 hours
     },
+    "fetch-rss-news-6h": {
+        "task": "apps.tcc_data.tasks.fetch_rss_news",
+        "schedule": 21600,  # 6 hours
+    },
     "recalculate-scores-6h": {
         "task": "apps.tcc_intelligence.tasks.recalculate_all_route_scores",
         "schedule": 21600,  # 6 hours
@@ -210,6 +214,7 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@tcchub.kz")
 # --- Telegram bot notifications ---
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
+TELEGRAM_ADMIN_IDS = os.getenv("TELEGRAM_ADMIN_IDS", TELEGRAM_CHAT_ID)
 
 # --- File upload limits ---
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB

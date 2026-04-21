@@ -7,6 +7,7 @@ from .views import (
     SanctionEntryViewSet,
     SyncLogViewSet,
     TradeFlowViewSet,
+    live_news_feed,
 )
 
 router = DefaultRouter()
@@ -17,5 +18,6 @@ router.register("trade-flows", TradeFlowViewSet)
 router.register("news", NewsItemViewSet)
 
 urlpatterns = [
+    path("live-news/", live_news_feed, name="live_news_feed"),
     path("", include(router.urls)),
 ]

@@ -242,3 +242,19 @@ def parse_and_annotate_news(self):
         source.save()
         logger.error("News fetch failed: %s", exc)
         raise self.retry(exc=exc)
+
+
+@shared_task(bind=True, max_retries=2, default_retry_delay=120)
+def fetch_rss_news(self):
+    """Парсит новости из RSS-лент логистических изданий (каждые 6 часов)"""
+    from .fetchers.rss_feeds import fetch_all_rss_feeds
+
+    try:
+        result = fetch_all_rss_feeds()
+        logger.info(
+            "RSS news fetch: %d sources, %d new articles",
+            result["sources"], result["total_new"],
+        )
+    except Exception as exc:
+        logger.error("RSS news fetch failed: %s", exc)
+        raise self.retry(exc=exc)

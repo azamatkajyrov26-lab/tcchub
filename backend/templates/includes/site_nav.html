@@ -3,11 +3,11 @@
   <div class="nav-inner">
     <a href="{% url 'landing' %}" class="nav-logo">
       <img src="{% static 'img/tcc_logo.png' %}" alt="TCC">
-      <span class="nav-logo-text" data-i18n="nav.logo">Платформа отраслевой<br>экспертизы</span>
+      <span class="nav-logo-text" data-i18n="nav.logo">Отраслевая<br>экспертиза</span>
     </a>
     <div class="nav-links">
       <a href="{% url 'landing' %}"{% if active_page == 'home' %} class="active"{% endif %} data-i18n="nav.home">ГЛАВНАЯ</a>
-      <a href="{% url 'about' %}"{% if active_page == 'about' %} class="active"{% endif %} data-i18n="nav.about">О ПЛАТФОРМЕ</a>
+      <a href="{% url 'about' %}"{% if active_page == 'about' %} class="active"{% endif %} data-i18n="nav.about">О НАС</a>
       <div class="nav-dropdown">
         <button type="button" class="nav-dropdown-toggle{% if active_page == 'analytics' or active_page == 'reports' or active_page == 'media' %} active{% endif %}"><span data-i18n="nav.knowledge">ЗНАНИЯ</span> <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
         <div class="nav-dropdown-menu">
@@ -17,22 +17,21 @@
         </div>
       </div>
       <div class="nav-dropdown">
-        <button type="button" class="nav-dropdown-toggle{% if active_page == 'solutions' or active_page == 'projects' or active_page == 'partners' %} active{% endif %}"><span data-i18n="nav.business">БИЗНЕС</span> <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <button type="button" class="nav-dropdown-toggle{% if active_page == 'solutions' or active_page == 'projects' or active_page == 'partners' %} active{% endif %}"><span data-i18n="nav.business">БИЗНЕСУ</span> <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
         <div class="nav-dropdown-menu">
           <a href="{% url 'solutions' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7h-4V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg><span data-i18n="nav.solutions">Решения для бизнеса</span></a>
           <a href="{% url 'projects' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg><span data-i18n="nav.projects">Проекты</span></a>
           <a href="{% url 'site_partners' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-i18n="nav.partners">Партнёры</span></a>
         </div>
       </div>
-      <a href="{% url 'education' %}"{% if active_page == 'education' %} class="active"{% endif %} data-i18n="nav.education">ОБРАЗОВАНИЕ</a>
+      <a href="{% url 'education' %}"{% if active_page == 'education' %} class="active"{% endif %} data-i18n="nav.education">ОБУЧЕНИЕ</a>
+      <a href="https://tcchub.kz/" target="_blank" rel="noopener" data-i18n="nav.tcchub" style="color:var(--gold);font-weight:800;display:inline-flex;align-items:center;gap:5px">TCC HUB <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="opacity:.8"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
       <a href="{% url 'contacts' %}"{% if active_page == 'contacts' %} class="active"{% endif %} data-i18n="nav.contacts">КОНТАКТЫ</a>
       <div class="nav-dropdown">
         <button type="button" class="nav-dropdown-toggle"><span data-i18n="nav.tools">ИНСТРУМЕНТЫ</span> <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
         <div class="nav-dropdown-menu">
           <a href="{% url 'wiki' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span data-i18n="nav.wiki">Вики Логист</span></a>
           <a href="{% url 'corridor' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg><span data-i18n="nav.routes">Маршруты</span></a>
-          <a href="{% url 'corridor_map' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><span data-i18n="nav.corridormap">Карта коридоров</span></a>
-          <a href="{% url 'monitoring' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span data-i18n="nav.monitoring">Мониторинг</span></a>
         </div>
       </div>
     </div>
@@ -106,21 +105,20 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
     </button>
     <a href="{% url 'landing' %}" data-i18n="nav.home">Главная</a>
-    <a href="{% url 'about' %}" data-i18n="nav.about">О платформе</a>
+    <a href="{% url 'about' %}" data-i18n="nav.about">О нас</a>
     <div class="mm-section" data-i18n="nav.knowledge">Знания</div>
     <a href="{% url 'site_analytics' %}" class="mm-sub" data-i18n="nav.analytics">Аналитика</a>
     <a href="{% url 'reports_catalog' %}" class="mm-sub" data-i18n="nav.reports">Отчёты</a>
     <a href="{% url 'site_media' %}" class="mm-sub" data-i18n="nav.media">Медиа</a>
-    <div class="mm-section" data-i18n="nav.business">Бизнес</div>
+    <div class="mm-section" data-i18n="nav.business">Бизнесу</div>
     <a href="{% url 'solutions' %}" class="mm-sub" data-i18n="nav.solutions">Решения для бизнеса</a>
     <a href="{% url 'projects' %}" class="mm-sub" data-i18n="nav.projects">Проекты</a>
     <a href="{% url 'site_partners' %}" class="mm-sub" data-i18n="nav.partners">Партнёры</a>
     <div class="mm-section" data-i18n="nav.tools">Инструменты</div>
     <a href="{% url 'wiki' %}" class="mm-sub" data-i18n="nav.wiki">Вики Логист</a>
     <a href="{% url 'corridor' %}" class="mm-sub" data-i18n="nav.routes">Маршруты</a>
-    <a href="{% url 'corridor_map' %}" class="mm-sub" data-i18n="nav.corridormap">Карта коридоров</a>
-    <a href="{% url 'monitoring' %}" class="mm-sub" data-i18n="nav.monitoring">Мониторинг</a>
-    <a href="{% url 'education' %}" data-i18n="nav.education">Образование</a>
+    <a href="{% url 'education' %}" data-i18n="nav.education">Обучение</a>
+    <a href="https://tcchub.kz/" target="_blank" rel="noopener" data-i18n="nav.tcchub" style="color:var(--gold);font-weight:800">TCC HUB ↗</a>
     <a href="{% url 'contacts' %}" data-i18n="nav.contacts">Контакты</a>
     <div class="mm-langs">
       <button type="button" class="active" data-lang="ru" onclick="switchLang('ru')">РУС</button>

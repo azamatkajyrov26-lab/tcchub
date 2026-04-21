@@ -10,6 +10,7 @@ from .models import (
     Page,
     PageSection,
     Partner,
+    SiteItem,
     Testimonial,
 )
 
@@ -101,3 +102,18 @@ class AdvantageAdmin(ModelAdmin):
 @admin.register(ContactInfo)
 class ContactInfoAdmin(ModelAdmin):
     list_display = ["email", "phone", "whatsapp", "address"]
+
+
+@admin.register(SiteItem)
+class SiteItemAdmin(ModelAdmin):
+    list_display = ["title", "category", "subcategory", "order", "is_published"]
+    list_filter = ["category", "subcategory", "is_published"]
+    list_editable = ["order", "is_published"]
+    search_fields = ["title", "subtitle", "description"]
+    fieldsets = (
+        ("Основное", {"fields": ("category", "subcategory", "order", "is_published")}),
+        ("Контент", {"fields": ("title", "subtitle", "description")}),
+        ("Изображение", {"fields": ("image", "image_url")}),
+        ("Ссылка", {"fields": ("url",)}),
+        ("Доп. данные (JSON)", {"fields": ("data",)}),
+    )

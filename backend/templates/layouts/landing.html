@@ -14,6 +14,10 @@
                 <a href="#courses" class="text-gray-400 hover:text-white transition">Курсы</a>
                 <a href="#advantages" class="text-gray-400 hover:text-white transition">Преимущества</a>
                 <a href="#testimonials" class="text-gray-400 hover:text-white transition">Отзывы</a>
+                <a href="https://tcchub.kz/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-primary hover:text-primary-hover font-semibold transition">
+                    TCC HUB
+                    <span class="material-icons-round text-sm leading-none">open_in_new</span>
+                </a>
             </div>
             <div class="hidden md:flex items-center gap-3">
                 {% if user.is_authenticated %}
@@ -35,6 +39,10 @@
             <a href="#courses" @click="open = false" class="block text-gray-400 hover:text-white">Курсы</a>
             <a href="#advantages" @click="open = false" class="block text-gray-400 hover:text-white">Преимущества</a>
             <a href="#testimonials" @click="open = false" class="block text-gray-400 hover:text-white">Отзывы</a>
+            <a href="https://tcchub.kz/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-primary font-semibold">
+                TCC HUB
+                <span class="material-icons-round text-sm">open_in_new</span>
+            </a>
             <hr class="border-white/10">
             {% if user.is_authenticated %}
                 <a href="/dashboard/" class="block px-4 py-2 bg-primary text-dark font-semibold rounded-xl text-center">Кабинет</a>

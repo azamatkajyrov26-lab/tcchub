@@ -28,19 +28,72 @@ from apps.landing.models import (
 _tg_logger = logging.getLogger("tcchub.telegram")
 
 
-def _notify_telegram(text):
-    """Send notification to Telegram bot (non-blocking, fail-silent)."""
+def _tg_request(method, payload):
+    """Low-level Telegram API call."""
     token = getattr(settings, "TELEGRAM_BOT_TOKEN", "") or ""
-    chat_id = getattr(settings, "TELEGRAM_CHAT_ID", "") or ""
-    if not token or not chat_id:
+    if not token:
         return
     try:
-        url = f"https://api.telegram.org/bot{token}/sendMessage"
-        payload = json.dumps({"chat_id": chat_id, "text": text, "parse_mode": "HTML"}).encode()
-        req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
+        url = f"https://api.telegram.org/bot{token}/{method}"
+        data = json.dumps(payload).encode()
+        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
         urllib.request.urlopen(req, timeout=5)
     except Exception as e:
-        _tg_logger.warning("telegram notify failed: %s", e)
+        _tg_logger.warning("telegram api failed (%s): %s", method, e)
+
+
+def _notify_telegram(text, reply_markup=None):
+    """Send notification to all admin chat IDs."""
+    token = getattr(settings, "TELEGRAM_BOT_TOKEN", "") or ""
+    if not token:
+        return
+    admin_ids_raw = getattr(settings, "TELEGRAM_ADMIN_IDS", "") or getattr(settings, "TELEGRAM_CHAT_ID", "") or ""
+    admin_ids = [i.strip() for i in str(admin_ids_raw).split(",") if i.strip()]
+    for chat_id in admin_ids:
+        payload = {"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
+        if reply_markup:
+            payload["reply_markup"] = reply_markup
+        _tg_request("sendMessage", payload)
+
+
+def _tg_send(chat_id, text, reply_markup=None):
+    """Send message to specific chat_id."""
+    payload = {"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
+    if reply_markup:
+        payload["reply_markup"] = reply_markup
+    _tg_request("sendMessage", payload)
+
+
+def _tg_answer_callback(callback_query_id, text=""):
+    _tg_request("answerCallbackQuery", {"callback_query_id": callback_query_id, "text": text})
+
+
+# ── Bot menu keyboards ──────────────────────────────────────────
+_MAIN_KEYBOARD = {
+    "inline_keyboard": [
+        [
+            {"text": "📋 Последние заявки", "callback_data": "leads_recent"},
+            {"text": "📊 Статистика", "callback_data": "stats"},
+        ],
+        [
+            {"text": "🌐 Открыть сайт", "url": "http://tc-cargo.kz"},
+            {"text": "⚙️ Админ-панель", "url": "http://tc-cargo.kz/admin/"},
+        ],
+        [
+            {"text": "📬 Контакты страница", "url": "http://tc-cargo.kz/contacts/"},
+            {"text": "📰 Аналитика", "url": "http://tc-cargo.kz/analytics/"},
+        ],
+    ]
+}
+
+_ADMIN_IDS_CACHE = None
+
+def _get_admin_ids():
+    global _ADMIN_IDS_CACHE
+    if _ADMIN_IDS_CACHE is None:
+        raw = getattr(settings, "TELEGRAM_ADMIN_IDS", "") or getattr(settings, "TELEGRAM_CHAT_ID", "") or ""
+        _ADMIN_IDS_CACHE = set(str(i).strip() for i in str(raw).split(",") if i.strip())
+    return _ADMIN_IDS_CACHE
 
 
 # ──────────────────────────────────────────────
@@ -164,8 +217,121 @@ def contact_submit_view(request):
         f"<b>Сообщение:</b> {message or '—'}\n\n"
         f"#{sub.pk} · {sub.created_at:%d.%m.%Y %H:%M}"
     )
-    _notify_telegram(tg_text)
+    lead_keyboard = {
+        "inline_keyboard": [[
+            {"text": "✅ Обработано", "callback_data": f"lead_done_{sub.pk}"},
+            {"text": "🌐 Сайт", "url": "http://tc-cargo.kz"},
+        ]]
+    }
+    _notify_telegram(tg_text, reply_markup=lead_keyboard)
     return JsonResponse({"ok": True})
+
+
+@csrf_exempt
+def telegram_webhook_view(request):
+    """Telegram bot webhook — handles commands and callbacks."""
+    if request.method != "POST":
+        return HttpResponse("ok")
+    try:
+        update = json.loads(request.body)
+    except Exception:
+        return HttpResponse("bad request", status=400)
+
+    msg = update.get("message") or {}
+    cb = update.get("callback_query") or {}
+
+    # ── Callback query (inline button press) ──
+    if cb:
+        chat_id = str(cb.get("chat", {}).get("id", ""))
+        cb_id = cb.get("id")
+        data = cb.get("data", "")
+        _tg_answer_callback(cb_id)
+
+        if str(chat_id) not in _get_admin_ids():
+            _tg_send(chat_id, "⛔ Нет доступа.")
+            return HttpResponse("ok")
+
+        if data == "stats":
+            from apps.landing.models import ContactSubmission as CS
+            total = CS.objects.count()
+            today = CS.objects.filter(created_at__date=datetime.now().date()).count()
+            _tg_send(chat_id,
+                f"<b>📊 Статистика заявок</b>\n\n"
+                f"Всего заявок: <b>{total}</b>\n"
+                f"Сегодня: <b>{today}</b>",
+                reply_markup=_MAIN_KEYBOARD)
+
+        elif data == "leads_recent":
+            from apps.landing.models import ContactSubmission as CS
+            leads = CS.objects.order_by("-created_at")[:5]
+            if not leads:
+                _tg_send(chat_id, "Заявок пока нет.", reply_markup=_MAIN_KEYBOARD)
+            else:
+                lines = ["<b>📋 Последние 5 заявок:</b>\n"]
+                for l in leads:
+                    lines.append(
+                        f"#{l.pk} · {l.created_at:%d.%m %H:%M}\n"
+                        f"👤 {l.name} | 📞 {l.phone or '—'} | 📧 {l.email or '—'}\n"
+                    )
+                _tg_send(chat_id, "\n".join(lines), reply_markup=_MAIN_KEYBOARD)
+
+        elif data.startswith("lead_done_"):
+            lead_id = data.split("_")[-1]
+            _tg_send(chat_id, f"✅ Заявка #{lead_id} отмечена как обработанная.")
+
+        return HttpResponse("ok")
+
+    # ── Text commands ──
+    chat_id = str(msg.get("chat", {}).get("id", ""))
+    text = (msg.get("text") or "").strip()
+
+    if not chat_id or not text:
+        return HttpResponse("ok")
+
+    if str(chat_id) not in _get_admin_ids():
+        _tg_send(chat_id, "👋 Привет! Этот бот только для администраторов TCC.")
+        return HttpResponse("ok")
+
+    if text.startswith("/start"):
+        from apps.landing.models import ContactSubmission as CS
+        total = CS.objects.count()
+        today = CS.objects.filter(created_at__date=datetime.now().date()).count()
+        _tg_send(chat_id,
+            "👋 <b>TCC HUB — Административный бот</b>\n\n"
+            "Добро пожаловать! Этот бот помогает управлять сайтом "
+            "<b>TransCaspian Cargo</b> и получать уведомления о заявках.\n\n"
+            "<b>Что умеет бот:</b>\n"
+            "📩 Уведомления о новых заявках с сайта\n"
+            "📋 Просмотр последних заявок\n"
+            "📊 Статистика заявок\n"
+            "🔗 Быстрые ссылки на сайт и админ-панель\n\n"
+            f"<b>Статистика сегодня:</b> {today} заявок · Всего: {total}\n\n"
+            "Выберите действие 👇",
+            reply_markup=_MAIN_KEYBOARD)
+
+    elif text.startswith("/zaявки") or text.startswith("/leads"):
+        from apps.landing.models import ContactSubmission as CS
+        leads = CS.objects.order_by("-created_at")[:5]
+        if not leads:
+            _tg_send(chat_id, "Заявок пока нет.")
+        else:
+            lines = ["<b>📋 Последние заявки:</b>\n"]
+            for l in leads:
+                lines.append(f"#{l.pk} · {l.name} | {l.phone or '—'} | {l.created_at:%d.%m %H:%M}")
+            _tg_send(chat_id, "\n".join(lines), reply_markup=_MAIN_KEYBOARD)
+
+    elif text.startswith("/stats"):
+        from apps.landing.models import ContactSubmission as CS
+        total = CS.objects.count()
+        today = CS.objects.filter(created_at__date=datetime.now().date()).count()
+        _tg_send(chat_id, f"📊 Всего заявок: <b>{total}</b>\nСегодня: <b>{today}</b>", reply_markup=_MAIN_KEYBOARD)
+
+    else:
+        _tg_send(chat_id,
+            "Команды:\n/start — меню\n/leads — последние заявки\n/stats — статистика",
+            reply_markup=_MAIN_KEYBOARD)
+
+    return HttpResponse("ok")
 
 
 def wiki_view(request):

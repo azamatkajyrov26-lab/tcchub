@@ -106,6 +106,35 @@ RSS_SOURCES = [
         "en",
         [],  # Kazakhstan-focused, all articles relevant
     ),
+    # ── Google News RSS (aggregates from all news sources) ──────────
+    (
+        "GNEWS_CORRIDOR",
+        "Google News: Средний коридор",
+        "https://news.google.com/rss/search?q=Middle+Corridor+Kazakhstan+logistics&hl=en-US&gl=US&ceid=US:en",
+        "en",
+        [],  # Already filtered by query
+    ),
+    (
+        "GNEWS_TMTM",
+        "Google News: ТМТМ",
+        "https://news.google.com/rss/search?q=TMTM+Trans-Caspian+railway&hl=en-US&gl=US&ceid=US:en",
+        "en",
+        [],
+    ),
+    (
+        "GNEWS_KZ_TRANSPORT",
+        "Google News: Транспорт КЗ",
+        "https://news.google.com/rss/search?q=Kazakhstan+railway+port+Aktau+freight+2025&hl=en-US&gl=US&ceid=US:en",
+        "en",
+        [],
+    ),
+    (
+        "GNEWS_KZ_RU",
+        "Google News: Логистика КЗ (рус)",
+        "https://news.google.com/rss/search?q=%D0%9A%D0%B0%D0%B7%D0%B0%D1%85%D1%81%D1%82%D0%B0%D0%BD+%D0%BB%D0%BE%D0%B3%D0%B8%D1%81%D1%82%D0%B8%D0%BA%D0%B0+%D0%BA%D0%BE%D1%80%D0%B8%D0%B4%D0%BE%D1%80&hl=ru&gl=KZ&ceid=KZ:ru",
+        "ru",
+        [],
+    ),
     (
         "ADB",
         "Asian Development Bank",

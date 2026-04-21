@@ -272,6 +272,30 @@ def news_feed_view(request):
     })
 
 
+@csrf_exempt
+@require_POST
+def news_refresh_view(request):
+    """Trigger RSS fetch + translation tasks, return task IDs."""
+    from apps.tcc_data.tasks import fetch_rss_news, translate_news_to_russian
+    t1 = fetch_rss_news.delay()
+    t2 = translate_news_to_russian.delay()
+    return JsonResponse({"ok": True, "fetch_id": str(t1.id), "translate_id": str(t2.id)})
+
+
+def news_status_view(request):
+    """Return current news stats for progress polling."""
+    from apps.tcc_data.models import NewsItem
+    total = NewsItem.objects.count()
+    translated = NewsItem.objects.filter(ai_processed=True).count()
+    pending = total - translated
+    return JsonResponse({
+        "total": total,
+        "translated": translated,
+        "pending": pending,
+        "pct": round(translated / total * 100) if total else 0,
+    })
+
+
 def solutions_view(request):
     return render(request, "site/solutions.html", {
         "active_page": "solutions",

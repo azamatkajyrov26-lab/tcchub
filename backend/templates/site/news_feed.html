@@ -70,20 +70,45 @@
 </div>
 
 <div class="nf-wrap">
-  <!-- Stats -->
+  <!-- Stats + Refresh -->
   <div class="nf-stats">
     <div class="nf-stat">
-      <div class="nf-stat-val">{{ news_items|length }}</div>
+      <div class="nf-stat-val" id="statTotal">{{ news_items|length }}</div>
       <div class="nf-stat-lbl">Показано</div>
     </div>
     <div class="nf-stat">
       <div class="nf-stat-val">{{ sources|length }}</div>
       <div class="nf-stat-lbl">Источников</div>
     </div>
-    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-mid)">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      Обновляется каждые 6 часов
+    <div class="nf-stat" id="statTranslated" style="display:none">
+      <div class="nf-stat-val" id="statTranslatedVal">—</div>
+      <div class="nf-stat-lbl">Переведено</div>
     </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <!-- Progress bar (hidden until refresh) -->
+      <div id="progressWrap" style="display:none;align-items:center;gap:8px;min-width:200px">
+        <div style="flex:1;height:6px;background:var(--border-light);border-radius:3px;overflow:hidden">
+          <div id="progressBar" style="height:100%;background:var(--gold);border-radius:3px;width:0%;transition:width .5s"></div>
+        </div>
+        <span id="progressText" style="font-size:11px;color:var(--text-mid);white-space:nowrap">0%</span>
+      </div>
+      <button id="refreshBtn" onclick="startRefresh()" style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:var(--navy);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Обновить новости
+      </button>
+    </div>
+  </div>
+
+  <!-- Translation progress bar -->
+  <div id="translateWrap" style="display:none;margin-bottom:16px;padding:14px 20px;background:rgba(198,164,109,.06);border:1px solid rgba(198,164,109,.2);border-radius:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-size:12px;font-weight:700;color:var(--gold-dark)">Авто-перевод на русский</span>
+      <span id="translatePct" style="font-size:12px;color:var(--text-mid)">загрузка...</span>
+    </div>
+    <div style="height:6px;background:var(--border-light);border-radius:3px;overflow:hidden">
+      <div id="translateBar" style="height:100%;background:var(--gold);border-radius:3px;width:0%;transition:width .8s"></div>
+    </div>
+    <p id="translateStatus" style="font-size:11px;color:var(--text-light);margin-top:6px"></p>
   </div>
 
   <!-- Category tabs -->
@@ -134,8 +159,12 @@
         <span class="nf-date">{{ item.published_at|date:"d.m.Y" }}</span>
       </div>
       {% if item.ai_summary_ru %}
+      <div style="display:inline-flex;align-items:center;gap:4px;margin-bottom:6px;padding:2px 8px;background:rgba(198,164,109,.1);border-radius:4px;font-size:9px;font-weight:800;color:var(--gold-dark);text-transform:uppercase;letter-spacing:.06em">
+        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        RU
+      </div>
       <div class="nf-title">{{ item.ai_summary_ru|truncatechars:120 }}</div>
-      <div class="nf-desc" style="color:var(--text-light);font-style:italic">{{ item.title|truncatechars:100 }}</div>
+      <div class="nf-desc" style="font-style:italic">{{ item.title|truncatechars:90 }}</div>
       {% else %}
       <div class="nf-title">{{ item.title }}</div>
       {% if item.content %}
@@ -159,5 +188,88 @@
   </div>
   {% endif %}
 </div>
-<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+#refreshBtn:disabled{opacity:.6;cursor:not-allowed}
+</style>
+<script>
+var refreshing = false;
+var pollTimer = null;
+
+function startRefresh() {
+  if (refreshing) return;
+  refreshing = true;
+  var btn = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Обновляем...';
+
+  document.getElementById('progressWrap').style.display = 'flex';
+  document.getElementById('translateWrap').style.display = 'block';
+  document.getElementById('statTranslated').style.display = '';
+  setProgress(5, 'Запускаем сбор новостей...');
+
+  fetch('/news/refresh/', {method:'POST', headers:{'X-CSRFToken': getCookie('csrftoken')}})
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        setProgress(20, 'Сбор новостей запущен...');
+        pollTimer = setInterval(pollStatus, 3000);
+        setTimeout(() => { setProgress(40, 'Получаем новости из источников...'); }, 5000);
+        setTimeout(() => { setProgress(65, 'Переводим на русский...'); }, 20000);
+        setTimeout(finishRefresh, 60000); // auto-finish after 60s
+      }
+    })
+    .catch(() => finishRefresh());
+}
+
+function pollStatus() {
+  fetch('/news/status/')
+    .then(r => r.json())
+    .then(data => {
+      var pct = data.pct || 0;
+      document.getElementById('statTranslatedVal').textContent = data.translated + '/' + data.total;
+      document.getElementById('translateBar').style.width = pct + '%';
+      document.getElementById('translatePct').textContent = pct + '%';
+      document.getElementById('translateStatus').textContent =
+        'Переведено: ' + data.translated + ' из ' + data.total + ' · Ожидают: ' + data.pending;
+      if (pct >= 95 || data.pending === 0) finishRefresh();
+    });
+}
+
+function setProgress(pct, text) {
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = text;
+}
+
+function finishRefresh() {
+  clearInterval(pollTimer);
+  setProgress(100, 'Готово!');
+  setTimeout(() => {
+    refreshing = false;
+    location.reload();
+  }, 1500);
+}
+
+function getCookie(name) {
+  var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  return v ? v[2] : '';
+}
+
+// Spin animation
+var style = document.createElement('style');
+style.textContent = '@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}';
+document.head.appendChild(style);
+
+// Load status on page open
+fetch('/news/status/').then(r=>r.json()).then(data => {
+  if (data.pending > 0) {
+    document.getElementById('translateWrap').style.display = 'block';
+    document.getElementById('translateBar').style.width = data.pct + '%';
+    document.getElementById('translatePct').textContent = data.pct + '%';
+    document.getElementById('translateStatus').textContent =
+      'Переведено: ' + data.translated + ' из ' + data.total + ' · Ожидают: ' + data.pending;
+    document.getElementById('statTranslated').style.display = '';
+    document.getElementById('statTranslatedVal').textContent = data.translated + '/' + data.total;
+  }
+});
+</script>
 {% endblock %}

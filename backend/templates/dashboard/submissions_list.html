@@ -42,79 +42,47 @@
 </table>
 </div>
 
-<!-- Модальное окно заявки -->
-<div id="subModal" onclick="if(event.target===this)closeModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)">
-  <div style="background:#fff;border-radius:20px;max-width:560px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.2)">
-    <div style="padding:24px 28px 20px;border-bottom:1px solid #eef0f4;display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
-      <div>
-        <div id="modal-name" style="font-size:18px;font-weight:800;color:#0B1628;margin-bottom:4px"></div>
-        <div id="modal-date" style="font-size:12px;color:#64728A"></div>
-      </div>
-      <button onclick="closeModal()" style="width:36px;height:36px;border-radius:50%;border:1px solid #D9DCE4;background:#f8f9fb;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;color:#64728A">&times;</button>
-    </div>
-    <div style="padding:20px 28px">
-      <div style="display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap">
-        <div id="modal-phone" style="display:none;align-items:center;gap:8px;padding:8px 14px;background:#f8f9fb;border-radius:10px;font-size:13px;color:#0B1628">
-          📞 <span id="modal-phone-val"></span>
-        </div>
-        <div id="modal-email" style="display:none;align-items:center;gap:8px;padding:8px 14px;background:#f8f9fb;border-radius:10px;font-size:13px;color:#0B1628">
-          ✉️ <span id="modal-email-val"></span>
-        </div>
-      </div>
-      <div style="font-size:12px;font-weight:700;color:#64728A;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Сообщение</div>
-      <div id="modal-message" style="font-size:15px;color:#0B1628;line-height:1.7;white-space:pre-wrap;background:#f8f9fb;border-radius:12px;padding:16px 20px;min-height:60px"></div>
-    </div>
-    <div style="padding:16px 28px 24px;display:flex;gap:10px">
-      <a id="modal-wa" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#25D366;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.11.547 4.093 1.504 5.818L0 24l6.335-1.632A11.955 11.955 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
-        WhatsApp
-      </a>
-      <a id="modal-tel" href="#" style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#f8f9fb;border:1px solid #D9DCE4;color:#0B1628;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none">
-        📞 Позвонить
-      </a>
-      <button onclick="closeModal()" style="margin-left:auto;padding:10px 18px;border:1px solid #D9DCE4;background:#fff;border-radius:10px;font-size:13px;color:#64728A;cursor:pointer">Закрыть</button>
-    </div>
-  </div>
-</div>
-
 <script>
 function openSubmission(id, name, date, phone, email, message) {
-  document.getElementById('modal-name').textContent = name;
-  document.getElementById('modal-date').textContent = date + ' · Заявка #' + id;
-  document.getElementById('modal-message').textContent = message || '(без сообщения)';
+  // Remove existing modal if any
+  var old = document.getElementById('tcc-sub-modal');
+  if (old) old.remove();
 
-  var phoneEl = document.getElementById('modal-phone');
-  var emailEl = document.getElementById('modal-email');
+  var waLink = phone
+    ? '<a href="https://wa.me/' + phone.replace(/\D/g,'') + '?text=' + encodeURIComponent('Здравствуйте, ' + name + '! Это TCC. По вашей заявке с сайта...') + '" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#25D366;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none">📱 WhatsApp</a>'
+    : '';
+  var telLink = phone
+    ? '<a href="tel:' + phone + '" style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#f8f9fb;border:1px solid #D9DCE4;color:#0B1628;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none">📞 ' + phone + '</a>'
+    : '';
+  var emailLink = email
+    ? '<a href="mailto:' + email + '" style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#f8f9fb;border:1px solid #D9DCE4;color:#0B1628;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none">✉️ ' + email + '</a>'
+    : '';
 
-  if (phone) {
-    document.getElementById('modal-phone-val').textContent = phone;
-    phoneEl.style.display = 'flex';
-    document.getElementById('modal-wa').href = 'https://wa.me/' + phone.replace(/\D/g, '') + '?text=' + encodeURIComponent('Здравствуйте, ' + name + '! Это TCC. По вашей заявке с сайта...');
-    document.getElementById('modal-tel').href = 'tel:' + phone;
-  } else {
-    phoneEl.style.display = 'none';
-    document.getElementById('modal-wa').style.display = 'none';
-    document.getElementById('modal-tel').style.display = 'none';
-  }
+  var html = '<div id="tcc-sub-modal" onclick="if(event.target===this){this.remove();document.body.style.overflow=\'\'}" style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px">'
+    + '<div style="background:#fff;border-radius:20px;max-width:560px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.3);max-height:90vh;overflow-y:auto">'
+    + '<div style="padding:24px 28px 20px;border-bottom:1px solid #eef0f4;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;position:sticky;top:0;background:#fff;border-radius:20px 20px 0 0">'
+    + '<div><div style="font-size:18px;font-weight:800;color:#0B1628;margin-bottom:4px">' + name + '</div>'
+    + '<div style="font-size:12px;color:#64728A">' + date + ' · Заявка #' + id + '</div></div>'
+    + '<button onclick="this.closest(\'#tcc-sub-modal\').remove();document.body.style.overflow=\'\'" style="width:36px;height:36px;border-radius:50%;border:1px solid #D9DCE4;background:#f8f9fb;cursor:pointer;font-size:20px;color:#64728A;line-height:1">&times;</button>'
+    + '</div>'
+    + '<div style="padding:20px 28px">'
+    + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">' + waLink + telLink + emailLink + '</div>'
+    + '<div style="font-size:11px;font-weight:700;color:#64728A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Сообщение</div>'
+    + '<div style="font-size:15px;color:#0B1628;line-height:1.75;white-space:pre-wrap;background:#f8f9fb;border-radius:12px;padding:16px 20px;min-height:60px">' + (message || '<em style="color:#64728A">без сообщения</em>') + '</div>'
+    + '</div>'
+    + '<div style="padding:12px 28px 20px;border-top:1px solid #eef0f4;text-align:right">'
+    + '<button onclick="this.closest(\'#tcc-sub-modal\').remove();document.body.style.overflow=\'\'" style="padding:10px 20px;border:1px solid #D9DCE4;background:#fff;border-radius:10px;font-size:13px;color:#64728A;cursor:pointer">Закрыть</button>'
+    + '</div></div></div>';
 
-  if (email) {
-    document.getElementById('modal-email-val').textContent = email;
-    emailEl.style.display = 'flex';
-  } else {
-    emailEl.style.display = 'none';
-  }
-
-  document.getElementById('subModal').style.display = 'flex';
+  document.body.insertAdjacentHTML('beforeend', html);
   document.body.style.overflow = 'hidden';
 }
 
-function closeModal() {
-  document.getElementById('subModal').style.display = 'none';
-  document.body.style.overflow = '';
-}
-
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Escape') {
+    var m = document.getElementById('tcc-sub-modal');
+    if (m) { m.remove(); document.body.style.overflow = ''; }
+  }
 });
 </script>
 {% endblock %}

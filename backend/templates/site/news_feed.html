@@ -133,9 +133,14 @@
         </div>
         <span class="nf-date">{{ item.published_at|date:"d.m.Y" }}</span>
       </div>
+      {% if item.ai_summary_ru %}
+      <div class="nf-title">{{ item.ai_summary_ru|truncatechars:120 }}</div>
+      <div class="nf-desc" style="color:var(--text-light);font-style:italic">{{ item.title|truncatechars:100 }}</div>
+      {% else %}
       <div class="nf-title">{{ item.title }}</div>
       {% if item.content %}
       <div class="nf-desc">{{ item.content|truncatechars:120 }}</div>
+      {% endif %}
       {% endif %}
       <div class="nf-footer">
         {% for category in categories %}{% if category.code == item.news_category %}

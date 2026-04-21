@@ -186,6 +186,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.tcc_data.tasks.fetch_rss_news",
         "schedule": 21600,  # 6 hours
     },
+    "translate-news-ru-1h": {
+        "task": "apps.tcc_data.tasks.translate_news_to_russian",
+        "schedule": 3600,  # every hour — translates up to 50 new items
+    },
     "recalculate-scores-6h": {
         "task": "apps.tcc_intelligence.tasks.recalculate_all_route_scores",
         "schedule": 21600,  # 6 hours

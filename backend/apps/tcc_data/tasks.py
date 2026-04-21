@@ -258,3 +258,61 @@ def fetch_rss_news(self):
     except Exception as exc:
         logger.error("RSS news fetch failed: %s", exc)
         raise self.retry(exc=exc)
+
+
+@shared_task(bind=True, max_retries=2, default_retry_delay=60)
+def translate_news_to_russian(self):
+    """
+    Translate untranslated English news titles and summaries to Russian.
+    Uses deep-translator (Google Translate, free, no API key).
+    Processes up to 50 items per run to avoid rate limits.
+    """
+    from .models import NewsItem
+
+    try:
+        from deep_translator import GoogleTranslator
+    except ImportError:
+        logger.warning("deep-translator not installed, skipping translation")
+        return {"translated": 0, "skipped": 0}
+
+    translator = GoogleTranslator(source="en", target="ru")
+
+    # Find English news without Russian summary
+    items = NewsItem.objects.filter(
+        language="en",
+        ai_summary_ru="",
+        ai_processed=False,
+    ).order_by("-published_at")[:50]
+
+    translated = 0
+    skipped = 0
+
+    for item in items:
+        try:
+            # Translate title (keep original, add RU version to summary)
+            text_to_translate = item.title
+            if item.content and len(item.content) > 20:
+                # Translate first 300 chars of content as summary
+                snippet = item.content[:300].strip()
+                text_to_translate = f"{item.title}\n\n{snippet}"
+
+            # Google Translate has ~5000 char limit per request
+            if len(text_to_translate) > 4800:
+                text_to_translate = text_to_translate[:4800]
+
+            ru_text = translator.translate(text_to_translate)
+
+            item.ai_summary_ru = ru_text or ""
+            item.ai_processed = True
+            item.save(update_fields=["ai_summary_ru", "ai_processed"])
+            translated += 1
+
+        except Exception as e:
+            logger.warning("Translation failed for news #%s: %s", item.pk, e)
+            # Mark as processed to avoid retry loops on broken items
+            item.ai_processed = True
+            item.save(update_fields=["ai_processed"])
+            skipped += 1
+
+    logger.info("Translation task: %d translated, %d skipped", translated, skipped)
+    return {"translated": translated, "skipped": skipped}

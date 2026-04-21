@@ -16,3 +16,4 @@ WeasyPrint>=62.0,<63.0
 # TCC Analytics Platform (Phase 1)
 requests>=2.32,<3.0
 lxml>=5.3,<6.0
+deep-translator>=1.11,<2.0

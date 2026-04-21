@@ -259,15 +259,15 @@ footer{background:#0F172A;color:#fff;padding:64px 24px 32px}
   .ios-tab.active svg{color:#C6A46D;stroke-width:2.2}
   .ios-tab.active span{color:#C6A46D;font-weight:700}
   .ios-tab:active{transform:scale(.92);opacity:.7}
-  /* Add bottom padding to body for tabbar */
-  body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+  /* Add bottom padding to body for tabbar (auth users only) */
+  body.has-tabbar{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
   /* Hide footer bottom padding adjustment */
   footer{margin-bottom:0}
 }
 </style>
 {% block page_css %}{% endblock %}
 </head>
-<body>
+<body{% if user.is_authenticated %} class="has-tabbar"{% endif %}>
 <div id="tcc-loading-bar"></div>
 
 {% include "includes/site_nav.html" %}
@@ -276,7 +276,8 @@ footer{background:#0F172A;color:#fff;padding:64px 24px 32px}
 
 {% include "includes/site_footer.html" %}
 
-<!-- iOS-style Bottom Tab Bar (mobile only) -->
+<!-- iOS-style Bottom Tab Bar (mobile only, auth users) -->
+{% if user.is_authenticated %}
 <nav class="ios-tabbar" id="iosTabbar">
   <a href="{% url 'landing' %}" class="ios-tab{% if active_page == 'home' %} active{% endif %}">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -299,6 +300,7 @@ footer{background:#0F172A;color:#fff;padding:64px 24px 32px}
     <span>Ещё</span>
   </button>
 </nav>
+{% endif %}
 
 <script>
 (function(){

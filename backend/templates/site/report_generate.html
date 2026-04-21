@@ -123,8 +123,6 @@
 
   <!-- Stats Bar -->
   <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:32px">
-    {% for label, val, color in report.stats|items %}
-    {% endfor %}
     <div style="background:#fff;border:1px solid var(--border-light);border-radius:14px;padding:16px;text-align:center">
       <div style="font-size:24px;font-weight:900;color:var(--navy)">{{ report.stats.total_period }}</div>
       <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Статей за период</div>

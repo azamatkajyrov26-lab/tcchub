@@ -276,12 +276,30 @@ def scrape_and_analyze_with_groq(self):
         logger.warning("GROQ_API_KEY not set, skipping Groq analysis")
         return {"analyzed": 0, "skipped": 0, "reason": "no_api_key"}
 
-    try:
-        from groq import Groq
-        groq_client = Groq(api_key=groq_key)
-    except ImportError:
-        logger.warning("groq package not installed")
-        return {"analyzed": 0, "skipped": 0}
+    import requests as _req
+
+    def groq_analyze(text: str) -> dict:
+        """Call Groq API via requests (more reliable than groq package)."""
+        resp = _req.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {groq_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": "llama-3.3-70b-versatile",
+                "messages": [
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": text},
+                ],
+                "response_format": {"type": "json_object"},
+                "temperature": 0.3,
+                "max_tokens": 400,
+            },
+            timeout=20,
+        )
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"]
 
     # newspaper4k for scraping full text
     try:
@@ -335,19 +353,8 @@ def scrape_and_analyze_with_groq(self):
             # Limit text for Groq
             text_for_groq = (item.title + "\n\n" + article_text)[:3000]
 
-            # Step 2: Groq analysis
-            response = groq_client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": f"Заголовок: {item.title}\n\nТекст: {article_text[:2500]}"}
-                ],
-                response_format={"type": "json_object"},
-                temperature=0.3,
-                max_tokens=400,
-            )
-
-            raw = response.choices[0].message.content
+            # Step 2: Groq analysis via requests
+            raw = groq_analyze(f"Заголовок: {item.title}\n\nТекст: {article_text[:2500]}")
             data = json.loads(raw)
 
             item.groq_score = float(data.get("score", 0))

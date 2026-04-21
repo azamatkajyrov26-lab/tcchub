@@ -52,7 +52,80 @@
 .nf-stat-lbl{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
 
 @media(max-width:900px){.nf-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:600px){.nf-grid{grid-template-columns:1fr}.nf-stats{gap:16px}.nf-stat-val{font-size:18px}}
+@media(max-width:768px){
+  /* ── iOS Mobile News Redesign ── */
+  .news-hero{padding:80px 16px 32px}
+  .news-hero h1{font-size:24px;letter-spacing:-.03em}
+  .news-hero p{font-size:13px;line-height:1.6}
+  .nf-wrap{padding:20px 16px 32px}
+
+  /* Stats as iOS-style compact pills */
+  .nf-stats{
+    display:flex;gap:8px;margin-bottom:16px;padding:0;background:none;border:none;border-radius:0;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none
+  }
+  .nf-stats::-webkit-scrollbar{display:none}
+  .nf-stat{
+    flex-shrink:0;background:#fff;border:1px solid rgba(27,42,74,.06);border-radius:14px;
+    padding:10px 16px;min-width:90px;box-shadow:0 1px 4px rgba(0,0,0,.04)
+  }
+  .nf-stat-val{font-size:20px}
+  .nf-stat-lbl{font-size:9px;margin-top:1px}
+
+  /* Category tabs — horizontal scroll like iOS segmented */
+  .cat-tabs{
+    display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    padding-bottom:12px;margin-bottom:12px;scrollbar-width:none;-ms-overflow-style:none
+  }
+  .cat-tabs::-webkit-scrollbar{display:none}
+  .cat-tab{flex-shrink:0;padding:8px 14px;border-radius:20px;font-size:11px;white-space:nowrap}
+
+  /* Search — iOS-style search bar */
+  .nf-filters{flex-direction:column;gap:10px;margin-bottom:16px}
+  .nf-search{min-width:100%;flex:none}
+  .nf-search input{
+    border-radius:14px;padding:12px 16px 12px 40px;font-size:15px;
+    background:#F2F2F7;border-color:transparent;min-height:44px
+  }
+  .nf-search input:focus{background:#fff;border-color:rgba(198,164,109,.4)}
+
+  /* Source filter pills — horizontal scroll */
+  .nf-sources{
+    display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;-ms-overflow-style:none;padding-bottom:2px
+  }
+  .nf-sources::-webkit-scrollbar{display:none}
+  .src-btn{flex-shrink:0;padding:8px 14px;border-radius:20px;font-size:11px;white-space:nowrap;min-height:36px}
+
+  /* News grid — single column, card-style like iOS */
+  .nf-grid{grid-template-columns:1fr;gap:12px}
+  .nf-card{
+    padding:16px;border-radius:16px;gap:8px;
+    border-color:rgba(0,0,0,.06);
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .15s ease,box-shadow .15s ease
+  }
+  .nf-card:active{transform:scale(.98);box-shadow:none}
+  .nf-card:hover{transform:none;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .nf-title{font-size:15px;line-height:1.4;-webkit-line-clamp:2}
+  .nf-desc{font-size:13px;line-height:1.5;-webkit-line-clamp:2}
+  .nf-footer{padding-top:8px}
+  .nf-source-name{font-size:10px}
+  .nf-date{font-size:10px}
+  .nf-read{font-size:11px}
+
+  /* Hero quick-nav buttons — full width */
+  .news-hero [style*="flex-direction:column"]{width:100%;flex-shrink:1!important}
+  .news-hero [style*="flex-direction:column"] a{width:100%;justify-content:center}
+
+  /* Refresh button area — iOS style */
+  #refreshBtn{
+    border-radius:12px;padding:10px 18px;font-size:12px;min-height:40px;
+    background:var(--navy);width:100%
+  }
+}
+@media(max-width:600px){.nf-grid{grid-template-columns:1fr}.nf-stats{gap:8px}.nf-stat-val{font-size:18px}}
 </style>
 {% endblock %}
 

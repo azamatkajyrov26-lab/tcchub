@@ -236,6 +236,34 @@ footer{background:#0F172A;color:#fff;padding:64px 24px 32px}
   .cta-banner{padding:32px 14px}
   .section-title{font-size:clamp(20px,5vw,28px)}
 }
+/* ── iOS-style Bottom Tab Bar ── */
+.ios-tabbar{display:none}
+@media(max-width:768px){
+  .ios-tabbar{
+    display:flex;position:fixed;bottom:0;left:0;right:0;z-index:9980;
+    background:rgba(255,255,255,.92);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);
+    border-top:0.5px solid rgba(0,0,0,.12);
+    padding:6px 0 calc(6px + env(safe-area-inset-bottom));
+    justify-content:space-around;align-items:center;
+    box-shadow:0 -1px 12px rgba(0,0,0,.04)
+  }
+  .ios-tab{
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    background:none;border:none;cursor:pointer;font-family:inherit;
+    text-decoration:none;padding:4px 12px;border-radius:12px;
+    transition:all .2s ease;min-width:56px;
+    -webkit-tap-highlight-color:transparent
+  }
+  .ios-tab svg{color:#8E8E93;transition:color .2s}
+  .ios-tab span{font-size:10px;font-weight:600;color:#8E8E93;letter-spacing:-.01em;transition:color .2s}
+  .ios-tab.active svg{color:#C6A46D;stroke-width:2.2}
+  .ios-tab.active span{color:#C6A46D;font-weight:700}
+  .ios-tab:active{transform:scale(.92);opacity:.7}
+  /* Add bottom padding to body for tabbar */
+  body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+  /* Hide footer bottom padding adjustment */
+  footer{margin-bottom:0}
+}
 </style>
 {% block page_css %}{% endblock %}
 </head>
@@ -247,6 +275,30 @@ footer{background:#0F172A;color:#fff;padding:64px 24px 32px}
 {% block content %}{% endblock %}
 
 {% include "includes/site_footer.html" %}
+
+<!-- iOS-style Bottom Tab Bar (mobile only) -->
+<nav class="ios-tabbar" id="iosTabbar">
+  <a href="{% url 'landing' %}" class="ios-tab{% if active_page == 'home' %} active{% endif %}">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Главная</span>
+  </a>
+  <a href="{% url 'news_feed' %}" class="ios-tab{% if active_page == 'news' %} active{% endif %}">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10l6 6v8a2 2 0 0 1-2 2z"/><line x1="7" y1="13" x2="17" y2="13"/><line x1="7" y1="17" x2="14" y2="17"/></svg>
+    <span>Новости</span>
+  </a>
+  <a href="{% url 'site_analytics' %}" class="ios-tab{% if active_page == 'analytics' %} active{% endif %}">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+    <span>Аналитика</span>
+  </a>
+  <a href="{% url 'education' %}" class="ios-tab{% if active_page == 'education' %} active{% endif %}">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    <span>Обучение</span>
+  </a>
+  <button type="button" class="ios-tab" id="iosTabMore" onclick="document.getElementById('navBurger').click()">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+    <span>Ещё</span>
+  </button>
+</nav>
 
 <script>
 (function(){

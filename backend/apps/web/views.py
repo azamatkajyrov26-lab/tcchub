@@ -362,6 +362,256 @@ def news_analysis_view(request):
     })
 
 
+REPORT_TYPES = {
+    "digest": {
+        "name": "Еженедельный дайджест",
+        "desc": "Краткий обзор ключевых событий за неделю. Формат McKinsey Pyramid: Ситуация → Проблема → Вывод.",
+        "days": 7,
+        "style": "digest",
+        "standard": "McKinsey Pyramid Principle",
+    },
+    "analytical": {
+        "name": "Аналитический отчёт",
+        "desc": "Полный анализ за месяц по стандарту ADB/World Bank: Executive Summary + Corridor Analysis + Risk Matrix.",
+        "days": 30,
+        "style": "analytical",
+        "standard": "ADB Central Asia Transport Report Format",
+    },
+    "event": {
+        "name": "Событийный отчёт",
+        "desc": "Анализ конкретного события и его влияния на маршрут. Формат: Факт → Влияние → Рекомендации.",
+        "days": 3,
+        "style": "event",
+        "standard": "OECD Policy Brief Format",
+    },
+    "investment": {
+        "name": "Инвестиционный брифинг",
+        "desc": "Квартальный обзор для инвесторов и партнёров. Стандарт SCOR + World Bank LPI методология.",
+        "days": 90,
+        "style": "investment",
+        "standard": "World Bank / IFC Investment Brief",
+    },
+}
+
+
+def report_generate_view(request):
+    """Report generation page — select type and generate."""
+    from apps.tcc_data.models import NewsItem
+    from django.db.models import Count, Avg
+
+    report_type = request.GET.get("type", "")
+    selected = REPORT_TYPES.get(report_type)
+
+    context = {
+        "active_page": "news",
+        "report_types": REPORT_TYPES,
+        "selected_type": report_type,
+        "selected": selected,
+        "total_news": NewsItem.objects.count(),
+        "analyzed_news": NewsItem.objects.filter(groq_processed=True).count(),
+    }
+
+    if report_type and selected and request.method == "POST":
+        # Generate report with Groq
+        report_data = _generate_report(report_type, selected)
+        context["report"] = report_data
+        context["generating"] = False
+    elif report_type and selected and request.method == "GET" and request.GET.get("generate"):
+        report_data = _generate_report(report_type, selected)
+        context["report"] = report_data
+
+    return render(request, "site/report_generate.html", context)
+
+
+def _generate_report(report_type, config):
+    """Generate report content using Groq + DB data."""
+    import os, json, requests as _req
+    from apps.tcc_data.models import NewsItem
+    from django.db.models import Count, Avg, Q
+    from django.utils import timezone
+    from datetime import timedelta
+
+    groq_key = os.getenv("GROQ_API_KEY", "")
+    days = config["days"]
+    since = timezone.now() - timedelta(days=days)
+
+    # Gather data
+    all_items = NewsItem.objects.filter(
+        groq_processed=True, groq_score__isnull=False,
+        published_at__gte=since
+    ).select_related("source").order_by("-groq_score")
+
+    total_period = NewsItem.objects.filter(published_at__gte=since).count()
+    analyzed = all_items.count()
+    avg_score = all_items.aggregate(Avg("groq_score"))["groq_score__avg"] or 0
+    critical = all_items.filter(groq_score__gte=8)
+    high = all_items.filter(groq_score__gte=6, groq_score__lt=8)
+    medium = all_items.filter(groq_score__gte=4, groq_score__lt=6)
+
+    impact_types = list(
+        all_items.values("groq_impact_type").annotate(c=Count("id")).order_by("-c")[:6]
+    )
+
+    top_articles = list(all_items.filter(groq_score__gte=5)[:10].values(
+        "title", "groq_score", "groq_impact_type",
+        "groq_summary_ru", "groq_affected_nodes",
+        "url", "published_at", "source__name"
+    ))
+
+    # Prepare headlines for Groq
+    headlines = "\n".join([
+        f"[{a['groq_score']}/10] {a['title']} ({a['groq_impact_type'] or 'прочее'})"
+        for a in top_articles[:15]
+    ])
+
+    # Groq prompts per report type
+    prompts = {
+        "digest": f"""Ты — аналитик Транскаспийского коридора. Напиши ЕЖЕНЕДЕЛЬНЫЙ ДАЙДЖЕСТ по стандарту McKinsey Pyramid.
+
+Данные за {days} дней: проанализировано {analyzed} статей, средний балл влияния {avg_score:.1f}/10.
+
+Ключевые события (топ):
+{headlines}
+
+Структура ответа (JSON):
+{{
+  "executive_summary": "2-3 предложения — главный вывод недели",
+  "situation": "Что происходит на Среднем коридоре прямо сейчас (3-4 предложения)",
+  "complication": "Какие проблемы/угрозы возникли (2-3 предложения)",
+  "key_insight": "Главный вывод аналитика (1-2 предложения)",
+  "risk_level": "ВЫСОКИЙ/СРЕДНИЙ/НИЗКИЙ",
+  "risk_rationale": "Почему такой уровень риска (2 предложения)",
+  "top_events": ["событие 1", "событие 2", "событие 3"],
+  "recommendation": "Что рекомендуется бизнесу прямо сейчас (2-3 предложения)"
+}}""",
+
+        "analytical": f"""Ты — старший аналитик логистики. Напиши АНАЛИТИЧЕСКИЙ ОТЧЁТ по стандарту ADB/World Bank.
+
+Данные за {days} дней: {total_period} статей собрано, {analyzed} проанализировано ИИ, средний балл {avg_score:.1f}/10.
+Критичные события: {critical.count()}, Высокий приоритет: {high.count()}, Средний: {medium.count()}.
+
+Ключевые события:
+{headlines}
+
+Структура ответа (JSON):
+{{
+  "executive_summary": "3-4 предложения — ключевые выводы периода",
+  "corridor_status": "НОРМАЛЬНЫЙ/НАПРЯЖЁННЫЙ/КРИТИЧЕСКИЙ",
+  "corridor_assessment": "Оценка состояния коридора (4-5 предложений)",
+  "infrastructure_findings": "Инфраструктурные изменения за период (3-4 предложения)",
+  "trade_flow_impact": "Влияние на торговые потоки (3-4 предложения)",
+  "risk_matrix": [
+    {{"risk": "название риска", "probability": "ВЫСОКАЯ/СРЕДНЯЯ/НИЗКАЯ", "impact": "ВЫСОКИЙ/СРЕДНИЙ/НИЗКИЙ", "description": "описание"}},
+    {{"risk": "название риска", "probability": "СРЕДНЯЯ", "impact": "ВЫСОКИЙ", "description": "описание"}}
+  ],
+  "key_findings": ["находка 1", "находка 2", "находка 3", "находка 4"],
+  "policy_recommendations": ["рекомендация 1", "рекомендация 2", "рекомендация 3"],
+  "outlook": "Прогноз на следующий период (2-3 предложения)",
+  "data_quality_note": "Примечание о качестве данных"
+}}""",
+
+        "event": f"""Ты — аналитик кризисных ситуаций. Напиши СОБЫТИЙНЫЙ ОТЧЁТ в формате OECD Policy Brief.
+
+Данные за {days} дней: {analyzed} событий проанализировано.
+Наиболее критичные:
+{headlines}
+
+Структура ответа (JSON):
+{{
+  "key_event_title": "Название главного события",
+  "key_event_summary": "Что произошло (3-4 предложения)",
+  "immediate_impact": "Немедленное влияние на коридор (2-3 предложения)",
+  "affected_segments": ["сегмент 1", "сегмент 2"],
+  "secondary_effects": "Вторичные эффекты через 1-4 недели (2 предложения)",
+  "comparison": "Как это соотносится с предыдущими событиями такого рода (2 предложения)",
+  "stakeholder_implications": {{"грузоотправители": "...", "перевозчики": "...", "государство": "..."}},
+  "urgent_actions": ["действие 1", "действие 2"],
+  "monitoring_indicators": ["что отслеживать 1", "что отслеживать 2"]
+}}""",
+
+        "investment": f"""Ты — аналитик для инвесторов. Напиши ИНВЕСТИЦИОННЫЙ БРИФИНГ по стандарту World Bank/IFC.
+
+Данные за {days} дней: {total_period} статей, средний риск-балл {avg_score:.1f}/10.
+
+Ключевые события:
+{headlines}
+
+Структура ответа (JSON):
+{{
+  "executive_brief": "Главный вывод для инвесторов (2-3 предложения)",
+  "corridor_investment_climate": "БЛАГОПРИЯТНЫЙ/НЕЙТРАЛЬНЫЙ/НЕБЛАГОПРИЯТНЫЙ",
+  "climate_rationale": "Почему такой климат (3 предложения)",
+  "opportunities": ["возможность 1", "возможность 2", "возможность 3"],
+  "risks_for_investors": ["риск 1", "риск 2", "риск 3"],
+  "infrastructure_gaps": ["потребность 1", "потребность 2"],
+  "key_metrics": {{"объём_транзита": "тренд", "тарифы": "тренд", "транзитное_время": "тренд"}},
+  "strategic_recommendations": ["рекомендация 1", "рекомендация 2"],
+  "disclaimer": "Стандартный дисклеймер об аналитическом отчёте"
+}}""",
+    }
+
+    # Call Groq
+    groq_result = {}
+    if groq_key and report_type in prompts:
+        try:
+            resp = _req.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
+                json={
+                    "model": "llama-3.3-70b-versatile",
+                    "messages": [{"role": "user", "content": prompts[report_type]}],
+                    "response_format": {"type": "json_object"},
+                    "temperature": 0.4,
+                    "max_tokens": 1500,
+                },
+                timeout=30,
+            )
+            if resp.status_code == 200:
+                groq_result = json.loads(resp.json()["choices"][0]["message"]["content"])
+        except Exception as e:
+            groq_result = {"error": str(e)}
+
+    return {
+        "type": report_type,
+        "config": config,
+        "generated_at": timezone.now(),
+        "period_days": days,
+        "stats": {
+            "total_period": total_period,
+            "analyzed": analyzed,
+            "avg_score": round(avg_score, 1),
+            "critical_count": critical.count(),
+            "high_count": high.count(),
+            "medium_count": medium.count(),
+        },
+        "impact_types": impact_types,
+        "top_articles": top_articles,
+        "groq": groq_result,
+        "has_ai": bool(groq_result and "error" not in groq_result),
+    }
+
+
+def report_detail_view_custom(request, report_id):
+    """Placeholder — redirect to generate."""
+    return redirect("report_generate")
+
+
+def report_pdf_view(request, report_id):
+    """Generate PDF from report data."""
+    from weasyprint import HTML
+    from django.http import HttpResponse
+    report_type = request.GET.get("type", "digest")
+    selected = REPORT_TYPES.get(report_type, REPORT_TYPES["digest"])
+    report_data = _generate_report(report_type, selected)
+    html_string = render(request, "site/report_pdf.html", {"report": report_data}).content.decode()
+    pdf = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf()
+    response = HttpResponse(pdf, content_type="application/pdf")
+    from django.utils import timezone
+    fname = f"TCC-Report-{report_type}-{timezone.now().strftime('%Y%m%d')}.pdf"
+    response["Content-Disposition"] = f'attachment; filename="{fname}"'
+    return response
+
+
 def solutions_view(request):
     return render(request, "site/solutions.html", {
         "active_page": "solutions",

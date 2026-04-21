@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Montserrat', Arial, sans-serif; font-size: 11pt; color: #1B2A4A; background: #fff; }
+
+/* Cover */
+.cover { background: linear-gradient(135deg, #080e1a, #0F1D35 60%, #1B2A4A); color: #fff; padding: 60px 56px; min-height: 280px; position: relative; }
+.cover-std { font-size: 9pt; font-weight: 800; color: rgba(198,164,109,.7); letter-spacing: .15em; text-transform: uppercase; margin-bottom: 16px; }
+.cover h1 { font-size: 28pt; font-weight: 900; margin-bottom: 10px; }
+.cover-sub { font-size: 11pt; color: rgba(255,255,255,.55); margin-bottom: 24px; }
+.cover-meta { font-size: 9pt; color: rgba(255,255,255,.4); border-top: 1px solid rgba(255,255,255,.1); padding-top: 16px; margin-top: 24px; }
+.gold { color: #C6A46D; }
+
+/* Sections */
+.page-break { page-break-before: always; }
+.section { padding: 28px 40px; border-bottom: 1px solid #eef0f4; }
+.section h2 { font-size: 14pt; font-weight: 900; color: #1B2A4A; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #C6A46D; }
+.section h3 { font-size: 11pt; font-weight: 800; color: #1B2A4A; margin: 14px 0 8px; }
+p { line-height: 1.7; margin-bottom: 10px; color: #3D5070; }
+
+/* Stats bar */
+.stats-bar { display: flex; gap: 0; background: #f8f9fb; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+.stat-item { flex: 1; padding: 16px; text-align: center; border-right: 1px solid #e5e7eb; }
+.stat-item:last-child { border-right: none; }
+.stat-val { font-size: 20pt; font-weight: 900; color: #C6A46D; }
+.stat-lbl { font-size: 8pt; color: #7A8BA8; text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
+
+/* Finding / Rec boxes */
+.finding { padding: 10px 14px; background: rgba(198,164,109,.08); border-left: 3px solid #C6A46D; border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 10.5pt; color: #1B2A4A; line-height: 1.6; }
+.rec { padding: 10px 14px; background: #f0fdf4; border-left: 3px solid #10B981; border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 10.5pt; color: #1B2A4A; line-height: 1.6; }
+.risk-high { color: #EF4444; font-weight: 800; }
+.risk-mid { color: #F59E0B; font-weight: 800; }
+.risk-low { color: #10B981; font-weight: 800; }
+
+/* Risk table */
+table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+th { background: #f8f9fb; padding: 8px 12px; font-size: 9pt; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #7A8BA8; text-align: left; border-bottom: 2px solid #e5e7eb; }
+td { padding: 10px 12px; border-bottom: 1px solid #eef0f4; vertical-align: top; }
+
+/* Article list */
+.art-item { padding: 10px 0; border-bottom: 1px solid #eef0f4; display: flex; gap: 12px; }
+.art-score-box { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12pt; font-weight: 900; flex-shrink: 0; }
+.art-title-pdf { font-size: 11pt; font-weight: 700; color: #1B2A4A; }
+.art-meta-pdf { font-size: 9pt; color: #7A8BA8; }
+.art-summary-pdf { font-size: 10pt; color: #3D5070; margin-top: 3px; }
+
+/* Footer */
+.footer { font-size: 8pt; color: #94A3B8; text-align: center; padding: 16px; border-top: 1px solid #eef0f4; }
+
+/* Risk badge */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 8pt; font-weight: 800; }
+.badge-red { background: rgba(239,68,68,.1); color: #EF4444; }
+.badge-yellow { background: rgba(245,158,11,.1); color: #F59E0B; }
+.badge-green { background: rgba(16,185,129,.1); color: #10B981; }
+</style>
+</head>
+<body>
+
+{% with r=report g=report.groq %}
+
+<!-- Cover Page -->
+<div class="cover">
+  <div class="cover-std">TransCaspian Cargo · {{ r.config.standard }}</div>
+  <h1>{{ r.config.name }}</h1>
+  <div class="cover-sub">Анализ влияния на Транскаспийский (Средний) коридор</div>
+  <div class="cover-meta">
+    Период: последние {{ r.period_days }} дней &nbsp;·&nbsp;
+    Дата: {{ r.generated_at|date:"d.m.Y" }} &nbsp;·&nbsp;
+    Источник ИИ: Groq Llama 3.3 70B &nbsp;·&nbsp;
+    Статей проанализировано: {{ r.stats.analyzed }}
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="section">
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-val">{{ r.stats.total_period }}</div><div class="stat-lbl">Статей за период</div></div>
+    <div class="stat-item"><div class="stat-val" style="color:#C6A46D">{{ r.stats.analyzed }}</div><div class="stat-lbl">Проанализировано</div></div>
+    <div class="stat-item"><div class="stat-val" style="color:#10B981">{{ r.stats.avg_score }}</div><div class="stat-lbl">Ср. балл коридора</div></div>
+    <div class="stat-item"><div class="stat-val" style="color:#EF4444">{{ r.stats.critical_count }}</div><div class="stat-lbl">Критичных (≥8)</div></div>
+    <div class="stat-item"><div class="stat-val" style="color:#F59E0B">{{ r.stats.high_count }}</div><div class="stat-lbl">Высокий (≥6)</div></div>
+  </div>
+</div>
+
+<!-- Executive Summary -->
+{% if g.executive_summary or g.executive_brief %}
+<div class="section">
+  <h2>Executive Summary</h2>
+  <p style="font-size:12pt;font-weight:600;color:#1B2A4A">{{ g.executive_summary|default:g.executive_brief }}</p>
+  {% if g.risk_level or g.corridor_status %}<p><strong>Уровень риска коридора: {{ g.risk_level|default:g.corridor_status|default:g.corridor_investment_climate }}</strong></p>{% endif %}
+  {% if g.risk_rationale or g.climate_rationale %}<p>{{ g.risk_rationale|default:g.climate_rationale }}</p>{% endif %}
+</div>
+{% endif %}
+
+<!-- Main Analysis -->
+{% if g.situation %}
+<div class="section">
+  <h2>Ситуация на коридоре</h2>
+  <p>{{ g.situation }}</p>
+  {% if g.complication %}<h3>Осложнение</h3><p>{{ g.complication }}</p>{% endif %}
+  {% if g.key_insight %}<div class="finding"><strong>Ключевой вывод:</strong> {{ g.key_insight }}</div>{% endif %}
+</div>
+{% endif %}
+
+{% if g.corridor_assessment %}
+<div class="section">
+  <h2>Оценка коридора</h2>
+  <p>{{ g.corridor_assessment }}</p>
+  {% if g.infrastructure_findings %}<h3>Инфраструктура</h3><p>{{ g.infrastructure_findings }}</p>{% endif %}
+  {% if g.trade_flow_impact %}<h3>Торговые потоки</h3><p>{{ g.trade_flow_impact }}</p>{% endif %}
+</div>
+{% endif %}
+
+<!-- Risk Matrix -->
+{% if g.risk_matrix %}
+<div class="section page-break">
+  <h2>Матрица рисков</h2>
+  <table>
+    <thead><tr><th>Риск</th><th>Вероятность</th><th>Влияние</th><th>Описание</th></tr></thead>
+    <tbody>
+      {% for risk in g.risk_matrix %}
+      <tr>
+        <td><strong>{{ risk.risk }}</strong></td>
+        <td class="{% if risk.probability == 'ВЫСОКАЯ' %}risk-high{% elif risk.probability == 'СРЕДНЯЯ' %}risk-mid{% else %}risk-low{% endif %}">{{ risk.probability }}</td>
+        <td class="{% if risk.impact == 'ВЫСОКИЙ' %}risk-high{% elif risk.impact == 'СРЕДНИЙ' %}risk-mid{% else %}risk-low{% endif %}">{{ risk.impact }}</td>
+        <td>{{ risk.description }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<!-- Findings & Recommendations -->
+{% if g.key_findings %}
+<div class="section">
+  <h2>Ключевые выводы</h2>
+  {% for f in g.key_findings %}<div class="finding">{{ f }}</div>{% endfor %}
+  {% for e in g.top_events %}<div class="finding">{{ e }}</div>{% endfor %}
+</div>
+{% endif %}
+
+{% if g.policy_recommendations or g.recommendation or g.strategic_recommendations %}
+<div class="section">
+  <h2>Рекомендации</h2>
+  {% if g.recommendation %}<div class="rec">{{ g.recommendation }}</div>{% endif %}
+  {% for r in g.policy_recommendations %}<div class="rec">{{ r }}</div>{% endfor %}
+  {% for r in g.strategic_recommendations %}<div class="rec">{{ r }}</div>{% endfor %}
+  {% for r in g.urgent_actions %}<div class="rec">⚡ {{ r }}</div>{% endfor %}
+</div>
+{% endif %}
+
+{% if g.outlook %}
+<div class="section">
+  <h2>Прогноз</h2>
+  <p>{{ g.outlook }}</p>
+</div>
+{% endif %}
+
+<!-- Top Articles -->
+{% if report.top_articles %}
+<div class="section page-break">
+  <h2>Источники данных</h2>
+  {% for art in report.top_articles %}
+  <div class="art-item">
+    <div class="art-score-box" style="background:{% if art.groq_score >= 8 %}rgba(239,68,68,.12){% elif art.groq_score >= 6 %}rgba(245,158,11,.12){% else %}rgba(16,185,129,.12){% endif %};color:{% if art.groq_score >= 8 %}#EF4444{% elif art.groq_score >= 6 %}#F59E0B{% else %}#10B981{% endif %}">{{ art.groq_score|floatformat:0 }}</div>
+    <div>
+      <div class="art-meta-pdf">{{ art.source__name }} · {{ art.published_at|date:"d.m.Y" }} · {{ art.groq_impact_type }}</div>
+      <div class="art-title-pdf">{{ art.title }}</div>
+      {% if art.groq_summary_ru %}<div class="art-summary-pdf">{{ art.groq_summary_ru|truncatechars:200 }}</div>{% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Methodology -->
+<div class="section">
+  <h2>Методология</h2>
+  <p>Отчёт сформирован автоматически на основе {{ report.stats.total_period }} статей из международных источников за {{ report.period_days }} дней.
+  ИИ-оценка произведена моделью Groq Llama 3.3 70B по шкале 0-10 (влияние на Транскаспийский Средний коридор).
+  Стандарт отчётности: <strong>{{ report.config.standard }}</strong>.</p>
+  <p style="font-size:9pt;color:#94A3B8">ДИСКЛЕЙМЕР: Данный отчёт сгенерирован автоматически и не является инвестиционной рекомендацией. TransCaspian Cargo не несёт ответственности за решения, принятые на его основании. © {{ report.generated_at|date:"Y" }} TransCaspian Cargo. Все права защищены.</p>
+</div>
+
+{% endwith %}
+
+<div class="footer">TransCaspian Cargo · tc-cargo.kz · {{ report.generated_at|date:"d.m.Y" }} · Сгенерировано автоматически системой TCC AI Analytics</div>
+
+</body>
+</html>

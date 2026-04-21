@@ -1,0 +1,280 @@
+{% extends "layouts/site.html" %}
+{% load static %}
+
+{% block title %}Генератор отчётов — TransCaspian Cargo{% endblock %}
+
+{% block page_css %}
+<style>
+.rg-hero{background:linear-gradient(135deg,#080e1a,#0F1D35 50%,#1B2A4A);padding:100px 24px 48px;position:relative;overflow:hidden}
+.rg-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 700px 300px at 50% 70%,rgba(198,164,109,.1),transparent)}
+.rg-hero-inner{position:relative;max-width:1280px;margin:0 auto}
+.rg-hero h1{font-size:clamp(26px,3.8vw,44px);font-weight:900;color:#fff;margin-bottom:10px}
+.rg-hero p{font-size:15px;color:rgba(255,255,255,.55);max-width:580px;line-height:1.7}
+
+.rg-wrap{max-width:1280px;margin:0 auto;padding:40px 24px}
+
+/* Type selector */
+.type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:40px}
+.type-card{background:#fff;border:2px solid var(--border-light);border-radius:20px;padding:24px;cursor:pointer;transition:all .25s;text-decoration:none;color:inherit;display:block}
+.type-card:hover{border-color:rgba(198,164,109,.4);transform:translateY(-3px);box-shadow:0 12px 32px rgba(27,42,74,.08)}
+.type-card.active{border-color:var(--gold);background:linear-gradient(135deg,rgba(198,164,109,.06),rgba(198,164,109,.02))}
+.type-card-icon{width:44px;height:44px;border-radius:12px;background:rgba(198,164,109,.1);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.type-card-name{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:6px}
+.type-card-desc{font-size:11px;color:var(--text-light);line-height:1.5;margin-bottom:10px}
+.type-card-std{font-size:9px;font-weight:700;color:var(--gold-dark);text-transform:uppercase;letter-spacing:.08em}
+
+/* Report output */
+.rp-section{background:#fff;border:1px solid var(--border-light);border-radius:20px;padding:32px;margin-bottom:24px}
+.rp-section h2{font-size:18px;font-weight:900;color:var(--navy);margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid var(--border-light);display:flex;align-items:center;gap:10px}
+.rp-label{display:inline-block;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.rp-risk-high{background:rgba(239,68,68,.1);color:#EF4444}
+.rp-risk-mid{background:rgba(245,158,11,.1);color:#F59E0B}
+.rp-risk-low{background:rgba(16,185,129,.1);color:#10B981}
+.rp-finding{padding:12px 16px;background:rgba(198,164,109,.06);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;font-size:13px;color:var(--text);margin-bottom:8px;line-height:1.6}
+.rp-rec{padding:12px 16px;background:#f0fdf4;border-left:3px solid #10B981;border-radius:0 10px 10px 0;font-size:13px;color:var(--text);margin-bottom:8px;line-height:1.6}
+.rp-risk-row{display:grid;grid-template-columns:1fr 120px 120px;gap:12px;align-items:center;padding:12px 16px;background:var(--bg-alt);border-radius:10px;margin-bottom:8px}
+
+/* Article cards */
+.art-card{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border-light)}
+.art-card:last-child{border-bottom:none}
+.art-score{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;flex-shrink:0}
+.art-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:3px}
+.art-meta{font-size:11px;color:var(--text-light)}
+.art-summary{font-size:12px;color:var(--text-mid);line-height:1.6;margin-top:4px}
+
+/* PDF button */
+.pdf-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:#EF4444;color:#fff;border-radius:12px;font-size:13px;font-weight:800;text-decoration:none;transition:all .2s}
+.pdf-btn:hover{background:#DC2626;transform:translateY(-1px)}
+
+@media(max-width:900px){.type-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.type-grid{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rg-hero">
+  <div class="rg-hero-inner">
+    <div style="display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:20px;background:rgba(198,164,109,.15);border:1px solid rgba(198,164,109,.25);font-size:10px;font-weight:800;color:var(--gold-light);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Генератор аналитических отчётов
+    </div>
+    <h1>Отчёты по международным стандартам</h1>
+    <p>Groq AI читает {{ total_news }} статей, анализирует влияние на Средний коридор и генерирует профессиональный отчёт. Скачивайте в PDF или читайте онлайн.</p>
+  </div>
+</div>
+
+<div class="rg-wrap">
+
+  <!-- Выбор типа -->
+  <div style="margin-bottom:24px">
+    <div style="font-size:11px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px">Выберите тип отчёта</div>
+    <div class="type-grid">
+      {% for code, cfg in report_types.items %}
+      <a href="?type={{ code }}&generate=1" class="type-card {% if selected_type == code %}active{% endif %}">
+        <div class="type-card-icon">
+          {% if code == "digest" %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          {% elif code == "analytical" %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+          {% elif code == "event" %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {% else %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          {% endif %}
+        </div>
+        <div class="type-card-name">{{ cfg.name }}</div>
+        <div class="type-card-desc">{{ cfg.desc }}</div>
+        <div class="type-card-std">{{ cfg.standard }}</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if report %}
+  <!-- Report Header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:32px;padding:24px 32px;background:var(--navy);border-radius:20px;color:#fff">
+    <div>
+      <div style="font-size:11px;font-weight:800;color:rgba(198,164,109,.7);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">{{ report.config.standard }}</div>
+      <div style="font-size:22px;font-weight:900">{{ report.config.name }}</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:4px">
+        За {{ report.period_days }} дней · Сгенерировано {{ report.generated_at|date:"d.m.Y H:i" }} · ИИ: Groq Llama 3.3 70B
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a href="/reports/0/pdf/?type={{ report.type }}" class="pdf-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Скачать PDF
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats Bar -->
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:32px">
+    {% for label, val, color in report.stats|items %}
+    {% endfor %}
+    <div style="background:#fff;border:1px solid var(--border-light);border-radius:14px;padding:16px;text-align:center">
+      <div style="font-size:24px;font-weight:900;color:var(--navy)">{{ report.stats.total_period }}</div>
+      <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Статей за период</div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border-light);border-radius:14px;padding:16px;text-align:center">
+      <div style="font-size:24px;font-weight:900;color:var(--gold)">{{ report.stats.analyzed }}</div>
+      <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Проанализировано</div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border-light);border-radius:14px;padding:16px;text-align:center">
+      <div style="font-size:24px;font-weight:900;color:#10B981">{{ report.stats.avg_score }}</div>
+      <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Ср. балл коридора</div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border-light);border-radius:14px;padding:16px;text-align:center">
+      <div style="font-size:24px;font-weight:900;color:#EF4444">{{ report.stats.critical_count }}</div>
+      <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Критичных (≥8)</div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border-light);border-radius:14px;padding:16px;text-align:center">
+      <div style="font-size:24px;font-weight:900;color:#F59E0B">{{ report.stats.high_count }}</div>
+      <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-top:4px">Высокий приор. (≥6)</div>
+    </div>
+  </div>
+
+  {% if report.has_ai %}
+  {% with g=report.groq %}
+
+  <!-- Executive Summary -->
+  {% if g.executive_summary or g.executive_brief %}
+  <div class="rp-section">
+    <h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Executive Summary</h2>
+    <p style="font-size:15px;color:var(--text);line-height:1.8;font-weight:500">{{ g.executive_summary|default:g.executive_brief }}</p>
+
+    {% if g.risk_level or g.corridor_status or g.corridor_investment_climate %}
+    <div style="margin-top:16px;padding:14px 20px;border-radius:12px;display:inline-flex;align-items:center;gap:10px;
+      {% if g.risk_level == 'ВЫСОКИЙ' or g.corridor_status == 'КРИТИЧЕСКИЙ' or g.corridor_investment_climate == 'НЕБЛАГОПРИЯТНЫЙ' %}background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)
+      {% elif g.risk_level == 'СРЕДНИЙ' or g.corridor_status == 'НАПРЯЖЁННЫЙ' or g.corridor_investment_climate == 'НЕЙТРАЛЬНЫЙ' %}background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2)
+      {% else %}background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2){% endif %}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{% if g.risk_level == 'ВЫСОКИЙ' or g.corridor_status == 'КРИТИЧЕСКИЙ' %}#EF4444{% elif g.risk_level == 'СРЕДНИЙ' %}#F59E0B{% else %}#10B981{% endif %}" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span style="font-size:13px;font-weight:800">Уровень риска коридора: {{ g.risk_level|default:g.corridor_status|default:g.corridor_investment_climate }}</span>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Main content sections based on report type -->
+  {% if g.situation %}
+  <div class="rp-section">
+    <h2>Ситуация на коридоре</h2>
+    <p style="font-size:14px;line-height:1.8;color:var(--text)">{{ g.situation }}</p>
+    {% if g.complication %}
+    <div style="margin-top:16px;padding:16px;background:rgba(239,68,68,.04);border-radius:12px;border-left:3px solid #EF4444">
+      <div style="font-size:11px;font-weight:800;color:#EF4444;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Осложнение</div>
+      <p style="font-size:13px;color:var(--text);line-height:1.7;margin:0">{{ g.complication }}</p>
+    </div>
+    {% endif %}
+    {% if g.key_insight %}
+    <div style="margin-top:12px;padding:16px;background:rgba(198,164,109,.08);border-radius:12px;border-left:3px solid var(--gold)">
+      <div style="font-size:11px;font-weight:800;color:var(--gold-dark);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Ключевой вывод</div>
+      <p style="font-size:14px;font-weight:700;color:var(--navy);line-height:1.6;margin:0">{{ g.key_insight }}</p>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if g.corridor_assessment %}
+  <div class="rp-section">
+    <h2>Оценка состояния коридора</h2>
+    <p style="font-size:14px;line-height:1.8;color:var(--text)">{{ g.corridor_assessment }}</p>
+    {% if g.infrastructure_findings %}
+    <div style="margin-top:16px"><div style="font-size:12px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Инфраструктура</div>
+    <p style="font-size:13px;color:var(--text-mid);line-height:1.7">{{ g.infrastructure_findings }}</p></div>
+    {% endif %}
+    {% if g.trade_flow_impact %}
+    <div style="margin-top:16px"><div style="font-size:12px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Торговые потоки</div>
+    <p style="font-size:13px;color:var(--text-mid);line-height:1.7">{{ g.trade_flow_impact }}</p></div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if g.risk_matrix %}
+  <div class="rp-section">
+    <h2>Матрица рисков</h2>
+    <div style="display:grid;grid-template-columns:1fr 120px 120px;gap:8px;margin-bottom:12px;font-size:10px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;padding:0 16px">
+      <div>Риск</div><div>Вероятность</div><div>Влияние</div>
+    </div>
+    {% for risk in g.risk_matrix %}
+    <div class="rp-risk-row">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--navy)">{{ risk.risk }}</div>
+        {% if risk.description %}<div style="font-size:11px;color:var(--text-mid);margin-top:2px">{{ risk.description }}</div>{% endif %}
+      </div>
+      <div style="text-align:center">
+        <span class="rp-label {% if risk.probability == 'ВЫСОКАЯ' %}rp-risk-high{% elif risk.probability == 'СРЕДНЯЯ' %}rp-risk-mid{% else %}rp-risk-low{% endif %}">{{ risk.probability }}</span>
+      </div>
+      <div style="text-align:center">
+        <span class="rp-label {% if risk.impact == 'ВЫСОКИЙ' %}rp-risk-high{% elif risk.impact == 'СРЕДНИЙ' %}rp-risk-mid{% else %}rp-risk-low{% endif %}">{{ risk.impact }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if g.key_findings %}
+  <div class="rp-section">
+    <h2>Ключевые выводы</h2>
+    {% for f in g.key_findings %}<div class="rp-finding">{{ f }}</div>{% endfor %}
+    {% for e in g.top_events %}<div class="rp-finding">{{ e }}</div>{% endfor %}
+  </div>
+  {% endif %}
+
+  {% if g.policy_recommendations or g.recommendation or g.strategic_recommendations or g.urgent_actions %}
+  <div class="rp-section">
+    <h2>Рекомендации</h2>
+    {% if g.recommendation %}<div class="rp-rec">{{ g.recommendation }}</div>{% endif %}
+    {% for r in g.policy_recommendations %}<div class="rp-rec">{{ r }}</div>{% endfor %}
+    {% for r in g.strategic_recommendations %}<div class="rp-rec">{{ r }}</div>{% endfor %}
+    {% for r in g.urgent_actions %}<div class="rp-rec">⚡ {{ r }}</div>{% endfor %}
+  </div>
+  {% endif %}
+
+  {% if g.outlook %}
+  <div class="rp-section">
+    <h2>Прогноз</h2>
+    <p style="font-size:14px;line-height:1.8;color:var(--text)">{{ g.outlook }}</p>
+  </div>
+  {% endif %}
+
+  {% endwith %}
+  {% endif %}
+
+  <!-- Top Articles -->
+  {% if report.top_articles %}
+  <div class="rp-section">
+    <h2>Источники данных — топ статей периода</h2>
+    {% for art in report.top_articles %}
+    <div class="art-card">
+      <div class="art-score" style="background:{% if art.groq_score >= 8 %}rgba(239,68,68,.12);color:#EF4444{% elif art.groq_score >= 6 %}rgba(245,158,11,.12);color:#F59E0B{% else %}rgba(16,185,129,.12);color:#10B981{% endif %}">{{ art.groq_score|floatformat:0 }}</div>
+      <div>
+        <div class="art-meta">{{ art.source__name }} · {{ art.published_at|date:"d.m.Y" }} · <span style="background:rgba(198,164,109,.1);padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;color:var(--gold-dark)">{{ art.groq_impact_type }}</span></div>
+        <a href="{{ art.url }}" target="_blank" class="art-title" style="display:block;text-decoration:none">{{ art.title }}</a>
+        {% if art.groq_summary_ru %}<div class="art-summary">{{ art.groq_summary_ru|truncatechars:180 }}</div>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Methodology -->
+  <div class="rp-section" style="background:var(--bg-alt)">
+    <h2>Методология и источники</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div style="font-size:12px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Методология</div>
+        <ul style="font-size:12px;color:var(--text-mid);line-height:1.8;padding-left:16px">
+          <li>Автоматический сбор из {{ report.stats.total_period }} статей за {{ report.period_days }} дней</li>
+          <li>Оценка влияния на коридор: Groq Llama 3.3 70B (шкала 0-10)</li>
+          <li>Стандарт: {{ report.config.standard }}</li>
+          <li>Категории: задержка / инфраструктура / тариф / санкция / объём / риск</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Дисклеймер</div>
+        <p style="font-size:11px;color:var(--text-light);line-height:1.7">Отчёт сгенерирован автоматически на основе открытых источников. Не является инвестиционной рекомендацией. TransCaspian Cargo не несёт ответственности за решения принятые на основе данного документа. Для принятия деловых решений рекомендуется дополнительная верификация.</p>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+
+</div>
+{% endblock %}

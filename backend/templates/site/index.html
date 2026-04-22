@@ -1045,20 +1045,12 @@
 </div>
 
 <div id="popupTm" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(8,14,26,.75);z-index:9999;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)">
-  <div style="background:#fff;border-radius:20px;max-width:480px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.3)">
+  <div style="background:#fff;border-radius:20px;max-width:640px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 32px 80px rgba(0,0,0,.3)">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--border-light)">
       <div><div style="font-size:11px;font-weight:800;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Товарный знак РК</div><div style="font-size:16px;font-weight:800;color:var(--navy)">Свидетельство о регистрации</div></div>
       <button onclick="document.getElementById('popupTm').style.display='none'" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border-light);background:var(--bg-alt);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
-    <div style="padding:32px;text-align:center">
-      <div style="width:80px;height:80px;border-radius:50%;background:rgba(198,164,109,.12);border:2px solid rgba(198,164,109,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 20px"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
-      <div style="font-size:18px;font-weight:800;color:var(--navy);margin-bottom:8px">TCC HUB™</div>
-      <div style="font-size:13px;color:var(--text-mid);line-height:1.7;margin-bottom:20px">Товарный знак зарегистрирован в РК. Свидетельство №110278 выдано Комитетом по правам интеллектуальной собственности.</div>
-      <a href="{% static 'docs/certificate.pdf' %}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:8px 20px;background:rgba(198,164,109,.1);border:1px solid rgba(198,164,109,.25);border-radius:20px;font-size:12px;font-weight:700;color:var(--gold);text-decoration:none;transition:all .2s" onmouseover="this.style.background='var(--gold)';this.style.color='#fff'" onmouseout="this.style.background='rgba(198,164,109,.1)';this.style.color='var(--gold)'">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Свидетельство №110278
-      </a>
-    </div>
+    <div style="padding:20px"><img src="{% static 'img/trademark-cert.jpeg' %}" alt="Свидетельство о регистрации товарного знака №110278" style="width:100%;border-radius:12px;display:block"></div>
   </div>
 </div>
 <script>document.addEventListener('keydown',function(e){if(e.key==='Escape'){['popupPatent','popupCaaae','popupTm'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none'})}});</script>

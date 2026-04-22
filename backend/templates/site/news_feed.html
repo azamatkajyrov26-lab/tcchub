@@ -36,6 +36,7 @@
 .nf-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,42,74,.08);border-color:rgba(198,164,109,.35)}
 .nf-card-top{display:flex;align-items:center;justify-content:space-between}
 .nf-source{display:flex;align-items:center;gap:6px}
+.nf-source-ico{width:18px;height:18px;border-radius:4px;object-fit:contain;flex-shrink:0}
 .nf-source-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0}
 .nf-source-name{font-size:10px;font-weight:800;color:var(--gold-dark);text-transform:uppercase;letter-spacing:.1em}
 .nf-date{font-size:10px;color:var(--text-light)}
@@ -227,7 +228,9 @@
     <a href="{{ item.url }}" target="_blank" rel="noopener" class="nf-card">
       <div class="nf-card-top">
         <div class="nf-source">
-          <div class="nf-source-dot"></div>
+          {% if item.source.base_url %}<img class="nf-source-ico" src="https://www.google.com/s2/favicons?domain={{ item.source.base_url|urlencode }}&sz=32" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display=''">
+          <div class="nf-source-dot" style="display:none"></div>
+          {% else %}<div class="nf-source-dot"></div>{% endif %}
           <span class="nf-source-name">{{ item.source.name|default:"News" }}</span>
         </div>
         <span class="nf-date">{{ item.published_at|date:"d.m.Y" }}</span>

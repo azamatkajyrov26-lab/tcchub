@@ -130,7 +130,7 @@
       </div>
       <div class="reveal-right">
         <div class="founder-card">
-          <div class="founder-avatar"><img src="{% static 'img/rustem.jpg' %}" alt="Рустем Бисалиев"></div>
+          <div class="founder-avatar"><img src="{% static 'img/rustem.jpg' %}?v=2" alt="Рустем Бисалиев"></div>
           <div class="founder-name" data-i18n="about.founder">Рустем Бисалиев</div>
           <div class="founder-role" data-i18n="about.founder.role">Основатель и Генеральный Директор</div>
           <div class="founder-quote" data-i18n="about.founder.quote">
@@ -376,11 +376,11 @@
       <div class="expert-card reveal-scale">
         <div class="avatar">
           {% if e.image_src %}<img src="{{ e.image_src }}" alt="{{ e.title }}">
-          {% elif "Рустем" in e.title %}<img src="{% static 'img/rustem.jpg' %}" alt="{{ e.title }}">
-          {% elif "Айслу" in e.title %}<img src="{% static 'img/experts/aislu.png' %}" alt="{{ e.title }}">
-          {% elif "Рустам" in e.title %}<img src="{% static 'img/experts/rustam.png' %}" alt="{{ e.title }}">
-          {% elif "Оксана" in e.title %}<img src="{% static 'img/experts/oksana.jpg' %}" alt="{{ e.title }}">
-          {% elif "Наргиза" in e.title %}<img src="{% static 'img/experts/nargiza.png' %}" alt="{{ e.title }}">
+          {% elif "Рустем" in e.title %}<img src="{% static 'img/rustem.jpg' %}?v=2" alt="{{ e.title }}">
+          {% elif "Айслу" in e.title %}<img src="{% static 'img/experts/aislu.png' %}?v=2" alt="{{ e.title }}">
+          {% elif "Рустам" in e.title %}<img src="{% static 'img/experts/rustam.png' %}?v=2" alt="{{ e.title }}">
+          {% elif "Оксана" in e.title %}<img src="{% static 'img/experts/oksana.jpg' %}?v=2" alt="{{ e.title }}">
+          {% elif "Наргиза" in e.title %}<img src="{% static 'img/experts/nargiza.png' %}?v=2" alt="{{ e.title }}">
           {% else %}<div class="avatar-initials">{{ e.data.initials }}</div>{% endif %}
         </div>
         <h4>{{ e.title }}</h4>

@@ -46,28 +46,6 @@
 .nf-empty{text-align:center;padding:80px 24px;color:var(--text-light)}
 .nf-empty svg{width:48px;height:48px;margin:0 auto 16px;opacity:.3}
 
-/* Mobile context quick-actions bar */
-.nf-mobile-ctx{display:none}
-@media(max-width:768px){
-  .nf-mobile-ctx{
-    display:flex;position:sticky;top:64px;z-index:50;
-    background:rgba(255,255,255,.92);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);
-    border-bottom:0.5px solid rgba(0,0,0,.08);
-    padding:8px 12px;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;
-    scrollbar-width:none;-ms-overflow-style:none
-  }
-  .nf-mobile-ctx::-webkit-scrollbar{display:none}
-  .nf-ctx-btn{
-    display:inline-flex;align-items:center;gap:5px;flex-shrink:0;
-    padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;
-    background:#F2F2F7;border:none;color:var(--text-mid);
-    text-decoration:none;white-space:nowrap;cursor:pointer;
-    font-family:inherit;transition:all .15s;
-    -webkit-tap-highlight-color:transparent;min-height:36px
-  }
-  .nf-ctx-btn svg{color:var(--gold);flex-shrink:0}
-  .nf-ctx-btn:active{transform:scale(.95);background:#E5E5EA}
-}
 
 .nf-stats{display:flex;gap:24px;margin-bottom:24px;padding:16px 20px;background:var(--bg-alt);border-radius:14px;border:1px solid var(--border-light)}
 .nf-stat{text-align:center}
@@ -153,30 +131,6 @@
 {% endblock %}
 
 {% block content %}
-<!-- Mobile Context Menu (News-specific quick actions) -->
-<div class="nf-mobile-ctx" id="nfMobileCtx">
-  <a href="#" onclick="document.querySelector('.nf-search input').focus();return false" class="nf-ctx-btn">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    Поиск
-  </a>
-  <a href="/news/analysis/" class="nf-ctx-btn">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
-    AI-анализ
-  </a>
-  <a href="/reports/generate/" class="nf-ctx-btn">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-    Отчёт
-  </a>
-  <button type="button" class="nf-ctx-btn" onclick="startRefresh()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-    Обновить
-  </button>
-  <button type="button" class="nf-ctx-btn" onclick="document.querySelector('.cat-tabs').scrollIntoView({behavior:'smooth',block:'start'})">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
-    Фильтры
-  </button>
-</div>
-
 <!-- Hero -->
 <div class="news-hero">
   <div style="position:relative;max-width:1280px;margin:0 auto">

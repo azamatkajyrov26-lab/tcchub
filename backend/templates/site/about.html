@@ -376,6 +376,10 @@
       <div class="expert-card reveal-scale">
         <div class="avatar">
           {% if e.image_src %}<img src="{{ e.image_src }}" alt="{{ e.title }}">
+          {% elif "Айслу" in e.title %}<img src="{% static 'img/experts/aislu.png' %}" alt="{{ e.title }}">
+          {% elif "Рустам" in e.title %}<img src="{% static 'img/experts/rustam.png' %}" alt="{{ e.title }}">
+          {% elif "Оксана" in e.title %}<img src="{% static 'img/experts/oksana.jpg' %}" alt="{{ e.title }}">
+          {% elif "Наргиза" in e.title %}<img src="{% static 'img/experts/nargiza.png' %}" alt="{{ e.title }}">
           {% else %}<div class="avatar-initials">{{ e.data.initials }}</div>{% endif %}
         </div>
         <h4>{{ e.title }}</h4>
@@ -392,7 +396,13 @@
 {% cms_visible "about" "section_6" as vis6 %}{% if vis6 %}<div class="cta-banner">
   {% cms_heading "about" "section_6" as h_s6 %}{% if h_s6 %}<h2 data-i18n="about.cta.h">{{ h_s6 }}</h2>{% else %}<h2 data-i18n="about.cta.h">Присоединяйтесь к экосистеме TCC</h2>{% endif %}
   <p data-i18n="about.cta.p">{% cms_sub "about" "section_6" "Станьте частью платформы отраслевой экспертизы в логистике Евразии" %}</p>
-  <button class="btn-white" data-i18n="about.cta.btn" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "about" "section_6" "СВЯЗАТЬСЯ С НАМИ" %}</button>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <button class="btn-white" data-i18n="about.cta.btn" onclick="location.href='{% url 'contacts' %}'">{% cms_cta_label "about" "section_6" "СВЯЗАТЬСЯ С НАМИ" %}</button>
+    <a href="{% static 'docs/certificate.pdf' %}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border:2px solid rgba(255,255,255,.3);border-radius:8px;color:#fff;font-size:14px;font-weight:700;text-decoration:none;transition:all .2s;letter-spacing:.03em" onmouseover="this.style.borderColor='#fff';this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.borderColor='rgba(255,255,255,.3)';this.style.background='transparent'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>
+      СВИДЕТЕЛЬСТВО О РЕГИСТРАЦИИ
+    </a>
+  </div>
 </div>{% endif %}
 {% endblock %}
 

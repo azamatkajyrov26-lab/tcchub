@@ -81,8 +81,10 @@
 .ed-expert:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,42,74,.08);border-color:rgba(198,164,109,.25)}
 .ed-expert::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%) scaleX(0);transform-origin:center;width:60px;height:3px;background:var(--gold);border-radius:0 0 3px 3px;transition:transform .4s}
 .ed-expert:hover::before{transform:translateX(-50%) scaleX(1)}
-.ed-expert .av{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,rgba(198,164,109,.18),rgba(198,164,109,.06));border:2px solid rgba(198,164,109,.25);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:900;font-size:24px;letter-spacing:-.02em;margin:0 auto 18px;transition:all .4s}
-.ed-expert:hover .av{transform:scale(1.05);background:var(--gold);color:#fff}
+.ed-expert .av{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,rgba(198,164,109,.18),rgba(198,164,109,.06));border:2px solid rgba(198,164,109,.25);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:900;font-size:24px;letter-spacing:-.02em;margin:0 auto 18px;transition:all .4s;overflow:hidden}
+.ed-expert .av img{width:100%;height:100%;object-fit:cover;object-position:center top;transition:transform .4s}
+.ed-expert:hover .av{transform:scale(1.05);border-color:var(--gold);box-shadow:0 0 0 4px rgba(198,164,109,.1)}
+.ed-expert:hover .av img{transform:scale(1.05)}
 .ed-expert h4{font-size:14px;font-weight:800;color:var(--navy);margin:0 0 6px;letter-spacing:-.01em}
 .ed-expert p{font-size:11px;color:var(--text-light);line-height:1.55;margin:0}
 .ed-expert .years{display:inline-block;margin-top:12px;padding:4px 10px;background:rgba(198,164,109,.1);color:var(--gold-dark);border-radius:10px;font-size:10px;font-weight:800;letter-spacing:.05em}
@@ -253,25 +255,25 @@
   </div>
   <div class="ed-experts">
     <div class="ed-expert reveal">
-      <div class="av">АТ</div>
+      <div class="av"><img src="{% static 'img/experts/aislu.png' %}" alt="Айслу Тайсаринова"></div>
       <h4>Айслу Тайсаринова</h4>
       <p>Эксперт по логистике и транспортному планированию</p>
       <div class="years">23+ лет</div>
     </div>
     <div class="ed-expert reveal">
-      <div class="av">РХ</div>
+      <div class="av"><img src="{% static 'img/experts/rustam.png' %}" alt="Рустам Хуснутдинов"></div>
       <h4>Рустам Хуснутдинов</h4>
       <p>Эксперт по проектной логистике и снабжению</p>
       <div class="years">25+ лет</div>
     </div>
     <div class="ed-expert reveal">
-      <div class="av">ОС</div>
+      <div class="av"><img src="{% static 'img/experts/oksana.jpg' %}" alt="Оксана Сорокина" style="object-position:50% 10%"></div>
       <h4>Оксана Сорокина</h4>
       <p>Международная логистика и авиаперевозки</p>
       <div class="years">22+ лет</div>
     </div>
     <div class="ed-expert reveal">
-      <div class="av">НТ</div>
+      <div class="av"><img src="{% static 'img/experts/nargiza.png' %}" alt="Наргиза Турарбек"></div>
       <h4>Наргиза Турарбек</h4>
       <p>Рекрутинг и HR в логистической отрасли</p>
       <div class="years">7+ лет</div>

@@ -376,6 +376,7 @@
       <div class="expert-card reveal-scale">
         <div class="avatar">
           {% if e.image_src %}<img src="{{ e.image_src }}" alt="{{ e.title }}">
+          {% elif "Рустем" in e.title %}<img src="{% static 'img/rustem.jpg' %}" alt="{{ e.title }}">
           {% elif "Айслу" in e.title %}<img src="{% static 'img/experts/aislu.png' %}" alt="{{ e.title }}">
           {% elif "Рустам" in e.title %}<img src="{% static 'img/experts/rustam.png' %}" alt="{{ e.title }}">
           {% elif "Оксана" in e.title %}<img src="{% static 'img/experts/oksana.jpg' %}" alt="{{ e.title }}">

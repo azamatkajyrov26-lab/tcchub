@@ -1019,6 +1019,7 @@ def education_view(request):
     return render(request, "site/education.html", {
         "active_page": "education",
         "programs": _site_items("program").order_by("order"),
+        "experts": _site_items("expert").order_by("order"),
     })
 
 

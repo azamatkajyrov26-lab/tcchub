@@ -76,7 +76,7 @@
 .ed-course-side .btn:hover{background:var(--gold-light);transform:translateY(-2px);box-shadow:0 10px 30px rgba(198,164,109,.35)}
 
 /* EXPERTS */
-.ed-experts{display:grid;grid-template-columns:repeat(5,1fr);gap:20px}
+.ed-experts{display:grid;grid-template-columns:repeat(5,1fr);gap:20px 16px}
 .ed-expert{position:relative;background:#fff;border:1px solid var(--border-light);border-radius:18px;padding:32px 24px;text-align:center;transition:all .4s;overflow:hidden}
 .ed-expert:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,42,74,.08);border-color:rgba(198,164,109,.25)}
 .ed-expert::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%) scaleX(0);transform-origin:center;width:60px;height:3px;background:var(--gold);border-radius:0 0 3px 3px;transition:transform .4s}
@@ -254,31 +254,13 @@
     <div class="sub" data-i18n="edu.experts.title">{% cms_sub "education" "section_4" "Практики отрасли с многолетним опытом" %}</div>
   </div>
   <div class="ed-experts">
+    {% for e in experts %}
     <div class="ed-expert reveal">
-      <div class="av"><img src="{% static 'img/experts/artem.jpg' %}" alt="Артем Чертищев"></div>
-      <h4>Артем Чертищев</h4>
-      <p>Эксперт по перевозке опасных грузов. Опыт работы более 15 лет</p>
+      <div class="av">{% if e.image_src %}<img src="{{ e.image_src }}" alt="{{ e.title }}">{% elif "Рустем" in e.title %}<img src="{% static 'img/rustem.jpg' %}?v=2" alt="{{ e.title }}">{% else %}<span>{{ e.title|truncatechars:2 }}</span>{% endif %}</div>
+      <h4>{{ e.title }}</h4>
+      <p>{{ e.description }}</p>
     </div>
-    <div class="ed-expert reveal">
-      <div class="av"><img src="{% static 'img/experts/anastasia.jpg' %}" alt="Анастасия Подовинникова"></div>
-      <h4>Анастасия Подовинникова</h4>
-      <p>Эксперт в области Supply Chain и Procurement с 20-летним опытом в международных FMCG и фармацевтических компаниях</p>
-    </div>
-    <div class="ed-expert reveal">
-      <div class="av"><img src="{% static 'img/experts/oksana_k.png' %}" alt="Оксана Крисанова"></div>
-      <h4>Оксана Крисанова</h4>
-      <p>Эксперт по вопросам таможенного регулирования и таможенного оформления, опыт работы более 20 лет</p>
-    </div>
-    <div class="ed-expert reveal">
-      <div class="av"><img src="{% static 'img/experts/elvis.jpg' %}" alt="Элвис Робертс"></div>
-      <h4>Элвис Робертс</h4>
-      <p>Эксперт в области перевозок негабаритных грузов. Опыт работы более 25 лет</p>
-    </div>
-    <div class="ed-expert reveal">
-      <div class="av"><img src="{% static 'img/experts/akmaral.jpg' %}" alt="Акмарал Сатбергенова"></div>
-      <h4>Акмарал Сатбергенова</h4>
-      <p>Эксперт по проектной логистике. Опыт работы более 20 лет</p>
-    </div>
+    {% endfor %}
   </div>
 </section>{% endif %}
 

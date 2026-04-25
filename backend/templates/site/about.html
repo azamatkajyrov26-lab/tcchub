@@ -36,7 +36,7 @@
 .eco-item:hover{background:rgba(198,164,109,.08);border-color:rgba(198,164,109,.2)}
 .eco-item svg{width:28px;height:28px;color:var(--gold);margin-bottom:8px}
 .eco-item span{font-size:11px;font-weight:600;color:var(--text-mid);display:block}
-.experts-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:48px}
+.experts-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:28px;margin-top:48px}
 .expert-card{text-align:center;padding:28px 20px;background:var(--bg-card);border:1px solid var(--border-light);border-radius:16px;transition:all .4s}
 .expert-card:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(0,0,0,.08);border-color:rgba(198,164,109,.2)}
 .expert-card .avatar{width:120px;height:120px;border-radius:50%;margin:0 auto 16px;overflow:hidden;border:3px solid rgba(198,164,109,.15);transition:all .4s;position:relative}
@@ -379,10 +379,6 @@
         <div class="avatar">
           {% if e.image_src %}<img src="{{ e.image_src }}" alt="{{ e.title }}">
           {% elif "Рустем" in e.title %}<img src="{% static 'img/rustem.jpg' %}?v=2" alt="{{ e.title }}">
-          {% elif "Айслу" in e.title %}<img src="{% static 'img/experts/aislu.png' %}?v=2" alt="{{ e.title }}">
-          {% elif "Рустам" in e.title %}<img src="{% static 'img/experts/rustam.png' %}?v=2" alt="{{ e.title }}">
-          {% elif "Оксана" in e.title %}<img src="{% static 'img/experts/oksana.jpg' %}?v=2" alt="{{ e.title }}">
-          {% elif "Наргиза" in e.title %}<img src="{% static 'img/experts/nargiza.png' %}?v=2" alt="{{ e.title }}">
           {% else %}<div class="avatar-initials">{{ e.data.initials }}</div>{% endif %}
         </div>
         <h4>{{ e.title }}</h4>

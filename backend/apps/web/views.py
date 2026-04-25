@@ -723,6 +723,69 @@ def _generate_report(report_type, config):
     }
 
 
+@require_POST
+@login_required
+def report_publish_view(request):
+    """Save generated report to catalog as draft (admin publishes later)."""
+    if not request.user.is_staff:
+        raise Http404
+    from apps.tcc_reports.models import Report, ReportTemplate, ReportSection
+    from django.utils import timezone
+
+    report_type = request.POST.get("report_type", "digest")
+    config = REPORT_TYPES.get(report_type, REPORT_TYPES["digest"])
+
+    # Generate the report data
+    report_data = _generate_report(report_type, config)
+
+    # Get or create template
+    template, _ = ReportTemplate.objects.get_or_create(
+        code=report_type,
+        defaults={
+            "name": config["name"],
+            "description": config["desc"],
+        },
+    )
+
+    # Build content
+    summary = ""
+    findings = []
+    recommendations = []
+    groq = report_data.get("groq", {})
+    if groq:
+        summary = groq.get("executive_summary", "")
+        findings = groq.get("top_events", [])
+        recommendations = groq.get("recommendations", [])
+
+    report = Report.objects.create(
+        template=template,
+        title=f"{config['name']} — {timezone.now().strftime('%d.%m.%Y')}",
+        subtitle=config["standard"],
+        status="draft",
+        created_by=request.user,
+        executive_summary=summary,
+        key_findings=findings,
+        recommendations=recommendations,
+        is_free_preview=True,
+        preview_text=summary,
+    )
+
+    # Save groq analysis as a section
+    if groq:
+        import json
+        ReportSection.objects.create(
+            report=report,
+            title="Анализ AI",
+            section_type="text",
+            content=json.dumps(groq, ensure_ascii=False),
+            order=1,
+        )
+
+    from django.contrib import messages
+    messages.success(request, f"Отчёт «{report.title}» сохранён как черновик. Опубликуйте его в админ-панели.")
+    return redirect("report_generate")
+
+
 def report_detail_view_custom(request, report_id):
     """Placeholder — redirect to generate."""
     return redirect("report_generate")
@@ -1377,7 +1440,7 @@ ARTICLES = {
         "tag": "Аналитический обзор · Март 2026",
         "date": "Март 2026",
         "read_time": "15 мин",
-        "image_url": "/static/img/analytics-march-2026-cover.jpeg",
+        "image_url": "/static/img/tcc-article-cover.svg",
         "meta_stats": [
             {"label": "Транзит 2025", "value": "36.9 млн тонн"},
             {"label": "Рост ТМТМ", "value": "+36%"},

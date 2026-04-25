@@ -52,6 +52,7 @@ urlpatterns = [
     path("news/status/", views.news_status_view, name="news_status"),
     path("news/analysis/", views.news_analysis_view, name="news_analysis"),
     path("reports/generate/", views.report_generate_view, name="report_generate"),
+    path("reports/publish/", views.report_publish_view, name="report_publish"),
     path("reports/<int:report_id>/", views.report_detail_view_custom, name="report_detail_custom"),
     path("reports/<int:report_id>/pdf/", views.report_pdf_view, name="report_pdf"),
     path("contacts/submit/", views.contact_submit_view, name="contact_submit"),

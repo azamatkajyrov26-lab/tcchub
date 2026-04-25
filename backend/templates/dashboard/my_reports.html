@@ -3,46 +3,103 @@
 {% block page_title %}Мои отчёты{% endblock %}
 
 {% block content %}
-<div class="mb-6">
-    <p class="text-gray-500 text-sm">Отчёты, к которым у вас есть доступ</p>
+<div class="mb-6 flex items-center justify-between flex-wrap gap-4">
+    <p class="text-gray-500 text-sm">Отчёты, сгенерированные вами через AI-инструменты</p>
+    <a href="{% url 'report_generate' %}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#C6A46D] text-white rounded-xl text-xs font-bold hover:bg-[#b8944f] transition">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Создать новый отчёт
+    </a>
 </div>
 
-{% if accesses %}
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {% for access in accesses %}
-    <a href="{% url 'report_detail' access.report.slug %}"
-       class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all group">
-        <div class="h-32 bg-gradient-to-br from-[#1B2A4A] to-[#2D4A7A] flex items-center justify-center">
-            <span class="text-white/30 text-4xl font-bold">{{ access.report.template.name|truncatechars:3 }}</span>
+{% if my_reports %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+    {% for r in my_reports %}
+    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all group">
+        <div class="h-28 bg-gradient-to-br from-[#1B2A4A] to-[#2D4A7A] flex items-center justify-center relative">
+            <span class="text-white/20 text-3xl font-bold">{{ r.template.name|truncatechars:6 }}</span>
+            <span class="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase
+                {% if r.status == 'published' %}bg-green-500 text-white
+                {% elif r.status == 'draft' %}bg-yellow-400 text-yellow-900
+                {% elif r.status == 'in_review' %}bg-blue-400 text-white
+                {% else %}bg-gray-400 text-white{% endif %}">
+                {{ r.get_status_display }}
+            </span>
         </div>
         <div class="p-5">
-            <div class="flex items-center gap-2 mb-2">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase
-                    {% if access.access_type == 'purchase' %}bg-blue-50 text-blue-600
-                    {% elif access.access_type == 'free' %}bg-green-50 text-green-600
-                    {% elif access.access_type == 'subscription' %}bg-purple-50 text-purple-600
-                    {% else %}bg-gray-50 text-gray-600{% endif %}">
-                    {{ access.get_access_type_display }}
-                </span>
-            </div>
-            <h3 class="font-bold text-[#1B2A4A] text-sm mb-1 group-hover:text-[#C6A46D] transition-colors">
-                {{ access.report.title }}
-            </h3>
-            <p class="text-gray-400 text-xs">{{ access.report.template.name }} · {{ access.granted_at|date:"d.m.Y" }}</p>
-            {% if access.expires_at %}
-            <p class="text-orange-500 text-xs mt-1">Истекает: {{ access.expires_at|date:"d.m.Y" }}</p>
+            <h3 class="font-bold text-[#1B2A4A] text-sm mb-1">{{ r.title }}</h3>
+            <p class="text-gray-400 text-xs mb-2">{{ r.subtitle }} · {{ r.created_at|date:"d.m.Y H:i" }}</p>
+            {% if r.executive_summary %}
+            <p class="text-gray-500 text-xs line-clamp-2 mb-3">{{ r.executive_summary|truncatechars:120 }}</p>
             {% endif %}
+            <div class="flex gap-2">
+                {% if r.status == 'published' %}
+                <a href="{% url 'report_detail' r.slug %}" class="px-3 py-1.5 bg-[#C6A46D]/10 text-[#C6A46D] rounded-lg text-[10px] font-bold hover:bg-[#C6A46D]/20 transition">Читать</a>
+                {% endif %}
+            </div>
         </div>
-    </a>
+    </div>
     {% endfor %}
 </div>
 {% else %}
-<div class="text-center py-20">
+<div class="text-center py-16 mb-12">
     <div class="text-4xl mb-4">📊</div>
-    <p class="text-gray-500 font-medium mb-2">У вас пока нет отчётов</p>
-    <a href="{% url 'reports_catalog' %}" class="inline-block mt-2 px-6 py-2 bg-[#C6A46D] text-white rounded-xl text-sm font-bold hover:bg-[#b8944f] transition">
-        Перейти в каталог
+    <p class="text-gray-500 font-medium mb-2">У вас пока нет сгенерированных отчётов</p>
+    <a href="{% url 'report_generate' %}" class="inline-block mt-2 px-6 py-2 bg-[#C6A46D] text-white rounded-xl text-sm font-bold hover:bg-[#b8944f] transition">
+        Создать первый отчёт
     </a>
+</div>
+{% endif %}
+
+{% if all_reports %}
+<div class="border-t border-gray-100 pt-8">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+            <h2 class="font-bold text-[#1B2A4A] text-base">Все отчёты пользователей</h2>
+            <p class="text-gray-400 text-xs">Только для администратора · {{ all_reports.count }} отчётов</p>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                    <th class="text-left px-5 py-3 font-bold">Отчёт</th>
+                    <th class="text-left px-5 py-3 font-bold">Автор</th>
+                    <th class="text-left px-5 py-3 font-bold">Тип</th>
+                    <th class="text-left px-5 py-3 font-bold">Статус</th>
+                    <th class="text-left px-5 py-3 font-bold">Дата</th>
+                    <th class="text-left px-5 py-3 font-bold">Действие</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in all_reports %}
+                <tr class="border-t border-gray-50 hover:bg-gray-50/50">
+                    <td class="px-5 py-3">
+                        <div class="font-bold text-[#1B2A4A] text-xs">{{ r.title|truncatechars:50 }}</div>
+                        <div class="text-gray-400 text-[10px]">{{ r.subtitle }}</div>
+                    </td>
+                    <td class="px-5 py-3 text-xs text-gray-600">{{ r.created_by.email|default:r.created_by.username }}</td>
+                    <td class="px-5 py-3 text-xs text-gray-500">{{ r.template.name }}</td>
+                    <td class="px-5 py-3">
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase
+                            {% if r.status == 'published' %}bg-green-50 text-green-600
+                            {% elif r.status == 'draft' %}bg-yellow-50 text-yellow-600
+                            {% elif r.status == 'in_review' %}bg-blue-50 text-blue-600
+                            {% else %}bg-gray-50 text-gray-600{% endif %}">
+                            {{ r.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-5 py-3 text-xs text-gray-400">{{ r.created_at|date:"d.m.Y H:i" }}</td>
+                    <td class="px-5 py-3">
+                        <a href="/admin/tcc_reports/report/{{ r.id }}/change/" class="text-[10px] font-bold text-[#C6A46D] hover:underline">Редактировать</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endif %}
 {% endblock %}

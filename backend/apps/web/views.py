@@ -726,11 +726,10 @@ def _generate_report(report_type, config):
 @require_POST
 @login_required
 def report_publish_view(request):
-    """Save generated report to catalog as draft (admin publishes later)."""
-    if not request.user.is_staff:
-        raise Http404
+    """Save generated report to user's cabinet. Admin can publish to catalog."""
     from apps.tcc_reports.models import Report, ReportTemplate, ReportSection
     from django.utils import timezone
+    import json as _json
 
     report_type = request.POST.get("report_type", "digest")
     config = REPORT_TYPES.get(report_type, REPORT_TYPES["digest"])
@@ -747,7 +746,7 @@ def report_publish_view(request):
         },
     )
 
-    # Build content
+    # Build content from AI analysis
     summary = ""
     findings = []
     recommendations = []
@@ -770,20 +769,28 @@ def report_publish_view(request):
         preview_text=summary,
     )
 
-    # Save groq analysis as a section
+    # Save full AI analysis as section
     if groq:
-        import json
         ReportSection.objects.create(
             report=report,
             title="Анализ AI",
             section_type="text",
-            content=json.dumps(groq, ensure_ascii=False),
+            content=_json.dumps(groq, ensure_ascii=False),
             order=1,
         )
 
-    from django.contrib import messages
-    messages.success(request, f"Отчёт «{report.title}» сохранён как черновик. Опубликуйте его в админ-панели.")
-    return redirect("report_generate")
+    # Save stats as section
+    stats = report_data.get("stats", {})
+    if stats:
+        ReportSection.objects.create(
+            report=report,
+            title="Статистика",
+            section_type="text",
+            content=_json.dumps(stats, ensure_ascii=False),
+            order=0,
+        )
+
+    return redirect("dashboard_my_reports")
 
 
 def report_detail_view_custom(request, report_id):
@@ -1748,12 +1755,20 @@ def buy_report_view(request, slug):
 
 @login_required
 def dashboard_my_reports_view(request):
-    from apps.tcc_commerce.models import ReportAccess
-    accesses = ReportAccess.objects.filter(
-        user=request.user
-    ).select_related("report", "report__template")
+    from apps.tcc_reports.models import Report
+    # Show user's own generated reports
+    my_reports = Report.objects.filter(
+        created_by=request.user
+    ).select_related("template").order_by("-created_at")
+    # For admin: show all reports
+    all_reports = None
+    if request.user.is_staff:
+        all_reports = Report.objects.select_related(
+            "template", "created_by"
+        ).order_by("-created_at")
     return render(request, "dashboard/my_reports.html", {
-        "accesses": accesses,
+        "my_reports": my_reports,
+        "all_reports": all_reports,
         "active_page": "my_reports",
     })
 

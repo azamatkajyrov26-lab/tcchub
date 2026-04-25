@@ -727,6 +727,186 @@ def _generate_report(report_type, config):
 
 @require_POST
 @login_required
+def _groq_to_sections(groq, stats=None):
+    """Convert Groq AI response dict into list of (title, section_type, html_content, order) tuples."""
+    sections = []
+    order = 0
+
+    # Stats overview
+    if stats:
+        total = stats.get("total_period", 0)
+        analyzed = stats.get("analyzed", 0)
+        avg = stats.get("avg_score", 0)
+        critical = stats.get("critical", 0)
+        high = stats.get("high", 0)
+        medium = stats.get("medium", 0)
+        html = (
+            '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px">'
+            f'<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:20px;text-align:center">'
+            f'<div style="font-size:32px;font-weight:900;color:#1B2A4A">{analyzed}</div>'
+            f'<div style="font-size:11px;color:#94a3b8;font-weight:600;margin-top:4px">Проанализировано</div></div>'
+            f'<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:20px;text-align:center">'
+            f'<div style="font-size:32px;font-weight:900;color:#C6A46D">{avg:.1f}</div>'
+            f'<div style="font-size:11px;color:#94a3b8;font-weight:600;margin-top:4px">Средний балл</div></div>'
+            f'<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:20px;text-align:center">'
+            f'<div style="font-size:32px;font-weight:900;color:#ef4444">{critical}</div>'
+            f'<div style="font-size:11px;color:#94a3b8;font-weight:600;margin-top:4px">Критичных</div></div>'
+            '</div>'
+            f'<p style="font-size:13px;color:#64748b">Всего статей за период: {total}. '
+            f'Высокий приоритет: {high}, средний: {medium}.</p>'
+        )
+        sections.append(("Обзор данных", "text", html, order))
+        order += 1
+
+    # SCR framework (Situation-Complication-Resolution)
+    sit = groq.get("situation", "")
+    comp = groq.get("complication", "")
+    insight = groq.get("key_insight", "")
+    if sit or comp or insight:
+        html = '<div style="display:grid;gap:16px">'
+        if sit:
+            html += (
+                '<div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-left:4px solid #0ea5e9;'
+                'border-radius:0 14px 14px 0;padding:20px 24px">'
+                '<div style="font-size:10px;font-weight:800;color:#0ea5e9;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px">Ситуация</div>'
+                f'<p style="font-size:14px;color:#334155;line-height:1.7;margin:0">{sit}</p></div>'
+            )
+        if comp:
+            html += (
+                '<div style="background:linear-gradient(135deg,#fef2f2,#fee2e2);border-left:4px solid #ef4444;'
+                'border-radius:0 14px 14px 0;padding:20px 24px">'
+                '<div style="font-size:10px;font-weight:800;color:#ef4444;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px">Осложнение</div>'
+                f'<p style="font-size:14px;color:#334155;line-height:1.7;margin:0">{comp}</p></div>'
+            )
+        if insight:
+            html += (
+                '<div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-left:4px solid #22c55e;'
+                'border-radius:0 14px 14px 0;padding:20px 24px">'
+                '<div style="font-size:10px;font-weight:800;color:#22c55e;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px">Ключевой вывод</div>'
+                f'<p style="font-size:14px;color:#334155;line-height:1.7;margin:0">{insight}</p></div>'
+            )
+        html += '</div>'
+        sections.append(("Ситуационный анализ", "text", html, order))
+        order += 1
+
+    # Risk level
+    risk = groq.get("risk_level", "")
+    risk_rationale = groq.get("risk_rationale", "")
+    if risk:
+        colors = {"ВЫСОКИЙ": ("#ef4444", "#fef2f2"), "СРЕДНИЙ": ("#f59e0b", "#fffbeb"), "НИЗКИЙ": ("#22c55e", "#f0fdf4")}
+        c, bg = colors.get(risk, ("#64748b", "#f8fafc"))
+        html = (
+            f'<div style="display:flex;align-items:center;gap:18px;background:{bg};border:1px solid {c}30;border-radius:16px;padding:24px">'
+            f'<div style="width:64px;height:64px;border-radius:50%;background:{c}18;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+            f'<span style="font-size:24px;font-weight:900;color:{c}">{risk[0]}</span></div>'
+            f'<div><div style="font-size:18px;font-weight:900;color:{c}">{risk}</div>'
+            f'<p style="font-size:13px;color:#64748b;line-height:1.6;margin:4px 0 0">{risk_rationale}</p></div></div>'
+        )
+        sections.append(("Уровень риска", "risk_table", html, order))
+        order += 1
+
+    # Corridor assessment
+    corridor = groq.get("corridor_assessment", "")
+    infra = groq.get("infrastructure_findings", "")
+    trade = groq.get("trade_flow_impact", "")
+    if corridor or infra or trade:
+        html = '<div style="display:grid;gap:14px">'
+        for label, text in [("Оценка коридора", corridor), ("Инфраструктура", infra), ("Торговые потоки", trade)]:
+            if text:
+                html += f'<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:20px"><div style="font-size:10px;font-weight:800;color:#C6A46D;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px">{label}</div><p style="font-size:14px;color:#334155;line-height:1.7;margin:0">{text}</p></div>'
+        html += '</div>'
+        sections.append(("Оценка коридора", "route_score", html, order))
+        order += 1
+
+    # Top events
+    events = groq.get("top_events", [])
+    if events and any(events):
+        html = '<div style="display:grid;gap:12px">'
+        for i, ev in enumerate(events, 1):
+            if not ev:
+                continue
+            html += (
+                f'<div style="display:flex;align-items:flex-start;gap:16px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px 20px">'
+                f'<div style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#C6A46D,#D4B87A);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0">{i:02d}</div>'
+                f'<p style="font-size:14px;color:#334155;line-height:1.6;margin:0;flex:1">{ev}</p></div>'
+            )
+        html += '</div>'
+        sections.append(("Ключевые события", "text", html, order))
+        order += 1
+
+    # Risk matrix
+    matrix = groq.get("risk_matrix", [])
+    if matrix and any(matrix):
+        html = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:separate;border-spacing:0;font-size:13px"><thead><tr style="background:#f8fafc">'
+        if isinstance(matrix[0], dict):
+            for key in matrix[0]:
+                html += f'<th style="padding:12px 16px;text-align:left;font-weight:800;color:#1B2A4A;border-bottom:2px solid #e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:.06em">{key}</th>'
+            html += '</tr></thead><tbody>'
+            for row in matrix:
+                html += '<tr>'
+                for val in row.values():
+                    html += f'<td style="padding:12px 16px;border-bottom:1px solid #f1f5f9;color:#475569">{val}</td>'
+                html += '</tr>'
+        html += '</tbody></table></div>'
+        sections.append(("Матрица рисков", "risk_table", html, order))
+        order += 1
+
+    # Recommendations / policy recommendations
+    recs = groq.get("recommendation", "") or ""
+    policy_recs = groq.get("policy_recommendations", [])
+    strategic_recs = groq.get("strategic_recommendations", [])
+    all_recs = policy_recs or strategic_recs
+    if recs or all_recs:
+        html = ""
+        if recs:
+            html += f'<p style="font-size:15px;color:#334155;line-height:1.7;margin:0 0 18px;padding:20px 24px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px">{recs}</p>'
+        if all_recs:
+            html += '<div style="display:grid;gap:10px">'
+            for r in all_recs:
+                if r:
+                    html += f'<div style="display:flex;align-items:flex-start;gap:12px;padding:14px 18px;background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.15);border-radius:12px"><div style="width:24px;height:24px;border-radius:7px;background:#22c55e;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0;font-size:12px">✓</div><p style="font-size:14px;color:#334155;line-height:1.6;margin:0">{r}</p></div>'
+            html += '</div>'
+        sections.append(("Рекомендации", "text", html, order))
+        order += 1
+
+    # KPI watch
+    kpis = groq.get("kpi_watch", [])
+    if kpis and any(kpis):
+        html = '<div style="display:flex;flex-wrap:wrap;gap:10px">'
+        for kpi in kpis:
+            if kpi:
+                html += f'<span style="padding:8px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;font-size:12px;font-weight:700;color:#1B2A4A">{kpi}</span>'
+        html += '</div>'
+        sections.append(("Индикаторы мониторинга", "text", html, order))
+        order += 1
+
+    # Outlook
+    outlook = groq.get("outlook", "")
+    if outlook:
+        html = f'<p style="font-size:15px;color:#334155;line-height:1.8;margin:0">{outlook}</p>'
+        sections.append(("Прогноз", "text", html, order))
+        order += 1
+
+    # Opportunities
+    opps = groq.get("opportunities", [])
+    if opps and any(opps):
+        html = '<div style="display:grid;gap:12px">'
+        for o in opps:
+            if o:
+                html += f'<div style="padding:16px 20px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #fde68a;border-radius:14px;font-size:14px;color:#92400e;line-height:1.6">{o}</div>'
+        html += '</div>'
+        sections.append(("Возможности", "text", html, order))
+        order += 1
+
+    # Disclaimer
+    disclaimer = groq.get("disclaimer", "")
+    if disclaimer:
+        html = f'<p style="font-size:12px;color:#94a3b8;line-height:1.6;font-style:italic;margin:0">{disclaimer}</p>'
+        sections.append(("Дисклеймер", "text", html, order))
+
+    return sections
+
+
 def report_publish_view(request):
     """Save generated report to user's cabinet. Admin can publish to catalog."""
     from apps.tcc_reports.models import Report, ReportTemplate, ReportSection
@@ -748,15 +928,12 @@ def report_publish_view(request):
         },
     )
 
-    # Build content from AI analysis
-    summary = ""
-    findings = []
-    recommendations = []
     groq = report_data.get("groq", {})
-    if groq:
-        summary = groq.get("executive_summary", "")
-        findings = groq.get("top_events", [])
-        recommendations = groq.get("recommendations", [])
+    stats = report_data.get("stats", {})
+
+    summary = groq.get("executive_summary", "") or groq.get("executive_brief", "") or ""
+    findings = groq.get("top_events", []) or groq.get("key_findings", []) or []
+    recs_list = groq.get("policy_recommendations", []) or groq.get("strategic_recommendations", []) or []
 
     report = Report.objects.create(
         template=template,
@@ -766,29 +943,31 @@ def report_publish_view(request):
         created_by=request.user,
         executive_summary=summary,
         key_findings=findings,
-        recommendations=recommendations,
+        recommendations=recs_list,
         is_free_preview=True,
         preview_text=summary,
     )
 
-    # Save full AI analysis as section
-    if groq:
+    # Convert AI response to formatted HTML sections
+    sections = _groq_to_sections(groq, stats)
+    for title, stype, html, order in sections:
         ReportSection.objects.create(
             report=report,
-            title="Анализ AI",
-            section_type="text",
-            content=_json.dumps(groq, ensure_ascii=False),
-            order=1,
+            title=title,
+            section_type=stype,
+            content=html,
+            data_config=groq if order == 0 else {},
+            order=order,
         )
 
-    # Save stats as section
-    stats = report_data.get("stats", {})
-    if stats:
+    # Fallback: if no sections created, save raw data
+    if not sections and groq:
         ReportSection.objects.create(
             report=report,
-            title="Статистика",
+            title="Данные анализа",
             section_type="text",
-            content=_json.dumps(stats, ensure_ascii=False),
+            content="<p style='color:#94a3b8'>Данные анализа обрабатываются. Пожалуйста, повторите генерацию.</p>",
+            data_config=groq,
             order=0,
         )
 

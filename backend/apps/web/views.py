@@ -1377,7 +1377,7 @@ ARTICLES = {
         "tag": "Аналитический обзор · Март 2026",
         "date": "Март 2026",
         "read_time": "15 мин",
-        "image_url": "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&h=500&fit=crop",
+        "image_url": "/static/img/analytics-march-2026-cover.jpeg",
         "meta_stats": [
             {"label": "Транзит 2025", "value": "36.9 млн тонн"},
             {"label": "Рост ТМТМ", "value": "+36%"},

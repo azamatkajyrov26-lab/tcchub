@@ -793,6 +793,27 @@ def report_publish_view(request):
     return redirect("dashboard_my_reports")
 
 
+@require_POST
+@login_required
+def report_toggle_status_view(request, report_id):
+    """Admin toggles report status between draft and published."""
+    if not request.user.is_staff:
+        raise Http404
+    from apps.tcc_reports.models import Report
+    from django.utils import timezone
+    report = get_object_or_404(Report, id=report_id)
+    if report.status == "published":
+        report.status = "draft"
+        report.published_at = None
+        report.published_by = None
+    else:
+        report.status = "published"
+        report.published_at = timezone.now()
+        report.published_by = request.user
+    report.save()
+    return redirect("dashboard_my_reports")
+
+
 def report_detail_view_custom(request, report_id):
     """Placeholder — redirect to generate."""
     return redirect("report_generate")

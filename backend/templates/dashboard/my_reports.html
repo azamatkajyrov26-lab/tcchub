@@ -92,8 +92,16 @@
                         </span>
                     </td>
                     <td class="px-5 py-3 text-xs text-gray-400">{{ r.created_at|date:"d.m.Y H:i" }}</td>
-                    <td class="px-5 py-3">
-                        <a href="/admin/tcc_reports/report/{{ r.id }}/change/" class="text-[10px] font-bold text-[#C6A46D] hover:underline">Редактировать</a>
+                    <td class="px-5 py-3 flex items-center gap-2">
+                        <form method="post" action="{% url 'report_toggle_status' r.id %}" style="margin:0">
+                            {% csrf_token %}
+                            {% if r.status == 'published' %}
+                            <button type="submit" class="px-3 py-1 rounded-lg text-[10px] font-bold bg-red-50 text-red-600 hover:bg-red-100 transition">Снять</button>
+                            {% else %}
+                            <button type="submit" class="px-3 py-1 rounded-lg text-[10px] font-bold bg-green-50 text-green-600 hover:bg-green-100 transition">Опубликовать</button>
+                            {% endif %}
+                        </form>
+                        <a href="/admin/tcc_reports/report/{{ r.id }}/change/" class="text-[10px] font-bold text-gray-400 hover:text-[#C6A46D] hover:underline transition">Админка</a>
                     </td>
                 </tr>
                 {% endfor %}

@@ -1887,7 +1887,13 @@ def report_detail_view(request, slug):
         slug=slug,
         status="published",
     )
-    Report.objects.filter(pk=report.pk).update(views_count=report.views_count + 1)
+    # Count view: 1 per session, skip staff
+    if not (request.user.is_authenticated and request.user.is_staff):
+        viewed = request.session.get("viewed_reports", [])
+        if report.pk not in viewed:
+            Report.objects.filter(pk=report.pk).update(views_count=report.views_count + 1)
+            viewed.append(report.pk)
+            request.session["viewed_reports"] = viewed
     has_access = False
     if request.user.is_authenticated:
         has_access = (

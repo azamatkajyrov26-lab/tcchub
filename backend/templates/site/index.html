@@ -904,36 +904,12 @@
     <div class="reveal" style="margin-bottom:44px">
       <div style="display:inline-flex;align-items:center;gap:10px;padding:8px 18px;background:#fff;border:1px solid var(--border-light);border-radius:100px;margin-bottom:20px">
         <span style="width:6px;height:6px;border-radius:50%;background:var(--gold)"></span>
-        <span style="font-size:11px;font-weight:800;color:var(--navy);letter-spacing:.12em;text-transform:uppercase">Бизнес и логистика</span>
+        <span style="font-size:11px;font-weight:800;color:var(--navy);letter-spacing:.12em;text-transform:uppercase">Международные партнёры</span>
       </div>
       <div class="partners-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px">
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/blue_bell_shipping.png' %}" alt="Blue Bell Shipping"><span>Blue Bell Shipping</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/coube.png' %}" alt="Coube"><span>Coube</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/asstra.svg' %}" alt="AsstrA"><span>AsstrA</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/new_silk_road_network.svg' %}" alt="New Silk Road Network"><span>New Silk Road Network</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/customs-partners.png' %}" alt="Customs Partners"><span>Customs Partners</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/cj-icm.png' %}" alt="CJ ICM Logistics"><span>CJ ICM Logistics</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/e-dgm.png' %}" alt="DGM Kazakhstan"><span>DGM Kazakhstan</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/pla.png' %}" alt="Project Logistics Alliance"><span>Project Logistics Alliance</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/aerotransport.png' %}" alt="AeroTransport Consultants"><span>AeroTransport Consultants</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/air_astana.png' %}" alt="Air Astana"><span>Air Astana</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/lc_waikiki.svg' %}" alt="LC Waikiki"><span>LC Waikiki</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/isco.svg' %}" alt="ISCO"><span>ISCO</span></div>
-      </div>
-    </div>
-
-    <div class="reveal" style="margin-bottom:44px">
-      <div style="display:inline-flex;align-items:center;gap:10px;padding:8px 18px;background:#fff;border:1px solid var(--border-light);border-radius:100px;margin-bottom:20px">
-        <span style="width:6px;height:6px;border-radius:50%;background:var(--gold)"></span>
-        <span style="font-size:11px;font-weight:800;color:var(--navy);letter-spacing:.12em;text-transform:uppercase">Промышленность и нефтегаз</span>
-      </div>
-      <div class="partners-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px">
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/aksai.jpg' %}" alt="Aksai Industrial Park"><span>Aksai Industrial Park</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/main_pipeline_assurance.svg' %}" alt="Main Pipeline Assurance"><span>Main Pipeline Assurance</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/apec_industries.svg' %}" alt="APEC Industries"><span>APEC Industries</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/petrocouncil.png' %}" alt="PetroCouncil.kz"><span>PetroCouncil.kz</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/intertek.svg' %}" alt="Intertek"><span>Intertek</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/euca_alliance.png' %}" alt="EUCA Alliance"><span>EUCA Alliance</span></div>
+        {% for p in partners_intl %}
+        <div class="partner-logo reveal-scale">{% if p.image_src %}<img loading="lazy" src="{{ p.image_src }}" alt="{{ p.title }}">{% endif %}<span>{{ p.title }}</span></div>
+        {% endfor %}
       </div>
     </div>
 
@@ -943,12 +919,9 @@
         <span style="font-size:11px;font-weight:800;color:var(--navy);letter-spacing:.12em;text-transform:uppercase">Образование и институты</span>
       </div>
       <div class="partners-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px">
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/atyrau_university.svg' %}" alt="Atyrau Oil & Gas University"><span>Atyrau Oil &amp; Gas University</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/satbayev_university.svg' %}" alt="Satbayev University"><span>Satbayev University</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/alma_university.svg' %}" alt="Almaty Management University"><span>Almaty Management University</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/dku.png' %}" alt="DKU"><span>DKU</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/yessenov_university.png' %}" alt="Yessenov University"><span>Yessenov University</span></div>
-        <div class="partner-logo reveal-scale"><img loading="lazy" src="{% static 'img/partners/apec.png' %}?v=3" alt="APEC PetroTechnic"><span>APEC PetroTechnic</span></div>
+        {% for p in partners_edu %}
+        <div class="partner-logo reveal-scale">{% if p.image_src %}<img loading="lazy" src="{{ p.image_src }}" alt="{{ p.title }}">{% endif %}<span>{{ p.title }}</span></div>
+        {% endfor %}
       </div>
     </div>
 

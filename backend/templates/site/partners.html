@@ -66,7 +66,7 @@
     <h1 class="prt-title" data-i18n="pt.hero.title">{% cms_heading "partners" "hero" "Партнёры, которые усиливают экосистему" %}</h1>
     <p class="prt-lead" data-i18n="pt.hero.desc">{% cms_sub "partners" "hero" "Международные организации, университеты и отраслевые объединения, с которыми TCC строит долгосрочные стратегические партнёрства в логистике, образовании и аналитике." %}</p>
     <div class="prt-stats">
-      <div class="prt-stat"><div class="prt-stat-num">17</div><div class="prt-stat-lab" data-i18n="pt.stats.partners">партнёров</div></div>
+      <div class="prt-stat"><div class="prt-stat-num">25</div><div class="prt-stat-lab" data-i18n="pt.stats.partners">партнёров</div></div>
       <div class="prt-stat"><div class="prt-stat-num">2</div><div class="prt-stat-lab" data-i18n="pt.stats.directions">направления</div></div>
       <div class="prt-stat"><div class="prt-stat-num">5</div><div class="prt-stat-lab" data-i18n="pt.stats.countries">стран</div></div>
       <div class="prt-stat"><div class="prt-stat-num">10<span style="font-size:.5em;color:var(--text-light);font-weight:700;margin-left:4px">+</span></div><div class="prt-stat-lab" data-i18n="pt.stats.years">лет сотрудничества</div></div>
@@ -87,7 +87,7 @@
           <h2 class="prt-cat-title" data-i18n="pt.int.title">{% cms_heading "partners" "section_2" "Международные организации" %}</h2>
         </div>
       </div>
-      <div class="prt-cat-count"><b>12</b> партнёров</div>
+      <div class="prt-cat-count"><b>{{ partners_intl.count }}</b> партнёров</div>
     </div>
     <div class="prt-grid">
       {% for p in partners_intl %}
@@ -113,7 +113,7 @@
           <h2 class="prt-cat-title" data-i18n="pt.edu.title">{% cms_heading "partners" "section_3" "Академические партнёры" %}</h2>
         </div>
       </div>
-      <div class="prt-cat-count"><b>5</b> университетов</div>
+      <div class="prt-cat-count"><b>{{ partners_edu.count }}</b> университетов</div>
     </div>
     <div class="prt-grid">
       {% for p in partners_edu %}

@@ -114,6 +114,8 @@ def landing_view(request):
         "hero": hero,
         "metrics": metrics,
         "partners": partners,
+        "partners_intl": _site_items("partner", "international").order_by("order"),
+        "partners_edu": _site_items("partner", "education").order_by("order"),
         "testimonials": testimonials,
         "advantages": advantages,
         "contact": contact,

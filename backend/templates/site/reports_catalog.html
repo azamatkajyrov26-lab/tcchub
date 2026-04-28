@@ -115,7 +115,7 @@
     <a href="{% url 'reports_catalog' %}?template={{ tpl.pk }}" class="rep-chip {% if current_template == tpl.pk %}active{% endif %}">{{ tpl.name }}</a>
     {% endfor %}
   </div>
-  <div class="rep-count-info"><b>{{ reports|length }}</b> {% if current_template %}отчётов в категории{% else %}отчётов опубликовано{% endif %}</div>
+  <div class="rep-count-info"><b>{{ reports|length }}</b> {% if current_template %}<span data-i18n="rep.cnt.cat">отчётов в категории</span>{% else %}<span data-i18n="rep.cnt.pub">отчётов опубликовано</span>{% endif %}</div>
 </section>{% endif %}
 
 <!-- GRID -->
@@ -132,7 +132,7 @@
         <div class="grad"></div>
         <div class="rep-card-tpl">{{ report.template.name }}</div>
         {% if report.price_usd == 0 or report.is_free_preview %}
-        <div class="rep-card-price free">Бесплатно</div>
+        <div class="rep-card-price free" data-i18n="rp.free.full">Бесплатно</div>
         {% else %}
         <div class="rep-card-price">${{ report.price_usd }}</div>
         {% endif %}
@@ -160,8 +160,8 @@
     {% empty %}
     <div class="rep-empty">
       <div class="rep-empty-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-      <h3>Отчёты готовятся к публикации</h3>
-      <p>Следите за обновлениями каталога — новые отчёты появятся в ближайшее время.</p>
+      <h3 data-i18n="rep.empty.h">Отчёты готовятся к публикации</h3>
+      <p data-i18n="rep.empty.p">Следите за обновлениями каталога — новые отчёты появятся в ближайшее время.</p>
     </div>
     {% endfor %}
   </div>

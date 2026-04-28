@@ -87,7 +87,7 @@
           <h2 class="prt-cat-title" data-i18n="pt.int.title">{% cms_heading "partners" "section_2" "Международные организации" %}</h2>
         </div>
       </div>
-      <div class="prt-cat-count"><b>{{ partners_intl.count }}</b> партнёров</div>
+      <div class="prt-cat-count"><b>{{ partners_intl.count }}</b> <span data-i18n="pt.partners">партнёров</span></div>
     </div>
     <div class="prt-grid">
       {% for p in partners_intl %}
@@ -95,7 +95,7 @@
         <div class="prt-logo-frame">{% if p.image_src %}<img src="{{ p.image_src }}" alt="{{ p.title }}">{% else %}<span style="font-size:24px;font-weight:900;color:var(--gold);letter-spacing:.02em">{{ p.data.initials|default:p.title|truncatechars:2 }}</span>{% endif %}</div>
         <div class="prt-name">{{ p.title }}</div>
         <div class="prt-desc">{{ p.description }}</div>
-        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
+        <span class="prt-link"><span data-i18n="pt.goto">Перейти</span> <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
       </a>
       {% endfor %}
     </div>
@@ -113,7 +113,7 @@
           <h2 class="prt-cat-title" data-i18n="pt.edu.title">{% cms_heading "partners" "section_3" "Академические партнёры" %}</h2>
         </div>
       </div>
-      <div class="prt-cat-count"><b>{{ partners_edu.count }}</b> университетов</div>
+      <div class="prt-cat-count"><b>{{ partners_edu.count }}</b> <span data-i18n="pt.universities">университетов</span></div>
     </div>
     <div class="prt-grid">
       {% for p in partners_edu %}
@@ -121,7 +121,7 @@
         <div class="prt-logo-frame">{% if p.image_src %}<img src="{{ p.image_src }}" alt="{{ p.title }}">{% else %}<span style="font-size:24px;font-weight:900;color:var(--gold);letter-spacing:.02em">{{ p.data.initials|default:p.title|truncatechars:2 }}</span>{% endif %}</div>
         <div class="prt-name">{{ p.title }}</div>
         <div class="prt-desc">{{ p.description }}</div>
-        <span class="prt-link">Перейти <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
+        <span class="prt-link"><span data-i18n="pt.goto">Перейти</span> <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></span>
       </a>
       {% endfor %}
     </div>

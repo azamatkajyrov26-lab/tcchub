@@ -22,11 +22,22 @@ echo "[4/6] Running migrations + collectstatic..."
 docker compose run --rm backend python manage.py migrate --noinput
 docker compose run --rm backend python manage.py collectstatic --noinput
 
-echo "[5/6] Restarting services..."
+echo "[5/7] Restarting services..."
 docker compose up -d
 
-echo "[6/6] Health check..."
+echo "[6/7] Reloading nginx (refresh upstream DNS for new backend IP)..."
+# When backend container is recreated, nginx caches the old IP and returns 502.
+# A reload re-resolves the 'backend' upstream via Docker DNS.
+sleep 2
+docker compose exec -T nginx nginx -s reload || docker compose restart nginx
+
+echo "[7/7] Health check..."
 sleep 3
 docker compose ps
+echo "  ↳ HTTP probe:"
+for url in https://tc-cargo.kz/ https://tcchub.kz/; do
+  code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$url" || echo "ERR")
+  echo "    $url → $code"
+done
 
 echo "✓ Deploy complete."

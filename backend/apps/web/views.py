@@ -1710,11 +1710,37 @@ ARTICLES = {
 }
 
 
+def _localize_article(slug, article):
+    """Attach KZ/EN translations (from ARTICLES_I18N) onto a deep copy of the
+    article so the template can emit data-i18n-en/kz via the i18n_blk tag.
+    RU (the rendered text) stays the source of truth."""
+    import copy
+    from apps.web.articles_i18n import ARTICLES_I18N
+    tr = ARTICLES_I18N.get(slug)
+    if not tr:
+        return article
+    art = copy.deepcopy(article)
+    art["i18n"] = {
+        lang: {k: tr[lang].get(k, "") for k in ("title", "tag", "date", "read_time")}
+        for lang in ("en", "kz") if lang in tr
+    }
+    for i, block in enumerate(art.get("content", [])):
+        bi = {}
+        for lang in ("en", "kz"):
+            blocks = (tr.get(lang) or {}).get("content") or []
+            if i < len(blocks):
+                bi[lang] = blocks[i]
+        if bi:
+            block["i18n"] = bi
+    return art
+
+
 def article_detail_view(request, slug):
     article = ARTICLES.get(slug)
     if not article:
         raise Http404("Статья не найдена")
-    related = [a for s, a in ARTICLES.items() if s != slug][:3]
+    article = _localize_article(slug, article)
+    related = [_localize_article(s, a) for s, a in ARTICLES.items() if s != slug][:3]
     return render(request, "site/article_detail.html", {
         "active_page": "analytics",
         "article": article,

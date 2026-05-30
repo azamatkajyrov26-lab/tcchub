@@ -1,5 +1,6 @@
 {% extends "layouts/site.html" %}
 {% load static %}
+{% load cms %}
 
 {% block title %}{{ article.title }} — TCC Hub{% endblock %}
 
@@ -112,17 +113,17 @@
   </div>
   <div class="article-hero-overlay"></div>
   <div class="article-hero-content">
-    <div class="article-hero-eyebrow"><span class="bar"></span>Аналитика TCC</div>
-    <div class="article-hero-tag">{{ article.tag }}</div>
-    <h1 class="article-hero-title">{{ article.title }}</h1>
+    <div class="article-hero-eyebrow"><span class="bar"></span><span data-i18n="art.eyebrow">Аналитика TCC</span></div>
+    <div class="article-hero-tag"{% i18n_blk article "tag" %}>{{ article.tag }}</div>
+    <h1 class="article-hero-title"{% i18n_blk article "title" %}>{{ article.title }}</h1>
     <div class="article-hero-meta">
       <span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        {{ article.date }}
+        <span{% i18n_blk article "date" %}>{{ article.date }}</span>
       </span>
       <span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        {{ article.read_time }} чтения
+        <span{% i18n_blk article "read_time" %}>{{ article.read_time }}</span> <span data-i18n="common.reading">чтения</span>
       </span>
     </div>
   </div>
@@ -132,18 +133,18 @@
 <div class="article-body">
   <a href="{% url 'site_analytics' %}" class="article-back">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-    Назад к аналитике
+    <span data-i18n="art.back">Назад к аналитике</span>
   </a>
 
   {% for block in article.content %}
     {% if block.type == "text" %}
-      <p class="article-text">{{ block.body }}</p>
+      <p class="article-text"{% i18n_blk block "body" %}>{{ block.body }}</p>
 
     {% elif block.type == "heading" %}
       {% if block.level == 2 %}
-        <h2 class="article-heading-2">{{ block.body }}</h2>
+        <h2 class="article-heading-2"{% i18n_blk block "body" %}>{{ block.body }}</h2>
       {% elif block.level == 3 %}
-        <h3 class="article-heading-3">{{ block.body }}</h3>
+        <h3 class="article-heading-3"{% i18n_blk block "body" %}>{{ block.body }}</h3>
       {% endif %}
 
     {% elif block.type == "stats_grid" %}
@@ -151,17 +152,17 @@
         {% for item in block.items %}
         <div class="article-stat">
           <div class="article-stat-value">{{ item.value }}</div>
-          <div class="article-stat-label">{{ item.label }}</div>
+          <div class="article-stat-label"{% i18n_blk block "labels" forloop.counter0 %}>{{ item.label }}</div>
         </div>
         {% endfor %}
       </div>
 
     {% elif block.type == "chart_bar" %}
       <div class="article-chart">
-        <div class="article-chart-title">{{ block.title }}</div>
+        <div class="article-chart-title"{% i18n_blk block "title" %}>{{ block.title }}</div>
         {% for bar in block.bars %}
         <div class="chart-bar">
-          <div class="chart-label">{{ bar.label }}</div>
+          <div class="chart-label"{% i18n_blk block "labels" forloop.counter0 %}>{{ bar.label }}</div>
           <div class="chart-track">
             <div class="chart-fill" style="width:{% widthratio bar.value bar.max 100 %}%"></div>
           </div>
@@ -173,19 +174,19 @@
     {% elif block.type == "image" %}
       <div class="article-image">
         <img src="{{ block.url }}" alt="{{ block.caption|default:'' }}">
-        {% if block.caption %}<div class="article-image-caption">{{ block.caption }}</div>{% endif %}
+        {% if block.caption %}<div class="article-image-caption"{% i18n_blk block "caption" %}>{{ block.caption }}</div>{% endif %}
       </div>
 
     {% elif block.type == "quote" %}
       <div class="article-quote">
-        <div class="article-quote-text">{{ block.body }}</div>
-        {% if block.author %}<div class="article-quote-author">— {{ block.author }}</div>{% endif %}
+        <div class="article-quote-text"{% i18n_blk block "body" %}>{{ block.body }}</div>
+        {% if block.author %}<div class="article-quote-author">— <span{% i18n_blk block "author" %}>{{ block.author }}</span></div>{% endif %}
       </div>
 
     {% elif block.type == "list" %}
       <ul class="article-list">
         {% for item in block.items %}
-        <li>{{ item }}</li>
+        <li{% i18n_blk block "items" forloop.counter0 %}>{{ item }}</li>
         {% endfor %}
       </ul>
 
@@ -197,7 +198,7 @@
 {% if related_articles %}
 <div class="related-section">
   <div class="related-inner">
-    <h2 class="related-title">Читайте также</h2>
+    <h2 class="related-title" data-i18n="art.related">Читайте также</h2>
     <div class="related-grid">
       {% for rel in related_articles %}
       <a href="{% url 'article_detail' slug=rel.slug %}" class="related-card">
@@ -205,9 +206,9 @@
           <img loading="lazy" src="{{ rel.image_url }}" alt="{{ rel.title }}">
         </div>
         <div class="related-card-body">
-          <div class="related-card-tag">{{ rel.tag }}</div>
-          <div class="related-card-title">{{ rel.title }}</div>
-          <div class="related-card-date">{{ rel.date }}</div>
+          <div class="related-card-tag"{% i18n_blk rel "tag" %}>{{ rel.tag }}</div>
+          <div class="related-card-title"{% i18n_blk rel "title" %}>{{ rel.title }}</div>
+          <div class="related-card-date"{% i18n_blk rel "date" %}>{{ rel.date }}</div>
         </div>
       </a>
       {% endfor %}

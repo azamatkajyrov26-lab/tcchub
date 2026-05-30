@@ -126,8 +126,8 @@
         {% if a.image_src %}<img loading="lazy" src="{{ a.image_src }}" alt="{{ a.title }}">{% endif %}
       </div>
       <div class="body">
-        <h3>{{ a.title }}</h3>
-        <p>{{ a.description }}</p>
+        <h3{% i18n_attr a "title" %}>{{ a.title }}</h3>
+        <p{% i18n_attr a "description" %}>{{ a.description }}</p>
         {% if a.data.metrics %}<div class="an-metrics">{% for m in a.data.metrics %}<span class="an-metric">{{ m }}</span>{% endfor %}</div>{% endif %}
         <div class="read" data-i18n="common.read">Читать →</div>
       </div>

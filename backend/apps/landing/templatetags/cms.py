@@ -142,3 +142,23 @@ def i18n_attr(item, field, idx=None):
     if not parts:
         return ""
     return mark_safe(" " + " ".join(parts))
+
+
+@register.simple_tag
+def i18n_blk(obj, field, idx=None):
+    """Like i18n_attr but for plain dicts carrying obj['i18n'] = {'en':..,'kz':..}.
+
+    Used for hardcoded ARTICLES content blocks localized in the view
+    (apps/web/views.py::_localize_article). `idx` selects a list element.
+    """
+    i18n = (obj.get("i18n") if isinstance(obj, dict) else None) or {}
+    parts = []
+    for lang in ("en", "kz"):
+        v = (i18n.get(lang) or {}).get(field)
+        if idx is not None:
+            v = v[idx] if isinstance(v, (list, tuple)) and 0 <= idx < len(v) else None
+        if v:
+            parts.append('data-i18n-%s="%s"' % (lang, escape(str(v))))
+    if not parts:
+        return ""
+    return mark_safe(" " + " ".join(parts))

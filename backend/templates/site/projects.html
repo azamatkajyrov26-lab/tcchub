@@ -98,10 +98,10 @@
       <div class="prj-item reveal-scale">
         <div class="prj-item-num">{{ forloop.counter|stringformat:"02d" }}</div>
         <div class="prj-item-content">
-          <h4>{{ p.title }}</h4>
-          <p>{{ p.description }}</p>
+          <h4{% i18n_attr p "title" %}>{{ p.title }}</h4>
+          <p{% i18n_attr p "description" %}>{{ p.description }}</p>
         </div>
-        <span class="prj-item-status {% if p.status == 'Активный' %}active{% else %}dev{% endif %}">{{ p.status }}</span>
+        <span class="prj-item-status {% if p.status == 'Активный' %}active{% else %}dev{% endif %}"{% i18n_attr p "status" %}>{{ p.status }}</span>
       </div>
       {% endfor %}
     </div>
@@ -123,10 +123,10 @@
       <div class="prj-item reveal-scale">
         <div class="prj-item-num">{{ forloop.counter|add:3|stringformat:"02d" }}</div>
         <div class="prj-item-content">
-          <h4>{{ p.title }}</h4>
-          <p>{{ p.description }}</p>
+          <h4{% i18n_attr p "title" %}>{{ p.title }}</h4>
+          <p{% i18n_attr p "description" %}>{{ p.description }}</p>
         </div>
-        <span class="prj-item-status {% if p.status == 'Активный' %}active{% else %}dev{% endif %}">{{ p.status }}</span>
+        <span class="prj-item-status {% if p.status == 'Активный' %}active{% else %}dev{% endif %}"{% i18n_attr p "status" %}>{{ p.status }}</span>
       </div>
       {% endfor %}
     </div>
@@ -148,10 +148,10 @@
       <div class="prj-item reveal-scale">
         <div class="prj-item-num">{{ forloop.counter|add:6|stringformat:"02d" }}</div>
         <div class="prj-item-content">
-          <h4>{{ p.title }}</h4>
-          <p>{{ p.description }}</p>
+          <h4{% i18n_attr p "title" %}>{{ p.title }}</h4>
+          <p{% i18n_attr p "description" %}>{{ p.description }}</p>
         </div>
-        <span class="prj-item-status {% if p.status == 'Активный' %}active{% else %}dev{% endif %}">{{ p.status }}</span>
+        <span class="prj-item-status {% if p.status == 'Активный' %}active{% else %}dev{% endif %}"{% i18n_attr p "status" %}>{{ p.status }}</span>
       </div>
       {% endfor %}
     </div>

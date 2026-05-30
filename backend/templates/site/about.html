@@ -381,9 +381,9 @@
           {% elif "Рустем" in e.title %}<img src="{% static 'img/rustem.jpg' %}?v=2" alt="{{ e.title }}">
           {% else %}<div class="avatar-initials">{{ e.data.initials }}</div>{% endif %}
         </div>
-        <h4>{{ e.title }}</h4>
-        <div class="expert-role">{{ e.subtitle }}</div>
-        <p>{{ e.description }}</p>
+        <h4{% i18n_attr e "title" %}>{{ e.title }}</h4>
+        <div class="expert-role"{% i18n_attr e "subtitle" %}>{{ e.subtitle }}</div>
+        <p{% i18n_attr e "description" %}>{{ e.description }}</p>
       </div>
       {% endfor %}
     </div>

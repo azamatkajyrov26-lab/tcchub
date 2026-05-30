@@ -10,6 +10,7 @@ Architecture notes:
 - Tags never raise; they always fall back to the provided default.
 """
 from django import template
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 from apps.landing.models import PageSection
@@ -104,3 +105,40 @@ def cms_cta_label(context, page_slug, section_key, default=""):
 @register.simple_tag(takes_context=True)
 def cms_cta_url(context, page_slug, section_key, default="#"):
     return _field(context, page_slug, section_key, "cta_url", default)
+
+
+# ── i18n for DB-driven SiteItem content ──
+# Translations live in SiteItem.data['i18n'] = {'kz': {...}, 'en': {...}}.
+# The Russian value rendered server-side stays the source of truth; this tag
+# emits sibling `data-i18n-en`/`data-i18n-kz` attributes that i18n.js swaps in
+# on language change (falling back to the rendered RU when a value is missing).
+
+def _i18n_value(item, lang, field, idx=None):
+    data = getattr(item, "data", None) or {}
+    block = (data.get("i18n") or {}).get(lang) or {}
+    val = block.get(field)
+    if idx is not None:
+        if isinstance(val, (list, tuple)) and 0 <= idx < len(val):
+            val = val[idx]
+        else:
+            return None
+    if val is None or val == "":
+        return None
+    return str(val)
+
+
+@register.simple_tag
+def i18n_attr(item, field, idx=None):
+    """Render ` data-i18n-en="..." data-i18n-kz="..."` for a SiteItem field.
+
+    `idx` selects an element when the field is a list (e.g. data.bullets).
+    Returns an empty string when no translations exist (JS then keeps RU).
+    """
+    parts = []
+    for lang in ("en", "kz"):
+        v = _i18n_value(item, lang, field, idx)
+        if v:
+            parts.append('data-i18n-%s="%s"' % (lang, escape(v)))
+    if not parts:
+        return ""
+    return mark_safe(" " + " ".join(parts))

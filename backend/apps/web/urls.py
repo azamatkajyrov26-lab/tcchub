@@ -45,6 +45,7 @@ urlpatterns = [
     path("education/", views.education_view, name="education"),
     path("projects/", views.projects_view, name="projects"),
     path("press/", views.site_media_view, name="site_media"),
+    path("press/<int:news_id>/", views.site_media_detail_view, name="site_media_detail"),
     path("partners/", views.site_partners_view, name="site_partners"),
     path("contacts/", views.contacts_view, name="contacts"),
     path("news/", views.news_feed_view, name="news_feed"),

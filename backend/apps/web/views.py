@@ -1031,10 +1031,35 @@ def projects_view(request):
 
 def site_media_view(request):
     from apps.landing.models import SiteNews
-    news = SiteNews.objects.filter(is_published=True)
+    news = list(SiteNews.objects.filter(is_published=True))
+    # Динамические счётчики по типам материалов для тулбара (ascii-ключи для шаблона)
+    kind_to_key = {
+        "статья": "article", "интервью": "interview", "исследование": "research",
+        "видео": "video", "мероприятие": "event", "новость": "news",
+    }
+    counts = {"all": len(news), "article": 0, "interview": 0,
+              "research": 0, "video": 0, "event": 0, "news": 0}
+    for n in news:
+        key = kind_to_key.get(n.kind)
+        if key:
+            counts[key] += 1
     return render(request, "site/media.html", {
         "active_page": "media",
         "news_items": news,
+        "media_counts": counts,
+    })
+
+
+def site_media_detail_view(request, news_id):
+    """Детальная страница новости/материала /press/<id>/."""
+    from django.shortcuts import get_object_or_404
+    from apps.landing.models import SiteNews
+    news = get_object_or_404(SiteNews, pk=news_id, is_published=True)
+    related = SiteNews.objects.filter(is_published=True).exclude(pk=news.pk)[:3]
+    return render(request, "site/media_detail.html", {
+        "active_page": "media",
+        "news": news,
+        "related_news": related,
     })
 
 

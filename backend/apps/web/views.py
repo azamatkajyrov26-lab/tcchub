@@ -2555,6 +2555,34 @@ def dashboard_cms_items_delete(request, category, item_id):
 
 @_staff_required
 @require_POST
+def dashboard_cms_items_reorder(request, category):
+    """Сохраняет новый порядок материалов (drag-and-drop). Тело: JSON {order:[id,…]}.
+    Поле order напрямую управляет порядком карточек на публичной странице."""
+    import json
+    if category not in _CATEGORY_LABELS:
+        return JsonResponse({"error": "Неизвестная категория"}, status=400)
+    try:
+        ids = json.loads(request.body.decode("utf-8")).get("order") or []
+    except Exception:
+        return JsonResponse({"error": "Некорректные данные"}, status=400)
+    items = {i.id: i for i in SiteItem.objects.filter(category=category, id__in=ids)}
+    changed = 0
+    for pos, raw in enumerate(ids):
+        try:
+            it = items.get(int(raw))
+        except (TypeError, ValueError):
+            continue
+        if it and it.order != pos:
+            it.order = pos
+            it.save(update_fields=["order"])
+            changed += 1
+    cms_logger.info("cms.items.reorder user=%s cat=%s n=%d changed=%d",
+                    request.user.pk, category, len(ids), changed)
+    return JsonResponse({"ok": True, "changed": changed})
+
+
+@_staff_required
+@require_POST
 def dashboard_cms_news_delete(request, news_id):
     item = SiteNews.objects.filter(pk=news_id).first()
     if item:

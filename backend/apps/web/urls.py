@@ -98,6 +98,7 @@ urlpatterns = [
     path("dashboard/cms/news/<int:news_id>/", views.dashboard_cms_news_edit, name="dashboard_cms_news_edit"),
     path("dashboard/cms/news/<int:news_id>/delete/", views.dashboard_cms_news_delete, name="dashboard_cms_news_delete"),
     path("dashboard/cms/items/<str:category>/", views.dashboard_cms_items_list, name="dashboard_cms_items_list"),
+    path("dashboard/cms/items/<str:category>/reorder/", views.dashboard_cms_items_reorder, name="dashboard_cms_items_reorder"),
     path("dashboard/cms/items/<str:category>/new/", views.dashboard_cms_items_edit, name="dashboard_cms_items_new"),
     path("dashboard/cms/items/<str:category>/<int:item_id>/", views.dashboard_cms_items_edit, name="dashboard_cms_items_edit"),
     path("dashboard/cms/items/<str:category>/<int:item_id>/delete/", views.dashboard_cms_items_delete, name="dashboard_cms_items_delete"),

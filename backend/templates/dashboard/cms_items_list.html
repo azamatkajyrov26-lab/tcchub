@@ -16,28 +16,33 @@
   <a href="{% url 'dashboard_cms_items_new' category %}" style="padding:12px 22px;background:#0B1628;color:#fff;text-decoration:none;border-radius:6px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">+ Добавить</a>
 </div>
 
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+  <div style="font-size:12px;color:#64728A">Перетаскивайте строки за <b>⠿</b>, чтобы изменить порядок на сайте.</div>
+  <span id="reorderStatus" style="font-size:12px;font-weight:700;color:#16a34a;opacity:0;transition:opacity .3s">✓ Порядок сохранён</span>
+</div>
+
 <div class="cab-card" style="padding:0;overflow:hidden">
   <table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead>
       <tr style="background:#f6f7f9;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#64728A">
+        <th style="padding:14px 8px;width:34px"></th>
         <th style="padding:14px 16px;text-align:left">Заголовок</th>
         <th style="padding:14px 16px;text-align:left">Подкатегория</th>
         <th style="padding:14px 16px;text-align:left">Тег/статус</th>
-        <th style="padding:14px 16px;text-align:center">Порядок</th>
         <th style="padding:14px 16px;text-align:center">Публ.</th>
         <th style="padding:14px 16px;text-align:right">Действия</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="sortable">
       {% for i in items %}
-      <tr style="border-top:1px solid #eef0f4">
+      <tr style="border-top:1px solid #eef0f4" data-id="{{ i.id }}">
+        <td style="padding:14px 8px;text-align:center"><span class="drag-handle" title="Перетащить" style="cursor:grab;color:#c0c6d2;font-size:18px;user-select:none">⠿</span></td>
         <td style="padding:14px 16px">
           <a href="{% url 'dashboard_cms_items_edit' category i.id %}" style="color:#0B1628;text-decoration:none;font-weight:700">{{ i.title|truncatechars:70 }}</a>
           {% if i.subtitle %}<div style="font-size:11px;color:#64728A;margin-top:2px">{{ i.subtitle|truncatechars:60 }}</div>{% endif %}
         </td>
         <td style="padding:14px 16px;color:#64728A">{{ i.subcategory|default:"—" }}</td>
         <td style="padding:14px 16px;color:#64728A">{{ i.tag|default:i.status|default:"—" }}</td>
-        <td style="padding:14px 16px;text-align:center;color:#64728A">{{ i.order }}</td>
         <td style="padding:14px 16px;text-align:center">{% if i.is_published %}<span style="color:#16a34a">●</span>{% else %}<span style="color:#cbb89e">○</span>{% endif %}</td>
         <td style="padding:14px 16px;text-align:right;white-space:nowrap">
           <a href="{% url 'dashboard_cms_items_edit' category i.id %}" style="padding:6px 12px;font-size:11px;color:#0B1628;text-decoration:none;border:1px solid #D9DCE4;border-radius:4px;margin-right:4px">Ред.</a>
@@ -53,4 +58,26 @@
     </tbody>
   </table>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
+<script>
+(function(){
+  var tbody=document.getElementById('sortable');
+  if(!tbody || !window.Sortable) return;
+  var URL="{% url 'dashboard_cms_items_reorder' category %}";
+  function getCookie(n){var v=null;(document.cookie||'').split(';').forEach(function(c){c=c.trim();if(c.indexOf(n+'=')===0)v=decodeURIComponent(c.slice(n.length+1));});return v;}
+  function flash(){var s=document.getElementById('reorderStatus');s.style.opacity='1';setTimeout(function(){s.style.opacity='0';},1800);}
+  Sortable.create(tbody,{
+    handle:'.drag-handle', animation:150, ghostClass:'drag-ghost',
+    onEnd:function(){
+      var ids=[].slice.call(tbody.querySelectorAll('tr[data-id]')).map(function(tr){return tr.getAttribute('data-id');});
+      fetch(URL,{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},body:JSON.stringify({order:ids})})
+        .then(function(r){return r.json();})
+        .then(function(d){ if(d && d.ok){flash();} else {alert('Не удалось сохранить порядок');} })
+        .catch(function(){alert('Ошибка сохранения порядка');});
+    }
+  });
+})();
+</script>
+<style>.drag-ghost{opacity:.4;background:#f6f4ee}</style>
 {% endblock %}

@@ -1762,14 +1762,25 @@ def _localize_article(slug, article):
 
 def article_detail_view(request, slug):
     article = ARTICLES.get(slug)
-    if not article:
+    if article:
+        article = _localize_article(slug, article)
+        related = [_localize_article(s, a) for s, a in ARTICLES.items() if s != slug][:3]
+        return render(request, "site/article_detail.html", {
+            "active_page": "analytics",
+            "article": article,
+            "related_articles": related,
+        })
+    # Фоллбэк: статья аналитики из БД (создана через CMS)
+    from apps.landing.models import SiteItem
+    item = SiteItem.objects.filter(category="article", is_published=True, slug=slug).first()
+    if not item:
         raise Http404("Статья не найдена")
-    article = _localize_article(slug, article)
-    related = [_localize_article(s, a) for s, a in ARTICLES.items() if s != slug][:3]
-    return render(request, "site/article_detail.html", {
+    related = (SiteItem.objects.filter(category="article", is_published=True)
+               .exclude(pk=item.pk).order_by("order")[:3])
+    return render(request, "site/item_detail.html", {
         "active_page": "analytics",
-        "article": article,
-        "related_articles": related,
+        "item": item,
+        "related_items": related,
     })
 
 
@@ -2424,6 +2435,28 @@ _CATEGORY_SUBCATS = {
                 ("research", "Исследования")],
 }
 
+# Типы материалов аналитики (tag). Значения совпадают с фильтром на /analytics/.
+ARTICLE_TYPES = [
+    ("Обзор", "Отраслевой обзор"),
+    ("Статья", "Аналитическая статья"),
+    ("Исследование", "Исследование рынка"),
+    ("Отчёт", "Экспертный отчёт"),
+]
+
+_TRANSLIT = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
+    'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+    'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+    'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch',
+    'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
+}
+
+
+def _translit_slug(text):
+    from django.utils.text import slugify
+    latin = ''.join(_TRANSLIT.get(ch, ch) for ch in (text or '').lower())
+    return slugify(latin) or 'material'
+
 
 @_staff_required
 def dashboard_cms_items_list(request, category):
@@ -2483,6 +2516,16 @@ def dashboard_cms_items_edit(request, category, item_id=None):
         if request.FILES.get("image"):
             item.image = request.FILES["image"]
         item.save()
+        # Статьи аналитики должны иметь slug для детальной страницы /analytics/<slug>/
+        if category == "article" and not item.slug:
+            base = _translit_slug(item.title)
+            slug = base
+            i = 2
+            while SiteItem.objects.filter(category="article", slug=slug).exclude(pk=item.pk).exists():
+                slug = f"{base}-{i}"
+                i += 1
+            item.slug = slug
+            item.save(update_fields=["slug"])
         cms_logger.info("cms.item.save user=%s cat=%s id=%s",
                         request.user.pk, category, item.pk)
         messages.success(request, "Сохранено")
@@ -2493,6 +2536,7 @@ def dashboard_cms_items_edit(request, category, item_id=None):
         "category": category,
         "category_label": _CATEGORY_LABELS[category],
         "subcats": _CATEGORY_SUBCATS.get(category, []),
+        "article_types": ARTICLE_TYPES if category == "article" else None,
         "active_page": "cms",
     })
 
@@ -2518,6 +2562,30 @@ def dashboard_cms_news_delete(request, news_id):
         cms_logger.info("cms.news.delete user=%s id=%s", request.user.pk, news_id)
         messages.success(request, "Новость удалена")
     return redirect("dashboard_cms_news_list")
+
+
+@_staff_required
+@require_POST
+def dashboard_cms_upload_image(request):
+    """Принимает изображение из визуального редактора (Quill), сохраняет
+    в media/cms_uploads/ и возвращает JSON {url}."""
+    from django.core.files.storage import default_storage
+    from django.core.files.base import ContentFile
+    import os, uuid
+
+    f = request.FILES.get("image")
+    if not f:
+        return JsonResponse({"error": "Нет файла"}, status=400)
+    if f.size > 8 * 1024 * 1024:
+        return JsonResponse({"error": "Файл больше 8 МБ"}, status=400)
+    ext = os.path.splitext(f.name)[1].lower()
+    if ext not in (".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"):
+        return JsonResponse({"error": "Неподдерживаемый формат"}, status=400)
+    name = f"cms_uploads/{uuid.uuid4().hex}{ext}"
+    saved = default_storage.save(name, ContentFile(f.read()))
+    cms_logger.info("cms.image.upload user=%s file=%s", request.user.pk, saved)
+    from django.conf import settings
+    return JsonResponse({"url": settings.MEDIA_URL + saved})
 
 
 # ──────────────────────────────────────────────

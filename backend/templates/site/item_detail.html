@@ -1,0 +1,108 @@
+{% extends "layouts/site.html" %}
+{% load static %}
+
+{% block title %}{{ item.title }} — TCC Hub{% endblock %}
+
+{% block page_css %}
+<style>
+.news-hero{position:relative;min-height:520px;display:flex;align-items:flex-end;overflow:hidden;background:#080e1a}
+.news-hero-img{position:absolute;inset:0;z-index:0}
+.news-hero-img img{width:100%;height:100%;object-fit:cover;opacity:.45}
+.news-hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,14,26,.98) 0%,rgba(8,14,26,.7) 50%,rgba(8,14,26,.3) 100%),radial-gradient(ellipse 800px 400px at 30% 80%,rgba(198,164,109,.12),transparent 70%);z-index:1}
+.news-hero-content{position:relative;z-index:2;max-width:920px;margin:0 auto;padding:140px 24px 64px;width:100%}
+.news-hero-tag{display:inline-block;font-size:10px;font-weight:800;color:var(--gold-light);letter-spacing:.14em;text-transform:uppercase;margin-bottom:20px;background:rgba(198,164,109,.14);border:1px solid rgba(198,164,109,.3);padding:7px 16px;border-radius:20px}
+.news-hero-title{font-size:clamp(28px,4.5vw,52px);font-weight:900;color:#fff;line-height:1.08;letter-spacing:-.02em;margin-bottom:22px;max-width:840px}
+.news-hero-meta{display:flex;gap:24px;flex-wrap:wrap;font-size:13px;color:rgba(255,255,255,.6);font-weight:600;padding-top:22px;border-top:1px solid rgba(255,255,255,.1)}
+
+.news-body{max-width:800px;margin:0 auto;padding:48px 24px 60px}
+.news-back{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text-light);margin-bottom:36px;transition:color .3s}
+.news-back:hover{color:var(--gold)}
+.news-back svg{width:18px;height:18px;transition:transform .3s}
+.news-back:hover svg{transform:translateX(-3px)}
+.news-lead{font-size:19px;line-height:1.7;color:var(--text);font-weight:500;margin-bottom:32px;padding-bottom:28px;border-bottom:1px solid var(--border-light)}
+
+.news-content{font-size:17px;line-height:1.85;color:var(--text-mid)}
+.news-content p{margin:0 0 24px}
+.news-content h2{font-size:24px;font-weight:800;color:var(--text);margin:42px 0 16px;line-height:1.3}
+.news-content h3{font-size:19px;font-weight:700;color:var(--text);margin:32px 0 14px;line-height:1.35}
+.news-content a{color:var(--gold-dark);text-decoration:underline;text-underline-offset:2px}
+.news-content a:hover{color:var(--gold)}
+.news-content ul,.news-content ol{margin:0 0 24px;padding-left:22px}
+.news-content li{margin-bottom:10px;line-height:1.7}
+.news-content img{max-width:100%;height:auto;display:block;border-radius:14px;margin:32px auto}
+.news-content blockquote{border-left:4px solid var(--gold);padding:20px 26px;margin:32px 0;background:rgba(198,164,109,.04);border-radius:0 14px 14px 0;font-style:italic;color:var(--text)}
+
+.news-metrics{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0 0}
+.news-metric{font-size:12px;font-weight:700;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);padding:6px 14px;border-radius:14px}
+
+.related-section{background:var(--bg-alt);padding:60px 24px;border-top:1px solid var(--border-light)}
+.related-inner{max-width:1240px;margin:0 auto}
+.related-title{font-size:24px;font-weight:800;color:var(--text);margin-bottom:32px;text-align:center}
+.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.related-card{background:#fff;border:1px solid var(--border-light);border-radius:14px;overflow:hidden;transition:all .35s;display:block}
+.related-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,.06);border-color:rgba(198,164,109,.2)}
+.related-card-img{height:160px;overflow:hidden;background:linear-gradient(135deg,var(--navy),#2D4A7A)}
+.related-card-img img{width:100%;height:100%;object-fit:cover;transition:transform .35s}
+.related-card:hover .related-card-img img{transform:scale(1.04)}
+.related-card-body{padding:20px}
+.related-card-tag{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.related-card-title{font-size:15px;font-weight:700;color:var(--text);line-height:1.35}
+
+@media(max-width:1024px){.related-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.news-hero{min-height:340px}.related-grid{grid-template-columns:1fr}}
+@media(max-width:480px){.news-hero-content{padding:80px 16px 32px}.news-body{padding:32px 16px 48px}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="news-hero">
+  {% if item.image_src %}
+  <div class="news-hero-img"><img src="{{ item.image_src }}" alt="{{ item.title }}"></div>
+  {% endif %}
+  <div class="news-hero-overlay"></div>
+  <div class="news-hero-content">
+    {% if item.tag %}<div class="news-hero-tag">{{ item.tag }}</div>{% endif %}
+    <h1 class="news-hero-title">{{ item.title }}</h1>
+    {% if item.subtitle %}<div class="news-hero-meta"><span>{{ item.subtitle }}</span></div>{% endif %}
+    {% if item.data.metrics %}<div class="news-metrics">{% for m in item.data.metrics %}<span class="news-metric">{{ m }}</span>{% endfor %}</div>{% endif %}
+  </div>
+</div>
+
+<div class="news-body">
+  <a href="{% url 'site_analytics' %}" class="news-back">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    <span>Назад к аналитике</span>
+  </a>
+
+  {% if item.description %}<p class="news-lead">{{ item.description }}</p>{% endif %}
+
+  <div class="news-content">{{ item.body|safe }}</div>
+
+  {% if item.link_url %}
+  <p style="margin-top:32px">
+    <a href="{{ item.link_url }}" target="_blank" rel="noopener" style="display:inline-block;padding:12px 24px;background:var(--navy);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none">Источник →</a>
+  </p>
+  {% endif %}
+</div>
+
+{% if related_items %}
+<div class="related-section">
+  <div class="related-inner">
+    <h2 class="related-title">Читайте также</h2>
+    <div class="related-grid">
+      {% for rel in related_items %}
+      <a href="{% if rel.slug %}{% url 'article_detail' slug=rel.slug %}{% elif rel.link_url %}{{ rel.link_url }}{% else %}#{% endif %}" class="related-card">
+        <div class="related-card-img">
+          {% if rel.image_src %}<img loading="lazy" src="{{ rel.image_src }}" alt="{{ rel.title }}">{% endif %}
+        </div>
+        <div class="related-card-body">
+          {% if rel.tag %}<div class="related-card-tag">{{ rel.tag }}</div>{% endif %}
+          <div class="related-card-title">{{ rel.title }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

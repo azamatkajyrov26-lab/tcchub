@@ -92,6 +92,7 @@ urlpatterns = [
     path("dashboard/submissions/", views.dashboard_submissions_list, name="dashboard_submissions"),
     path("dashboard/cms/help/", views.dashboard_cms_help, name="dashboard_cms_help"),
     path("dashboard/cms/request/", views.dashboard_cms_request, name="dashboard_cms_request"),
+    path("dashboard/cms/upload-image/", views.dashboard_cms_upload_image, name="dashboard_cms_upload_image"),
     path("dashboard/cms/news/", views.dashboard_cms_news_list, name="dashboard_cms_news_list"),
     path("dashboard/cms/news/new/", views.dashboard_cms_news_edit, name="dashboard_cms_news_new"),
     path("dashboard/cms/news/<int:news_id>/", views.dashboard_cms_news_edit, name="dashboard_cms_news_edit"),

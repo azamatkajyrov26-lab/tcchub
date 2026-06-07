@@ -62,9 +62,9 @@
   </div>
 
   <div class="form-row">
-    <label>Полный текст (HTML)</label>
-    <textarea name="body" rows="10" class="body-textarea">{{ item.body|default:'' }}</textarea>
-    <div class="hint">Поддерживает HTML-теги: &lt;b&gt;, &lt;i&gt;, &lt;a href="..."&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;h3&gt; и т.д.</div>
+    <label>Полный текст</label>
+    <textarea name="body" rows="10" class="body-textarea" data-rich>{{ item.body|default:'' }}</textarea>
+    <div class="hint">Визуальный редактор: форматирование, списки, ссылки, изображения (загрузка прямо в текст).</div>
   </div>
 
   <div class="form-grid-2">
@@ -95,8 +95,18 @@
 
   <div class="form-grid-2">
     <div class="form-row">
+      {% if article_types %}
+      <label>Тип материала *</label>
+      <select name="tag">
+        {% for val, label in article_types %}
+        <option value="{{ val }}" {% if item and item.tag == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <div class="hint">Определяет, в каком фильтре на странице Аналитики появится материал.</div>
+      {% else %}
       <label>Тег/бейдж (напр. «Статья», «Отчёт»)</label>
       <input type="text" name="tag" maxlength="80" value="{{ item.tag|default:'' }}">
+      {% endif %}
     </div>
     <div class="form-row">
       <label>Статус (напр. «Активный»)</label>
@@ -137,4 +147,5 @@ document.getElementById('imgUrlInput').addEventListener('input', function(){
   }
 });
 </script>
+{% include "includes/quill_editor.html" %}
 {% endblock %}

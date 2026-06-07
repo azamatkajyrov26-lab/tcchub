@@ -120,7 +120,7 @@
   <div class="an-grid">
 
     {% for a in articles %}
-    <a href="{{ a.link_url|default:'#' }}" class="an-card {% if a.data.featured %}featured{% endif %} reveal" data-type="{{ a.tag|lower }}">
+    <a href="{% if a.slug %}{% url 'article_detail' slug=a.slug %}{% elif a.link_url %}{{ a.link_url }}{% else %}#{% endif %}" class="an-card {% if a.data.featured %}featured{% endif %} reveal" data-type="{{ a.tag|lower }}">
       <div class="img">
         <span class="tag">{{ a.tag }}</span>
         {% if a.image_src %}<img loading="lazy" src="{{ a.image_src }}" alt="{{ a.title }}">{% endif %}

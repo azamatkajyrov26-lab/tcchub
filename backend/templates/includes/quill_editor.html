@@ -1,0 +1,91 @@
+{# Подключается один раз на странице с формой. Превращает каждый
+   <textarea data-rich> в визуальный редактор Quill. На submit формы
+   HTML из редактора копируется обратно в textarea. #}
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<style>
+.ql-wrap{border:1px solid #D9DCE4;border-radius:6px;overflow:hidden;background:#fff}
+.ql-wrap .ql-toolbar.ql-snow{border:none;border-bottom:1px solid #eef0f4;font-family:inherit}
+.ql-wrap .ql-container.ql-snow{border:none;font-family:inherit;font-size:15px}
+.ql-wrap .ql-editor{min-height:260px;line-height:1.7;color:#1B2A4A}
+.ql-wrap .ql-editor img{max-width:100%;border-radius:8px}
+.ql-snow .ql-toolbar button:hover .ql-stroke,.ql-snow.ql-toolbar button:hover .ql-stroke{stroke:#C6A46D}
+.ql-snow .ql-toolbar button.ql-active .ql-stroke{stroke:#C6A46D}
+</style>
+<script>
+(function(){
+  function getCookie(name){
+    var v=null;
+    if(document.cookie){
+      document.cookie.split(';').forEach(function(c){
+        c=c.trim();
+        if(c.substring(0,name.length+1)===(name+'=')){v=decodeURIComponent(c.substring(name.length+1));}
+      });
+    }
+    return v;
+  }
+  var UPLOAD_URL="{% url 'dashboard_cms_upload_image' %}";
+
+  function makeImageHandler(quill){
+    return function(){
+      var input=document.createElement('input');
+      input.setAttribute('type','file');
+      input.setAttribute('accept','image/*');
+      input.click();
+      input.onchange=function(){
+        var file=input.files[0];
+        if(!file) return;
+        var fd=new FormData();
+        fd.append('image',file);
+        var range=quill.getSelection(true);
+        quill.insertText(range.index,'  загрузка…',{italic:true});
+        fetch(UPLOAD_URL,{method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken')},body:fd})
+          .then(function(r){return r.json();})
+          .then(function(data){
+            quill.deleteText(range.index,11);
+            if(data && data.url){
+              quill.insertEmbed(range.index,'image',data.url,'user');
+              quill.setSelection(range.index+1);
+            }else{
+              alert('Не удалось загрузить изображение'+(data && data.error?': '+data.error:''));
+            }
+          })
+          .catch(function(){quill.deleteText(range.index,11);alert('Ошибка загрузки изображения');});
+      };
+    };
+  }
+
+  function initOne(ta){
+    ta.style.display='none';
+    var wrap=document.createElement('div'); wrap.className='ql-wrap';
+    var ed=document.createElement('div');
+    wrap.appendChild(ed);
+    ta.parentNode.insertBefore(wrap, ta);
+    var quill=new Quill(ed,{
+      theme:'snow',
+      placeholder:'Пишите материал здесь…',
+      modules:{toolbar:[
+        [{header:[2,3,false]}],
+        ['bold','italic','underline'],
+        [{list:'ordered'},{list:'bullet'}],
+        ['blockquote','link','image'],
+        ['clean']
+      ]}
+    });
+    if(ta.value){ quill.clipboard.dangerouslyPasteHTML(ta.value); }
+    quill.getModule('toolbar').addHandler('image', makeImageHandler(quill));
+    var form=ta.closest('form');
+    if(form){
+      form.addEventListener('submit',function(){
+        var html=quill.root.innerHTML;
+        if(html==='<p><br></p>') html='';
+        ta.value=html;
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded',function(){
+    document.querySelectorAll('textarea[data-rich]').forEach(initOne);
+  });
+})();
+</script>

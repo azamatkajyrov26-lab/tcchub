@@ -2595,25 +2595,60 @@ def dashboard_cms_news_delete(request, news_id):
 @_staff_required
 @require_POST
 def dashboard_cms_upload_image(request):
-    """Принимает изображение из визуального редактора (Quill), сохраняет
-    в media/cms_uploads/ и возвращает JSON {url}."""
+    """Принимает изображение из визуального редактора (CKEditor 5), сохраняет
+    в media/cms_uploads/ и возвращает JSON {url}. CKEditor SimpleUploadAdapter
+    шлёт файл под именем 'upload' и ждёт ошибку в формате {error:{message}};
+    'image' оставлен для обратной совместимости."""
     from django.core.files.storage import default_storage
     from django.core.files.base import ContentFile
     import os, uuid
 
-    f = request.FILES.get("image")
+    def _err(msg, status=400):
+        return JsonResponse({"error": {"message": msg}}, status=status)
+
+    f = request.FILES.get("upload") or request.FILES.get("image")
     if not f:
-        return JsonResponse({"error": "Нет файла"}, status=400)
+        return _err("Нет файла")
     if f.size > 8 * 1024 * 1024:
-        return JsonResponse({"error": "Файл больше 8 МБ"}, status=400)
+        return _err("Файл больше 8 МБ")
     ext = os.path.splitext(f.name)[1].lower()
     if ext not in (".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"):
-        return JsonResponse({"error": "Неподдерживаемый формат"}, status=400)
+        return _err("Неподдерживаемый формат")
     name = f"cms_uploads/{uuid.uuid4().hex}{ext}"
     saved = default_storage.save(name, ContentFile(f.read()))
     cms_logger.info("cms.image.upload user=%s file=%s", request.user.pk, saved)
     from django.conf import settings
-    return JsonResponse({"url": settings.MEDIA_URL + saved})
+    url = settings.MEDIA_URL + saved
+    return JsonResponse({"url": url, "urls": {"default": url}})
+
+
+@_staff_required
+@require_POST
+def dashboard_cms_news_preview(request):
+    """Предпросмотр новости БЕЗ сохранения: строит несохранённый SiteNews из
+    данных формы и рендерит реальный публичный шаблон /press/<id>/
+    (site/media_detail.html), чтобы автор видел итоговый вид перед публикацией."""
+    import datetime
+    from django.utils import timezone
+    from apps.landing.models import SiteNews
+
+    news = SiteNews(
+        title=request.POST.get("title", "").strip() or "Без заголовка",
+        kind=request.POST.get("kind", "новость"),
+        excerpt=request.POST.get("excerpt", ""),
+        body=request.POST.get("body", ""),
+        cover_url=request.POST.get("cover_url", ""),
+        external_url=request.POST.get("external_url", ""),
+    )
+    raw_date = request.POST.get("published_at", "")
+    try:
+        news.published_at = datetime.date.fromisoformat(raw_date)
+    except (ValueError, TypeError):
+        news.published_at = timezone.now().date()
+    # related_news пустой — это предпросмотр одного материала
+    return render(request, "site/media_detail.html", {
+        "news": news, "related_news": [], "is_preview": True,
+    })
 
 
 # ──────────────────────────────────────────────

@@ -4,7 +4,7 @@
 {% block page_title %}{% if item %}Редактировать <span class="ital">новость</span>{% else %}Новая <span class="ital">новость</span>{% endif %}{% endblock %}
 {% block page_sub %}<p class="cab-sub">Заголовок, обложка и дата обязательны. Полный текст — по желанию.</p>{% endblock %}
 
-{% block page_css %}
+{% block extra_head %}{{ block.super }}
 <style>
 .form-row{margin-bottom:18px}
 .form-row label{display:block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#64728A;margin-bottom:6px}
@@ -102,9 +102,10 @@
     <input type="number" name="order" value="{{ item.order|default:0 }}" min="0" style="max-width:140px">
   </div>
 
-  <div style="display:flex;gap:12px;margin-top:22px;padding-top:22px;border-top:1px solid #eef0f4">
+  <div style="display:flex;gap:12px;margin-top:22px;padding-top:22px;border-top:1px solid #eef0f4;flex-wrap:wrap">
     <button type="submit" style="padding:14px 28px;background:#0B1628;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">Сохранить</button>
-    <a href="{% url 'dashboard_cms_news_list' %}" style="padding:14px 28px;color:#64728A;text-decoration:none;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">Отмена</a>
+    <button type="submit" formaction="{% url 'dashboard_cms_news_preview' %}" formtarget="_blank" formnovalidate style="padding:14px 28px;background:#fff;color:#0B1628;border:1px solid #C6A46D;border-radius:6px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">↗ Предпросмотр</button>
+    <a href="{% url 'dashboard_cms_news_list' %}" style="padding:14px 28px;color:#64728A;text-decoration:none;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;align-self:center">Отмена</a>
   </div>
 </form>
 
@@ -118,5 +119,5 @@ document.getElementById('coverUrlInput').addEventListener('input', function(){
   }
 });
 </script>
-{% include "includes/quill_editor.html" %}
+{% include "includes/ckeditor.html" %}
 {% endblock %}

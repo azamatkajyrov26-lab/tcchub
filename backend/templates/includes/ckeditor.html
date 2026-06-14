@@ -1,0 +1,127 @@
+{% comment %}
+  Подключается один раз на странице с формой. Превращает каждый
+  <textarea data-rich> в современный визуальный редактор CKEditor 5.
+  На submit формы HTML из редактора копируется обратно в textarea.
+  Хранение — HTML (как было у Quill), миграция данных не нужна.
+
+  CKEditor 5 v48.2.0 — self-hosted сборка (GPL). Файлы лежат локально в
+  static/vendor/ckeditor5/, поэтому licenseKey:'GPL' валиден (облачный CDN
+  GPL-ключ не принимает — ошибка license-key-invalid-distribution-channel).
+{% endcomment %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'vendor/ckeditor5/ckeditor5.css' %}">
+<script src="{% static 'vendor/ckeditor5/ckeditor5.umd.js' %}"></script>
+<script src="{% static 'vendor/ckeditor5/translations/ru.umd.js' %}"></script>
+<style>
+:root{
+  --ck-color-focus-border:#C6A46D;
+  --ck-color-base-active:#C6A46D;
+  --ck-color-base-active-focus:#b8945a;
+  --ck-border-radius:8px;
+}
+.ck.ck-editor{font-family:inherit;width:100%}
+/* Тулбар: липкий сверху, переносится на несколько строк — кнопки НЕ обрезаются */
+.ck.ck-toolbar{border-color:#E3E6EC!important;background:#fbfbfc!important;flex-wrap:wrap}
+.ck.ck-editor__top .ck-sticky-panel__content{border-color:#E3E6EC}
+.ck.ck-editor__main>.ck-editor__editable{border-color:#E3E6EC;background:#fff}
+.ck.ck-editor__editable{min-height:520px}
+.ck.ck-editor__editable.ck-focused{border-color:#C6A46D!important;box-shadow:inset 0 0 0 1px rgba(198,164,109,.25)}
+/* Ручка блока (drag-and-drop, как в Notion) — делаем заметнее */
+.ck.ck-block-toolbar-button{color:#C6A46D}
+
+/* === WYSIWYG: зона редактирования выглядит как опубликованная новость /press/ === */
+.ck-content{
+  font-size:17px;line-height:1.85;color:#3D5070;font-family:inherit;
+  max-width:760px;margin:0 auto;padding:8px 0;
+}
+.ck-content p{margin:0 0 24px}
+.ck-content h2{font-size:24px;font-weight:800;color:#1B2A4A;margin:42px 0 16px;line-height:1.3}
+.ck-content h3{font-size:19px;font-weight:700;color:#1B2A4A;margin:32px 0 14px;line-height:1.35}
+.ck-content a{color:#A38450;text-decoration:underline;text-underline-offset:2px}
+.ck-content a:hover{color:#C6A46D}
+.ck-content ul,.ck-content ol{margin:0 0 24px;padding-left:22px}
+.ck-content li{margin-bottom:10px;line-height:1.7}
+.ck-content img{max-width:100%;height:auto;border-radius:14px;margin:32px auto}
+.ck-content figure{margin:32px auto}
+.ck-content figure figcaption{font-size:12px;color:#7A8BA8;text-align:center;font-style:italic;background:transparent}
+.ck-content blockquote{
+  border-left:4px solid #C6A46D;padding:20px 26px;margin:32px 0;
+  background:rgba(198,164,109,.04);border-radius:0 14px 14px 0;font-style:italic;color:#1B2A4A;
+}
+.ck-content table{margin:28px auto}
+.ck-content hr{border:none;border-top:1px solid rgba(27,42,74,.08);margin:36px 0}
+</style>
+<script>
+(function(){
+  function getCookie(name){
+    var v=null;
+    if(document.cookie){
+      document.cookie.split(';').forEach(function(c){
+        c=c.trim();
+        if(c.substring(0,name.length+1)===(name+'=')){v=decodeURIComponent(c.substring(name.length+1));}
+      });
+    }
+    return v;
+  }
+  var UPLOAD_URL="{% url 'dashboard_cms_upload_image' %}";
+  var CSRF=getCookie('csrftoken');
+
+  function initOne(ta){
+    var C=window.CKEDITOR;
+    var P={
+      ClassicEditor:C.ClassicEditor, Essentials:C.Essentials, Paragraph:C.Paragraph,
+      Heading:C.Heading, Bold:C.Bold, Italic:C.Italic, Underline:C.Underline,
+      Link:C.Link, List:C.List, BlockQuote:C.BlockQuote, HorizontalLine:C.HorizontalLine,
+      Image:C.Image, ImageToolbar:C.ImageToolbar, ImageCaption:C.ImageCaption,
+      ImageStyle:C.ImageStyle, ImageResize:C.ImageResize, ImageInsert:C.ImageInsert,
+      ImageUpload:C.ImageUpload, AutoImage:C.AutoImage, SimpleUploadAdapter:C.SimpleUploadAdapter,
+      Table:C.Table, TableToolbar:C.TableToolbar, MediaEmbed:C.MediaEmbed,
+      Autoformat:C.Autoformat, PasteFromOffice:C.PasteFromOffice, GeneralHtmlSupport:C.GeneralHtmlSupport,
+      BlockToolbar:C.BlockToolbar
+    };
+    P.ClassicEditor.create(ta,{
+      plugins:[P.Essentials,P.Paragraph,P.Heading,P.Bold,P.Italic,P.Underline,P.Link,
+        P.List,P.BlockQuote,P.HorizontalLine,P.Image,P.ImageToolbar,P.ImageCaption,
+        P.ImageStyle,P.ImageResize,P.ImageInsert,P.ImageUpload,P.AutoImage,
+        P.SimpleUploadAdapter,P.Table,P.TableToolbar,P.MediaEmbed,P.Autoformat,
+        P.PasteFromOffice,P.GeneralHtmlSupport,P.BlockToolbar],
+      toolbar:{items:['undo','redo','|','heading','|','bold','italic','underline','|',
+        'link','insertImage','mediaEmbed','insertTable','blockQuote','|',
+        'bulletedList','numberedList','|','horizontalLine'],shouldNotGroupWhenFull:false},
+      blockToolbar:['heading','|','bold','italic','link','|','bulletedList','numberedList','|',
+        'insertImage','blockQuote','insertTable','|','horizontalLine'],
+      heading:{options:[
+        {model:'paragraph',title:'Абзац',class:'ck-heading_paragraph'},
+        {model:'heading2',view:'h2',title:'Заголовок',class:'ck-heading_heading2'},
+        {model:'heading3',view:'h3',title:'Подзаголовок',class:'ck-heading_heading3'}
+      ]},
+      image:{toolbar:['imageStyle:inline','imageStyle:block','imageStyle:side','|',
+        'toggleImageCaption','imageTextAlternative','|','resizeImage']},
+      table:{contentToolbar:['tableColumn','tableRow','mergeTableCells']},
+      simpleUpload:{uploadUrl:UPLOAD_URL,withCredentials:true,headers:{'X-CSRFToken':CSRF}},
+      link:{addTargetToExternalLinks:true,defaultProtocol:'https://'},
+      htmlSupport:{allow:[{name:/.*/,attributes:true,classes:true,styles:true}]},
+      placeholder:'Пишите материал здесь…',
+      licenseKey:'GPL',
+      language:'ru'
+    }).then(function(editor){
+      ta._cke=editor;
+    }).catch(function(err){
+      console.error('CKEditor init failed',err);
+      ta.style.display='';   // fallback: показать обычную textarea
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded',function(){
+    var tas=document.querySelectorAll('textarea[data-rich]');
+    tas.forEach(initOne);
+    document.querySelectorAll('form').forEach(function(form){
+      form.addEventListener('submit',function(){
+        form.querySelectorAll('textarea[data-rich]').forEach(function(ta){
+          if(ta._cke){ ta.value=ta._cke.getData(); }
+        });
+      });
+    });
+  });
+})();
+</script>

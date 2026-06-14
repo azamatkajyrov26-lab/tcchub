@@ -3,7 +3,7 @@
 {% block page_eyebrow %}Админ · CMS · {{ category_label }}{% endblock %}
 {% block page_title %}{% if item %}Редактировать{% else %}Добавить{% endif %} <span class="ital">{{ category_label|lower }}</span>{% endblock %}
 
-{% block page_css %}
+{% block extra_head %}{{ block.super }}
 <style>
 .form-row{margin-bottom:18px}
 .form-row label{display:block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#64728A;margin-bottom:6px}
@@ -147,5 +147,5 @@ document.getElementById('imgUrlInput').addEventListener('input', function(){
   }
 });
 </script>
-{% include "includes/quill_editor.html" %}
+{% include "includes/ckeditor.html" %}
 {% endblock %}

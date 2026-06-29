@@ -248,7 +248,7 @@ class SiteItem(models.Model):
     slug = models.SlugField("Slug", max_length=200, blank=True)
     title = models.CharField("Заголовок", max_length=300)
     subtitle = models.CharField("Подзаголовок", max_length=300, blank=True)
-    description = models.TextField("Описание", max_length=1500, blank=True)
+    description = models.TextField("Описание", blank=True)
     body = models.TextField("Полный текст (HTML)", blank=True)
     image = models.ImageField("Изображение/лого", upload_to="site_items/", blank=True, null=True)
     image_url = models.URLField("URL изображения", max_length=1000, blank=True)

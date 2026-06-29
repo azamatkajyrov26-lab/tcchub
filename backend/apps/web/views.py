@@ -1761,6 +1761,18 @@ def _localize_article(slug, article):
 
 
 def article_detail_view(request, slug):
+    from apps.landing.models import SiteItem
+
+    item = SiteItem.objects.filter(category="article", is_published=True, slug=slug).first()
+    if item and (item.body or len(item.description or "") > 1000):
+        related = (SiteItem.objects.filter(category="article", is_published=True)
+                   .exclude(pk=item.pk).order_by("order")[:3])
+        return render(request, "site/item_detail.html", {
+            "active_page": "analytics",
+            "item": item,
+            "related_items": related,
+        })
+
     article = ARTICLES.get(slug)
     if article:
         article = _localize_article(slug, article)
@@ -1771,8 +1783,6 @@ def article_detail_view(request, slug):
             "related_articles": related,
         })
     # Фоллбэк: статья аналитики из БД (создана через CMS)
-    from apps.landing.models import SiteItem
-    item = SiteItem.objects.filter(category="article", is_published=True, slug=slug).first()
     if not item:
         raise Http404("Статья не найдена")
     related = (SiteItem.objects.filter(category="article", is_published=True)
@@ -2072,7 +2082,7 @@ cms_logger = logging.getLogger("tcchub.cms")
 
 _staff_required = user_passes_test(lambda u: u.is_authenticated and u.is_staff)
 
-# Input length limits (chars). Matches model field limits + sanity cap on body.
+# Input length limits (chars). Matches model field limits + sanity caps.
 _CMS_LIMITS = {
     "title": 200,
     "meta_title": 200,
@@ -2084,6 +2094,8 @@ _CMS_LIMITS = {
     "cta_label": 120,
     "cta_url": 500,
 }
+_CMS_DESCRIPTION_LIMIT = 250000
+_CMS_RICH_TEXT_LIMIT = 1000000
 
 
 def _clean(request_post, key, limit):
@@ -2092,6 +2104,16 @@ def _clean(request_post, key, limit):
     if len(value) > limit:
         value = value[:limit]
     return value
+
+
+def _clean_rich_text(request_post, key):
+    """Length-clamp rich HTML without stripping editor-managed whitespace."""
+    return (request_post.get(key) or "")[:_CMS_RICH_TEXT_LIMIT]
+
+
+def _clean_description(request_post, key):
+    """Length-clamp item descriptions without the old article-sized cutoff."""
+    return (request_post.get(key) or "").strip()[:_CMS_DESCRIPTION_LIMIT]
 
 
 # Expected PageSection keys per page slug — ensures editor always shows the full
@@ -2384,7 +2406,7 @@ def dashboard_cms_news_edit(request, news_id=None):
             kind = "новость"
 
         excerpt = _clean(request.POST, "excerpt", 600)
-        body = request.POST.get("body", "")[:20000]
+        body = _clean_rich_text(request.POST, "body")
         cover_url = _clean(request.POST, "cover_url", 1000)
         external_url = _clean(request.POST, "external_url", 1000)
         published_at = _parse_date(request.POST.get("published_at"))
@@ -2497,8 +2519,8 @@ def dashboard_cms_items_edit(request, category, item_id=None):
         item.subtitle = _clean(request.POST, "subtitle", 300)
         item.subcategory = _clean(request.POST, "subcategory", 80)
         item.slug = _clean(request.POST, "slug", 200)
-        item.description = _clean(request.POST, "description", 1500)
-        item.body = request.POST.get("body", "")[:30000]
+        item.description = _clean_description(request.POST, "description")
+        item.body = _clean_rich_text(request.POST, "body")
         item.image_url = _clean(request.POST, "image_url", 1000)
         item.link_url = _clean(request.POST, "link_url", 1000)
         item.tag = _clean(request.POST, "tag", 80)
@@ -2526,8 +2548,9 @@ def dashboard_cms_items_edit(request, category, item_id=None):
                 i += 1
             item.slug = slug
             item.save(update_fields=["slug"])
-        cms_logger.info("cms.item.save user=%s cat=%s id=%s",
-                        request.user.pk, category, item.pk)
+        cms_logger.info("cms.item.save user=%s cat=%s id=%s description_len=%s body_len=%s",
+                        request.user.pk, category, item.pk,
+                        len(item.description or ""), len(item.body or ""))
         messages.success(request, "Сохранено")
         return redirect("dashboard_cms_items_edit", category=category, item_id=item.pk)
 

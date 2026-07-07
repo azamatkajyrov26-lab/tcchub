@@ -82,9 +82,13 @@ def live_news_feed(request):
     """
     limit = min(int(request.query_params.get("limit", 20)), 50)
 
+    # Only surface items that are already Russian or have a Russian translation —
+    # the homepage widget shows just 4 cards, and they must never appear in English
+    # while translate_news_to_russian (hourly, ~50/run) is still catching up.
     items = (
         NewsItem.objects
         .select_related("source")
+        .filter(Q(language="ru") | ~Q(ai_summary_ru=""))
         .order_by("-published_at")[:limit]
     )
 

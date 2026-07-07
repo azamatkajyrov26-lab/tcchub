@@ -90,9 +90,22 @@ def live_news_feed(request):
 
     results = []
     for item in items:
+        title = item.title
+        content = item.content or ""
+
+        # Use the Russian translation (populated hourly by translate_news_to_russian)
+        # for non-Russian sources so the homepage feed reads in Russian.
+        if item.language != "ru" and item.ai_summary_ru:
+            ru_title, _, ru_content = item.ai_summary_ru.partition("\n\n")
+            ru_title = ru_title.strip()
+            ru_content = ru_content.strip()
+            if ru_title:
+                title = ru_title
+                content = ru_content or content
+
         # Determine tone based on content keywords
-        title_lower = (item.title or "").lower()
-        content_lower = (item.content or "").lower()
+        title_lower = (title or "").lower()
+        content_lower = (content or "").lower()
         combined = f"{title_lower} {content_lower}"
 
         if any(w in combined for w in ["risk", "delay", "crisis", "decline", "drop",
@@ -122,8 +135,8 @@ def live_news_feed(request):
             "id": item.id,
             "source": item.source.name if item.source else "",
             "source_code": item.source.code if item.source else "",
-            "title": item.title,
-            "content": (item.content or "")[:300],
+            "title": title,
+            "content": (content or "")[:300],
             "url": item.url,
             "published_at": item.published_at.isoformat() if item.published_at else None,
             "time_ago": time_ago,

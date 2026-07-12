@@ -290,30 +290,24 @@
       <svg class="eco-lines" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet">
         <!-- Static lines (dim) -->
         <line class="eco-line" x1="300" y1="300" x2="300" y2="36" data-sat="0"/>
-        <line class="eco-line" x1="300" y1="300" x2="576" y2="300" data-sat="1"/>
-        <line class="eco-line" x1="300" y1="300" x2="300" y2="564" data-sat="2"/>
-        <line class="eco-line" x1="300" y1="300" x2="24" y2="300" data-sat="3"/>
+        <line class="eco-line" x1="300" y1="300" x2="529" y2="432" data-sat="1"/>
+        <line class="eco-line" x1="300" y1="300" x2="71" y2="432" data-sat="2"/>
         <!-- Glow lines (appear on activation) -->
         <line class="eco-line-glow" x1="300" y1="300" x2="300" y2="36" data-sat="0"/>
-        <line class="eco-line-glow" x1="300" y1="300" x2="576" y2="300" data-sat="1"/>
-        <line class="eco-line-glow" x1="300" y1="300" x2="300" y2="564" data-sat="2"/>
-        <line class="eco-line-glow" x1="300" y1="300" x2="24" y2="300" data-sat="3"/>
+        <line class="eco-line-glow" x1="300" y1="300" x2="529" y2="432" data-sat="1"/>
+        <line class="eco-line-glow" x1="300" y1="300" x2="71" y2="432" data-sat="2"/>
         <!-- Animated dots traveling along lines -->
         <circle class="eco-dot-flow" r="4" data-sat="0">
           <animate attributeName="cx" values="300;300" dur="1s" repeatCount="1"/>
           <animate attributeName="cy" values="300;36" dur="1s" repeatCount="1"/>
         </circle>
         <circle class="eco-dot-flow" r="4" data-sat="1">
-          <animate attributeName="cx" values="300;576" dur="1s" repeatCount="1"/>
-          <animate attributeName="cy" values="300;300" dur="1s" repeatCount="1"/>
+          <animate attributeName="cx" values="300;529" dur="1s" repeatCount="1"/>
+          <animate attributeName="cy" values="300;432" dur="1s" repeatCount="1"/>
         </circle>
         <circle class="eco-dot-flow" r="4" data-sat="2">
-          <animate attributeName="cx" values="300;300" dur="1s" repeatCount="1"/>
-          <animate attributeName="cy" values="300;564" dur="1s" repeatCount="1"/>
-        </circle>
-        <circle class="eco-dot-flow" r="4" data-sat="3">
-          <animate attributeName="cx" values="300;24" dur="1s" repeatCount="1"/>
-          <animate attributeName="cy" values="300;300" dur="1s" repeatCount="1"/>
+          <animate attributeName="cx" values="300;71" dur="1s" repeatCount="1"/>
+          <animate attributeName="cy" values="300;432" dur="1s" repeatCount="1"/>
         </circle>
       </svg>
 
@@ -323,40 +317,31 @@
         <strong>HUB</strong>
       </div>
 
-      <!-- Satellite: Архитектура (top) -->
+      <!-- Satellite: Диагностика (top) -->
       <div class="eco-sat" data-idx="0" style="top:6%;left:50%">
+        <div class="eco-sat-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </div>
+        <h4 data-i18n="about.eco.s1.h">Диагностика цепей поставок</h4>
+        <p data-i18n="about.eco.s1.p">Аудит, риски, узкие места</p>
+      </div>
+
+      <!-- Satellite: Аналитика (bottom-right) -->
+      <div class="eco-sat" data-idx="1" style="top:72%;left:88%">
         <div class="eco-sat-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
         </div>
-        <h4 data-i18n="about.eco.s1.h">Архитектура цепей поставок</h4>
-        <p data-i18n="about.eco.s1.p">ТМТМ, BRI и INSTC</p>
+        <h4 data-i18n="about.eco.s2.h">Аналитика коридоров</h4>
+        <p data-i18n="about.eco.s2.p">Коридоры, санкции, риски</p>
       </div>
 
-      <!-- Satellite: Аналитика (right) -->
-      <div class="eco-sat" data-idx="1" style="top:50%;left:96%">
-        <div class="eco-sat-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        </div>
-        <h4 data-i18n="about.eco.s2.h">SCM-аналитика</h4>
-        <p data-i18n="about.eco.s2.p">Рынки, риски, сценарии</p>
-      </div>
-
-      <!-- Satellite: Компетенции (bottom) -->
-      <div class="eco-sat" data-idx="2" style="top:94%;left:50%">
+      <!-- Satellite: Компетенции (bottom-left) -->
+      <div class="eco-sat" data-idx="2" style="top:72%;left:12%">
         <div class="eco-sat-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
         </div>
-        <h4 data-i18n="about.eco.s3.h">Компетенции и лидерство</h4>
-        <p data-i18n="about.eco.s3.p">Программы, мастермайнды</p>
-      </div>
-
-      <!-- Satellite: Партнёрства (left) -->
-      <div class="eco-sat" data-idx="3" style="top:50%;left:4%">
-        <div class="eco-sat-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        </div>
-        <h4 data-i18n="about.eco.s4.h">Партнёрства и рынки</h4>
-        <p data-i18n="about.eco.s4.p">Форумы, торговые миссии</p>
+        <h4 data-i18n="about.eco.s3.h">Развитие компетенций</h4>
+        <p data-i18n="about.eco.s3.p">SCM, executive-программы</p>
       </div>
     </div>
   </div>

@@ -249,7 +249,7 @@
       {% else %}
       <div class="nf-title">{{ item.title }}</div>
       {% if item.content %}
-      <div class="nf-desc">{{ item.content|striptags }}</div>
+      <div class="nf-desc">{{ item.content|striptags|truncatechars:350 }}</div>
       {% endif %}
       {% endif %}
       <div class="nf-footer">

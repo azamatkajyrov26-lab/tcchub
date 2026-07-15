@@ -1,7 +1,16 @@
 {% extends "layouts/site.html" %}
 {% load static %}
 
-{% block title %}{{ news.title }} — TCC Hub{% endblock %}
+{% block title %}{{ news.title }} — TransCaspian Cargo{% endblock %}
+{% block meta_description %}{{ news.excerpt|default:news.title|striptags|truncatechars:160 }}{% endblock %}
+{% block og_title %}{{ news.title }}{% endblock %}
+{% block og_description %}{{ news.excerpt|default:news.title|striptags|truncatechars:200 }}{% endblock %}
+{% block og_image %}{% if news.cover_src %}{% if news.cover_src|slice:":4" == "http" %}{{ news.cover_src }}{% else %}https://tc-cargo.kz{{ news.cover_src }}{% endif %}{% else %}https://tc-cargo.kz{% static 'img/favicon.png' %}{% endif %}{% endblock %}
+{% block extra_ld %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"NewsArticle","headline":"{{ news.title|escapejs }}","datePublished":"{{ news.published_at|date:'Y-m-d' }}","dateModified":"{{ news.updated_at|date:'Y-m-d' }}","author":{"@type":"Organization","name":"TransCaspian Cargo"},"publisher":{"@type":"Organization","name":"TransCaspian Cargo","logo":{"@type":"ImageObject","url":"https://tc-cargo.kz{% static 'img/favicon.png' %}"}},"mainEntityOfPage":"https://tc-cargo.kz{{ request.path }}"{% if news.cover_src %},"image":"{% if news.cover_src|slice:":4" == "http" %}{{ news.cover_src }}{% else %}https://tc-cargo.kz{{ news.cover_src }}{% endif %}"{% endif %}}
+</script>
+{% endblock %}
 
 {% block page_css %}
 <style>

@@ -19,9 +19,11 @@ def robots_txt(request):
 
 
 def sitemap_xml(request):
+    from apps.landing.models import SiteNews
+
     pages = [
         "", "about/", "analytics/", "solutions/", "education/",
-        "projects/", "press/", "partners/", "contacts/",
+        "projects/", "press/", "news/", "partners/", "contacts/",
         "wiki/", "corridor/", "live-data/", "corridor-map/",
         "monitoring/", "kz-logistics-laws/", "reports/",
     ]
@@ -29,6 +31,12 @@ def sitemap_xml(request):
         f"<url><loc>https://tc-cargo.kz/{p}</loc><changefreq>weekly</changefreq><priority>{'1.0' if not p else '0.8'}</priority></url>"
         for p in pages
     )
+    for n in SiteNews.objects.filter(is_published=True).only("id", "updated_at")[:500]:
+        urls += (
+            f"<url><loc>https://tc-cargo.kz/press/{n.id}/</loc>"
+            f"<lastmod>{n.updated_at:%Y-%m-%d}</lastmod>"
+            f"<changefreq>monthly</changefreq><priority>0.6</priority></url>"
+        )
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'
     return HttpResponse(xml, content_type="application/xml")
 

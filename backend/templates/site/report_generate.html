@@ -265,9 +265,80 @@
     {% endwith %}
     {% endif %}
     {% endwith %}
+    {% if g.risk_rationale or g.climate_rationale %}
+    <p style="font-size:13px;color:var(--text-mid);line-height:1.7;margin-top:12px">{{ g.risk_rationale|default:g.climate_rationale }}</p>
+    {% endif %}
   </div>
   {% endif %}
   {% endwith %}{% endwith %}
+
+  <!-- EVENT: Главное событие -->
+  {% if g.key_event_title or g.key_event_summary %}
+  <div class="rp-section">
+    <h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Главное событие</h2>
+    {% if g.key_event_title %}<div style="font-size:16px;font-weight:800;color:var(--navy);margin-bottom:12px">{{ g.key_event_title }}</div>{% endif %}
+    {% if g.key_event_summary %}<p style="font-size:14px;line-height:1.8;color:var(--text)">{{ g.key_event_summary }}</p>{% endif %}
+    {% if g.corridor_nodes_affected %}
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:11px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em">Затронутые узлы:</span>
+      {% for node in g.corridor_nodes_affected %}<span style="padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700;background:rgba(198,164,109,.1);border:1px solid rgba(198,164,109,.25);color:var(--gold-dark)">{{ node }}</span>{% endfor %}
+    </div>
+    {% endif %}
+    {% if g.immediate_impact %}
+    <div style="margin-top:16px;padding:16px;background:rgba(239,68,68,.04);border-radius:12px;border-left:3px solid #EF4444">
+      <div style="font-size:11px;font-weight:800;color:#EF4444;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Немедленное влияние (24–72 часа)</div>
+      <p style="font-size:13px;color:var(--text);line-height:1.7;margin:0">{{ g.immediate_impact }}</p>
+    </div>
+    {% endif %}
+    {% if g.tcd_impact %}
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px">
+      {% if g.tcd_impact.time_delta %}
+      <div style="background:var(--bg-alt);border:1px solid var(--border-light);border-radius:12px;padding:16px">
+        <div style="font-size:10px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Транзитное время</div>
+        <div style="font-size:13px;font-weight:700;color:var(--navy);line-height:1.5">{{ g.tcd_impact.time_delta }}</div>
+      </div>
+      {% endif %}
+      {% if g.tcd_impact.cost_delta %}
+      <div style="background:var(--bg-alt);border:1px solid var(--border-light);border-radius:12px;padding:16px">
+        <div style="font-size:10px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Стоимость перевозки</div>
+        <div style="font-size:13px;font-weight:700;color:var(--navy);line-height:1.5">{{ g.tcd_impact.cost_delta }}</div>
+      </div>
+      {% endif %}
+      {% if g.tcd_impact.reliability_delta %}
+      <div style="background:var(--bg-alt);border:1px solid var(--border-light);border-radius:12px;padding:16px">
+        <div style="font-size:10px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Надёжность расписания</div>
+        <div style="font-size:13px;font-weight:700;color:var(--navy);line-height:1.5">{{ g.tcd_impact.reliability_delta }}</div>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+    {% if g.secondary_effects %}
+    <div style="margin-top:16px"><div style="font-size:12px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Вторичные эффекты (1–4 недели)</div>
+    <p style="font-size:13px;color:var(--text-mid);line-height:1.7;margin:0">{{ g.secondary_effects }}</p></div>
+    {% endif %}
+    {% if g.route_diversion_risk %}
+    <div style="margin-top:12px;padding:14px 18px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:12px">
+      <div style="font-size:11px;font-weight:800;color:#F59E0B;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Риск переключения грузов на другие коридоры</div>
+      <p style="font-size:13px;color:var(--text);line-height:1.6;margin:0">{{ g.route_diversion_risk }}</p>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- EVENT: Влияние на участников рынка -->
+  {% if g.stakeholder_implications %}
+  <div class="rp-section">
+    <h2>Влияние на участников рынка</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      {% for role, impact in g.stakeholder_implications.items %}
+      <div style="background:var(--bg-alt);border:1px solid var(--border-light);border-radius:12px;padding:18px">
+        <div style="font-size:12px;font-weight:800;color:var(--gold-dark);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">{{ role }}</div>
+        <p style="font-size:13px;color:var(--text);line-height:1.6;margin:0">{{ impact }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 
   <!-- Main content sections based on report type -->
   {% if g.situation %}
@@ -301,10 +372,73 @@
     <div style="margin-top:16px"><div style="font-size:12px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Торговые потоки</div>
     <p style="font-size:13px;color:var(--text-mid);line-height:1.7">{{ g.trade_flow_impact }}</p></div>
     {% endif %}
+    {% if g.lpi_dimension_assessment %}
+    <div style="margin-top:20px">
+      <div style="font-size:12px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Оценка по измерениям LPI (World Bank)</div>
+      <div style="display:grid;gap:8px">
+        {% for dim, assessment in g.lpi_dimension_assessment.items %}
+        <div style="display:flex;gap:14px;padding:12px 16px;background:var(--bg-alt);border-radius:10px;align-items:baseline">
+          <div style="min-width:160px;font-size:12px;font-weight:800;color:var(--navy)">{{ dim }}</div>
+          <div style="font-size:13px;color:var(--text-mid);line-height:1.6">{{ assessment }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
   </div>
   {% endif %}
 
-  {% if g.risk_matrix %}
+  <!-- INVESTMENT: Размер рынка и финансовые индикаторы -->
+  {% if g.market_sizing or g.financial_metrics %}
+  <div class="rp-section">
+    <h2>Рынок и финансовые индикаторы</h2>
+    {% if g.market_sizing %}
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+      {% if g.market_sizing.current_volume %}
+      <div style="background:var(--bg-alt);border:1px solid var(--border-light);border-radius:12px;padding:16px">
+        <div style="font-size:10px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Текущий объём</div>
+        <div style="font-size:13px;font-weight:700;color:var(--navy);line-height:1.5">{{ g.market_sizing.current_volume }}</div>
+      </div>
+      {% endif %}
+      {% if g.market_sizing.addressable_market %}
+      <div style="background:var(--bg-alt);border:1px solid var(--border-light);border-radius:12px;padding:16px">
+        <div style="font-size:10px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Адресуемый рынок</div>
+        <div style="font-size:13px;font-weight:700;color:var(--navy);line-height:1.5">{{ g.market_sizing.addressable_market }}</div>
+      </div>
+      {% endif %}
+      {% if g.market_sizing.growth_scenario %}
+      <div style="background:var(--bg-alt);border:1px solid var(--border-light);border-radius:12px;padding:16px">
+        <div style="font-size:10px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Сценарии роста</div>
+        <div style="font-size:13px;font-weight:700;color:var(--navy);line-height:1.5">{{ g.market_sizing.growth_scenario }}</div>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+    {% if g.financial_metrics %}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      {% if g.financial_metrics.transit_volume_trend %}<div style="padding:12px 16px;background:var(--bg-alt);border-radius:10px;font-size:12px"><b style="color:var(--navy)">Объём транзита:</b> <span style="color:var(--text-mid)">{{ g.financial_metrics.transit_volume_trend }}</span></div>{% endif %}
+      {% if g.financial_metrics.freight_rate_trend %}<div style="padding:12px 16px;background:var(--bg-alt);border-radius:10px;font-size:12px"><b style="color:var(--navy)">Фрахтовые ставки:</b> <span style="color:var(--text-mid)">{{ g.financial_metrics.freight_rate_trend }}</span></div>{% endif %}
+      {% if g.financial_metrics.transit_time_trend %}<div style="padding:12px 16px;background:var(--bg-alt);border-radius:10px;font-size:12px"><b style="color:var(--navy)">Транзитное время:</b> <span style="color:var(--text-mid)">{{ g.financial_metrics.transit_time_trend }}</span></div>{% endif %}
+      {% if g.financial_metrics.infrastructure_utilization %}<div style="padding:12px 16px;background:var(--bg-alt);border-radius:10px;font-size:12px"><b style="color:var(--navy)">Загрузка мощностей:</b> <span style="color:var(--text-mid)">{{ g.financial_metrics.infrastructure_utilization }}</span></div>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- INVESTMENT: Возможности и барьеры -->
+  {% if g.opportunities or g.investment_barriers or g.infrastructure_gaps_and_capex %}
+  <div class="rp-section">
+    <h2>Инвестиционные возможности и барьеры</h2>
+    {% for o in g.opportunities %}<div class="rp-finding">💡 {{ o }}</div>{% endfor %}
+    {% for b in g.investment_barriers %}<div class="rp-finding" style="background:rgba(239,68,68,.05);border-left-color:#EF4444">⛔ {{ b }}</div>{% endfor %}
+    {% if g.infrastructure_gaps_and_capex %}
+    <div style="margin-top:16px"><div style="font-size:12px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Инфраструктурные потребности (CAPEX)</div>
+    {% for gap in g.infrastructure_gaps_and_capex %}<div class="rp-finding">🏗️ {{ gap }}</div>{% endfor %}</div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if g.risk_matrix or g.risk_matrix_for_investors %}
   <div class="rp-section">
     <h2>Матрица рисков</h2>
     <div style="display:grid;grid-template-columns:1fr 120px 120px;gap:8px;margin-bottom:12px;font-size:10px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;padding:0 16px">
@@ -313,8 +447,23 @@
     {% for risk in g.risk_matrix %}
     <div class="rp-risk-row">
       <div>
+        <div style="font-size:13px;font-weight:700;color:var(--navy)">{{ risk.risk }}{% if risk.category %} <span style="font-size:10px;font-weight:700;color:var(--gold-dark);background:rgba(198,164,109,.1);padding:1px 8px;border-radius:6px;margin-left:6px">{{ risk.category }}</span>{% endif %}</div>
+        {% if risk.description %}<div style="font-size:11px;color:var(--text-mid);margin-top:2px;line-height:1.5">{{ risk.description }}</div>{% endif %}
+        {% if risk.mitigation %}<div style="font-size:11px;color:#10B981;margin-top:4px;line-height:1.5"><b>Митигация:</b> {{ risk.mitigation }}</div>{% endif %}
+      </div>
+      <div style="text-align:center">
+        <span class="rp-label {% if risk.probability == 'ВЫСОКАЯ' %}rp-risk-high{% elif risk.probability == 'СРЕДНЯЯ' %}rp-risk-mid{% else %}rp-risk-low{% endif %}">{{ risk.probability }}</span>
+      </div>
+      <div style="text-align:center">
+        <span class="rp-label {% if risk.impact == 'ВЫСОКИЙ' %}rp-risk-high{% elif risk.impact == 'СРЕДНИЙ' %}rp-risk-mid{% else %}rp-risk-low{% endif %}">{{ risk.impact }}</span>
+      </div>
+    </div>
+    {% endfor %}
+    {% for risk in g.risk_matrix_for_investors %}
+    <div class="rp-risk-row">
+      <div>
         <div style="font-size:13px;font-weight:700;color:var(--navy)">{{ risk.risk }}</div>
-        {% if risk.description %}<div style="font-size:11px;color:var(--text-mid);margin-top:2px">{{ risk.description }}</div>{% endif %}
+        {% if risk.mitigation %}<div style="font-size:11px;color:#10B981;margin-top:4px;line-height:1.5"><b>Хеджирование:</b> {{ risk.mitigation }}</div>{% endif %}
       </div>
       <div style="text-align:center">
         <span class="rp-label {% if risk.probability == 'ВЫСОКАЯ' %}rp-risk-high{% elif risk.probability == 'СРЕДНЯЯ' %}rp-risk-mid{% else %}rp-risk-low{% endif %}">{{ risk.probability }}</span>
@@ -335,20 +484,47 @@
   </div>
   {% endif %}
 
-  {% if g.policy_recommendations or g.recommendation or g.strategic_recommendations or g.urgent_actions %}
+  {% if g.policy_recommendations or g.recommendation or g.strategic_recommendations or g.urgent_actions or g.due_diligence_checklist %}
   <div class="rp-section">
     <h2>Рекомендации</h2>
     {% if g.recommendation %}<div class="rp-rec">{{ g.recommendation }}</div>{% endif %}
     {% for r in g.policy_recommendations %}<div class="rp-rec">{{ r }}</div>{% endfor %}
     {% for r in g.strategic_recommendations %}<div class="rp-rec">{{ r }}</div>{% endfor %}
     {% for r in g.urgent_actions %}<div class="rp-rec">⚡ {{ r }}</div>{% endfor %}
+    {% if g.due_diligence_checklist %}
+    <div style="margin-top:16px"><div style="font-size:12px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Чек-лист Due Diligence</div>
+    {% for c in g.due_diligence_checklist %}<div class="rp-rec">☑️ {{ c }}</div>{% endfor %}</div>
+    {% endif %}
   </div>
   {% endif %}
 
-  {% if g.outlook %}
+  {% if g.kpi_watch or g.monitoring_indicators %}
+  <div class="rp-section">
+    <h2>Индикаторы для мониторинга</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">
+      {% for kpi in g.kpi_watch %}<span style="padding:8px 16px;background:var(--bg-alt);border:1px solid var(--border-light);border-radius:20px;font-size:12px;font-weight:700;color:var(--navy)">📊 {{ kpi }}</span>{% endfor %}
+    </div>
+    {% if g.monitoring_indicators %}
+    <div style="display:grid;gap:8px;margin-top:{% if g.kpi_watch %}14px{% else %}0{% endif %}">
+      {% for ind in g.monitoring_indicators %}<div class="rp-finding">👁️ {{ ind }}</div>{% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if g.outlook or g.precedent_analysis %}
   <div class="rp-section">
     <h2>Прогноз</h2>
-    <p style="font-size:14px;line-height:1.8;color:var(--text)">{{ g.outlook }}</p>
+    {% if g.outlook %}<p style="font-size:14px;line-height:1.8;color:var(--text)">{{ g.outlook }}</p>{% endif %}
+    {% if g.precedent_analysis %}
+    <div style="margin-top:14px;padding:14px 18px;background:var(--bg-alt);border-radius:12px">
+      <div style="font-size:11px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Анализ прецедентов</div>
+      <p style="font-size:13px;color:var(--text-mid);line-height:1.7;margin:0">{{ g.precedent_analysis }}</p>
+    </div>
+    {% endif %}
+    {% if g.data_quality_note %}
+    <p style="font-size:12px;color:var(--text-light);line-height:1.6;font-style:italic;margin-top:14px">{{ g.data_quality_note }}</p>
+    {% endif %}
   </div>
   {% endif %}
 
@@ -365,7 +541,7 @@
       <div>
         <div class="art-meta">{{ art.source__name }} · {{ art.published_at|date:"d.m.Y" }} · <span style="background:rgba(198,164,109,.1);padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;color:var(--gold-dark)">{{ art.groq_impact_type }}</span></div>
         <a href="{{ art.url }}" target="_blank" class="art-title" style="display:block;text-decoration:none">{{ art.title }}</a>
-        {% if art.groq_summary_ru %}<div class="art-summary">{{ art.groq_summary_ru|truncatechars:180 }}</div>{% endif %}
+        {% if art.groq_summary_ru %}<div class="art-summary">{{ art.groq_summary_ru }}</div>{% endif %}
       </div>
     </div>
     {% endfor %}

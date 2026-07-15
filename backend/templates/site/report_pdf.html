@@ -147,22 +147,73 @@ td { padding: 10px 12px; border-bottom: 1px solid #eef0f4; vertical-align: top; 
   <p>{{ g.corridor_assessment }}</p>
   {% if g.infrastructure_findings %}<h3>Инфраструктура</h3><p>{{ g.infrastructure_findings }}</p>{% endif %}
   {% if g.trade_flow_impact %}<h3>Торговые потоки</h3><p>{{ g.trade_flow_impact }}</p>{% endif %}
+  {% if g.lpi_dimension_assessment %}
+  <h3>Оценка по измерениям LPI</h3>
+  {% for dim, assessment in g.lpi_dimension_assessment.items %}<p><strong>{{ dim }}:</strong> {{ assessment }}</p>{% endfor %}
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- Event report -->
+{% if g.key_event_title or g.key_event_summary %}
+<div class="section">
+  <h2>Главное событие{% if g.key_event_title %}: {{ g.key_event_title }}{% endif %}</h2>
+  {% if g.key_event_summary %}<p>{{ g.key_event_summary }}</p>{% endif %}
+  {% if g.corridor_nodes_affected %}<p><strong>Затронутые узлы:</strong> {{ g.corridor_nodes_affected|join:", " }}</p>{% endif %}
+  {% if g.immediate_impact %}<h3>Немедленное влияние (24–72 часа)</h3><p>{{ g.immediate_impact }}</p>{% endif %}
+  {% if g.tcd_impact %}
+  <h3>Влияние по методологии TCD</h3>
+  {% if g.tcd_impact.time_delta %}<p><strong>Транзитное время:</strong> {{ g.tcd_impact.time_delta }}</p>{% endif %}
+  {% if g.tcd_impact.cost_delta %}<p><strong>Стоимость:</strong> {{ g.tcd_impact.cost_delta }}</p>{% endif %}
+  {% if g.tcd_impact.reliability_delta %}<p><strong>Надёжность:</strong> {{ g.tcd_impact.reliability_delta }}</p>{% endif %}
+  {% endif %}
+  {% if g.secondary_effects %}<h3>Вторичные эффекты</h3><p>{{ g.secondary_effects }}</p>{% endif %}
+  {% if g.route_diversion_risk %}<h3>Риск переключения маршрута</h3><p>{{ g.route_diversion_risk }}</p>{% endif %}
+  {% if g.precedent_analysis %}<h3>Анализ прецедентов</h3><p>{{ g.precedent_analysis }}</p>{% endif %}
+</div>
+{% endif %}
+
+{% if g.stakeholder_implications %}
+<div class="section">
+  <h2>Влияние на участников рынка</h2>
+  {% for role, impact in g.stakeholder_implications.items %}<p><strong>{{ role }}:</strong> {{ impact }}</p>{% endfor %}
+</div>
+{% endif %}
+
+<!-- Investment report -->
+{% if g.market_sizing or g.opportunities or g.investment_barriers %}
+<div class="section">
+  <h2>Рынок и инвестиции</h2>
+  {% if g.market_sizing.current_volume %}<p><strong>Текущий объём:</strong> {{ g.market_sizing.current_volume }}</p>{% endif %}
+  {% if g.market_sizing.addressable_market %}<p><strong>Адресуемый рынок:</strong> {{ g.market_sizing.addressable_market }}</p>{% endif %}
+  {% if g.market_sizing.growth_scenario %}<p><strong>Сценарии роста:</strong> {{ g.market_sizing.growth_scenario }}</p>{% endif %}
+  {% for o in g.opportunities %}<div class="finding">💡 {{ o }}</div>{% endfor %}
+  {% for b in g.investment_barriers %}<div class="finding">⛔ {{ b }}</div>{% endfor %}
+  {% for gap in g.infrastructure_gaps_and_capex %}<div class="finding">🏗️ {{ gap }}</div>{% endfor %}
 </div>
 {% endif %}
 
 <!-- Risk Matrix -->
-{% if g.risk_matrix %}
+{% if g.risk_matrix or g.risk_matrix_for_investors %}
 <div class="section page-break">
   <h2>Матрица рисков</h2>
   <table>
-    <thead><tr><th>Риск</th><th>Вероятность</th><th>Влияние</th><th>Описание</th></tr></thead>
+    <thead><tr><th>Риск</th><th>Вероятность</th><th>Влияние</th><th>Описание / митигация</th></tr></thead>
     <tbody>
       {% for risk in g.risk_matrix %}
       <tr>
         <td><strong>{{ risk.risk }}</strong></td>
         <td class="{% if risk.probability == 'ВЫСОКАЯ' %}risk-high{% elif risk.probability == 'СРЕДНЯЯ' %}risk-mid{% else %}risk-low{% endif %}">{{ risk.probability }}</td>
         <td class="{% if risk.impact == 'ВЫСОКИЙ' %}risk-high{% elif risk.impact == 'СРЕДНИЙ' %}risk-mid{% else %}risk-low{% endif %}">{{ risk.impact }}</td>
-        <td>{{ risk.description }}</td>
+        <td>{{ risk.description }}{% if risk.mitigation %} <em>Митигация: {{ risk.mitigation }}</em>{% endif %}</td>
+      </tr>
+      {% endfor %}
+      {% for risk in g.risk_matrix_for_investors %}
+      <tr>
+        <td><strong>{{ risk.risk }}</strong></td>
+        <td class="{% if risk.probability == 'ВЫСОКАЯ' %}risk-high{% elif risk.probability == 'СРЕДНЯЯ' %}risk-mid{% else %}risk-low{% endif %}">{{ risk.probability }}</td>
+        <td class="{% if risk.impact == 'ВЫСОКИЙ' %}risk-high{% elif risk.impact == 'СРЕДНИЙ' %}risk-mid{% else %}risk-low{% endif %}">{{ risk.impact }}</td>
+        <td>{% if risk.mitigation %}<em>Хеджирование: {{ risk.mitigation }}</em>{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -206,7 +257,7 @@ td { padding: 10px 12px; border-bottom: 1px solid #eef0f4; vertical-align: top; 
     <div>
       <div class="art-meta-pdf">{{ art.source__name }} · {{ art.published_at|date:"d.m.Y" }} · {{ art.groq_impact_type }}</div>
       <div class="art-title-pdf">{{ art.title }}</div>
-      {% if art.groq_summary_ru %}<div class="art-summary-pdf">{{ art.groq_summary_ru|truncatechars:200 }}</div>{% endif %}
+      {% if art.groq_summary_ru %}<div class="art-summary-pdf">{{ art.groq_summary_ru }}</div>{% endif %}
     </div>
   </div>
   {% endfor %}

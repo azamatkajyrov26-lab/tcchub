@@ -40,8 +40,8 @@
 .nf-source-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0}
 .nf-source-name{font-size:10px;font-weight:800;color:var(--gold-dark);text-transform:uppercase;letter-spacing:.1em}
 .nf-date{font-size:10px;color:var(--text-light)}
-.nf-title{font-size:14px;font-weight:700;color:var(--text);line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1}
-.nf-desc{font-size:12px;color:var(--text-mid);line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nf-title{font-size:14px;font-weight:700;color:var(--text);line-height:1.45;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.nf-desc{font-size:12px;color:var(--text-mid);line-height:1.65;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;flex:1}
 .nf-footer{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border-light);margin-top:auto}
 .nf-read{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.06em;text-transform:uppercase}
 .nf-empty{text-align:center;padding:80px 24px;color:var(--text-light)}
@@ -110,8 +110,8 @@
   }
   .nf-card:active{transform:scale(.98);box-shadow:none}
   .nf-card:hover{transform:none;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-  .nf-title{font-size:15px;line-height:1.4;-webkit-line-clamp:2}
-  .nf-desc{font-size:13px;line-height:1.5;-webkit-line-clamp:2}
+  .nf-title{font-size:15px;line-height:1.4;-webkit-line-clamp:3}
+  .nf-desc{font-size:13px;line-height:1.5;-webkit-line-clamp:3}
   .nf-footer{padding-top:8px}
   .nf-source-name{font-size:10px}
   .nf-date{font-size:10px}
@@ -240,12 +240,16 @@
         <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         RU
       </div>
-      <div class="nf-title">{{ item.ai_summary_ru|truncatechars:120 }}</div>
-      <div class="nf-desc" style="font-style:italic">{{ item.title|truncatechars:90 }}</div>
+      <div class="nf-title">{{ item.ru_title }}</div>
+      {% if item.ru_desc %}
+      <div class="nf-desc">{{ item.ru_desc }}</div>
+      {% else %}
+      <div class="nf-desc" style="font-style:italic">{{ item.title }}</div>
+      {% endif %}
       {% else %}
       <div class="nf-title">{{ item.title }}</div>
       {% if item.content %}
-      <div class="nf-desc">{{ item.content|truncatechars:120 }}</div>
+      <div class="nf-desc">{{ item.content|striptags }}</div>
       {% endif %}
       {% endif %}
       <div class="nf-footer">

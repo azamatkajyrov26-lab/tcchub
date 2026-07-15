@@ -240,6 +240,12 @@ def news_feed_view(request):
     all_items = list(qs[:300])
     for item in all_items:
         item.news_category = _categorize_news(item.title, item.content)
+        # ai_summary_ru = "переведённый заголовок\n\nпереведённый фрагмент текста"
+        # — разделяем, чтобы карточка показывала их как заголовок и описание
+        if item.ai_summary_ru:
+            parts = item.ai_summary_ru.split("\n", 1)
+            item.ru_title = parts[0].strip()
+            item.ru_desc = parts[1].strip() if len(parts) > 1 else ""
 
     # Filter by category if selected
     if category_code:
@@ -536,11 +542,11 @@ def _generate_report(report_type, config):
   "infrastructure_findings": "Состояние ключевых узлов: Хоргос, Актау/Курык, Алат (Баку), Поти/Батуми, грузинские ж/д. Что изменилось за период. 4-5 предложений.",
   "trade_flow_impact": "Влияние новостей на объёмы и маршрутизацию грузов. Сравни с Северным/Южным коридором. 3-4 предложения.",
   "lpi_dimension_assessment": {{
-    "customs": "Оценка таможенных процедур КЗ/АЗ/ГЕ на основе новостей",
-    "infrastructure": "Изменения в инфраструктуре за период",
-    "shipments": "Доступность и конкурентность услуг",
-    "logistics_quality": "Качество операторов и отслеживание грузов",
-    "timeliness": "Выполнение расписания и предсказуемость"
+    "Таможня": "Оценка таможенных процедур КЗ/АЗ/ГЕ на основе новостей",
+    "Инфраструктура": "Изменения в инфраструктуре за период",
+    "Международные перевозки": "Доступность и конкурентность услуг",
+    "Качество логистики": "Качество операторов и отслеживание грузов",
+    "Своевременность": "Выполнение расписания и предсказуемость"
   }},
   "risk_matrix": [
     {{"risk": "Конкретный риск из новостей", "category": "геополитика/инфраструктура/тариф/регуляторный/операционный", "probability": "ВЫСОКАЯ/СРЕДНЯЯ/НИЗКАЯ", "impact": "ВЫСОКИЙ/СРЕДНИЙ/НИЗКИЙ", "description": "2-3 предложения о природе риска и механизме влияния на коридор", "mitigation": "Действие для снижения риска"}},
@@ -586,10 +592,10 @@ def _generate_report(report_type, config):
   "secondary_effects": "Вторичные эффекты через 1-4 недели: перераспределение грузов, маршрутизация. 3 предложения.",
   "route_diversion_risk": "Вероятность переключения грузов на Северный или Южный коридор: ВЫСОКАЯ/СРЕДНЯЯ/НИЗКАЯ. Обоснование.",
   "stakeholder_implications": {{
-    "грузоотправители": "Конкретное влияние и рекомендуемые действия",
-    "перевозчики_операторы": "Конкретное влияние и рекомендуемые действия",
-    "государства_транзита": "Конкретное влияние и рекомендуемые действия",
-    "инвесторы": "Конкретное влияние и рекомендуемые действия"
+    "Грузоотправители": "Конкретное влияние и рекомендуемые действия",
+    "Перевозчики и операторы": "Конкретное влияние и рекомендуемые действия",
+    "Государства транзита": "Конкретное влияние и рекомендуемые действия",
+    "Инвесторы": "Конкретное влияние и рекомендуемые действия"
   }},
   "urgent_actions": [
     "Действие 1 (сделать в течение 48 часов)",
@@ -670,7 +676,7 @@ def _generate_report(report_type, config):
                     "messages": [{"role": "user", "content": prompts[report_type]}],
                     "response_format": {"type": "json_object"},
                     "temperature": 0.35,
-                    "max_tokens": 2500,
+                    "max_tokens": 4500,
                 },
                 timeout=45,
             )
@@ -690,7 +696,8 @@ def _generate_report(report_type, config):
         "corridor_nodes_affected", "immediate_impact", "tcd_impact", "secondary_effects",
         "route_diversion_risk", "stakeholder_implications", "urgent_actions",
         "monitoring_indicators", "precedent_analysis", "market_sizing", "opportunities",
-        "investment_barriers", "risks_for_investors", "infrastructure_gaps_and_capex",
+        "investment_barriers", "risks_for_investors", "risk_matrix_for_investors",
+        "infrastructure_gaps_and_capex",
         "financial_metrics", "strategic_recommendations", "due_diligence_checklist",
         "disclaimer", "affected_segments", "comparison",
     ]
@@ -700,7 +707,7 @@ def _generate_report(report_type, config):
                 "risk_matrix","opportunities","urgent_actions","monitoring_indicators",
                 "corridor_nodes_affected","affected_segments","strategic_recommendations",
                 "due_diligence_checklist","infrastructure_gaps_and_capex","kpi_watch",
-                "investment_barriers","risks_for_investors"] else ""
+                "investment_barriers","risks_for_investors","risk_matrix_for_investors"] else ""
 
     return {
         "type": report_type,
@@ -722,8 +729,6 @@ def _generate_report(report_type, config):
     }
 
 
-@require_POST
-@login_required
 def _groq_to_sections(groq, stats=None):
     """Convert Groq AI response dict into list of (title, section_type, html_content, order) tuples."""
     sections = []
@@ -811,8 +816,81 @@ def _groq_to_sections(groq, stats=None):
         for label, text in [("Оценка коридора", corridor), ("Инфраструктура", infra), ("Торговые потоки", trade)]:
             if text:
                 html += f'<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:20px"><div style="font-size:10px;font-weight:800;color:#C6A46D;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px">{label}</div><p style="font-size:14px;color:#334155;line-height:1.7;margin:0">{text}</p></div>'
+        lpi = groq.get("lpi_dimension_assessment", "")
+        if isinstance(lpi, dict) and lpi:
+            html += '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:20px"><div style="font-size:10px;font-weight:800;color:#C6A46D;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px">Оценка по измерениям LPI</div>'
+            for dim, text in lpi.items():
+                if text:
+                    html += f'<p style="font-size:13px;color:#334155;line-height:1.6;margin:0 0 8px"><b>{dim}:</b> {text}</p>'
+            html += '</div>'
         html += '</div>'
         sections.append(("Оценка коридора", "route_score", html, order))
+        order += 1
+
+    # Key event (event report)
+    ev_title = groq.get("key_event_title", "")
+    ev_summary = groq.get("key_event_summary", "")
+    if ev_title or ev_summary:
+        html = ""
+        if ev_title:
+            html += f'<div style="font-size:17px;font-weight:900;color:#1B2A4A;margin-bottom:10px">{ev_title}</div>'
+        if ev_summary:
+            html += f'<p style="font-size:14px;color:#334155;line-height:1.7;margin:0 0 14px">{ev_summary}</p>'
+        nodes = groq.get("corridor_nodes_affected", [])
+        if nodes and any(nodes):
+            chips = "".join(f'<span style="padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700;background:rgba(198,164,109,.1);border:1px solid rgba(198,164,109,.25);color:#8a6f3f;margin-right:6px">{n}</span>' for n in nodes if n)
+            html += f'<div style="margin-bottom:14px"><b style="font-size:12px;color:#94a3b8">Затронутые узлы:</b> {chips}</div>'
+        for label, key, color in [
+            ("Немедленное влияние (24–72 часа)", "immediate_impact", "#ef4444"),
+            ("Вторичные эффекты (1–4 недели)", "secondary_effects", "#f59e0b"),
+            ("Риск переключения маршрута", "route_diversion_risk", "#f59e0b"),
+            ("Анализ прецедентов", "precedent_analysis", "#64748b"),
+        ]:
+            text = groq.get(key, "")
+            if text:
+                html += f'<div style="background:#f8fafc;border-left:3px solid {color};border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:10px"><div style="font-size:10px;font-weight:800;color:{color};letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">{label}</div><p style="font-size:13px;color:#334155;line-height:1.6;margin:0">{text}</p></div>'
+        tcd = groq.get("tcd_impact", "")
+        if isinstance(tcd, dict) and tcd:
+            html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px">'
+            for label, key in [("Транзитное время", "time_delta"), ("Стоимость", "cost_delta"), ("Надёжность", "reliability_delta")]:
+                val = tcd.get(key, "")
+                if val:
+                    html += f'<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px"><div style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">{label}</div><div style="font-size:13px;font-weight:700;color:#1B2A4A">{val}</div></div>'
+            html += '</div>'
+        sections.append(("Главное событие", "text", html, order))
+        order += 1
+
+    # Stakeholder implications (event report)
+    stakeholders = groq.get("stakeholder_implications", "")
+    if isinstance(stakeholders, dict) and stakeholders:
+        html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">'
+        for role, impact in stakeholders.items():
+            if impact:
+                html += f'<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:18px"><div style="font-size:12px;font-weight:800;color:#C6A46D;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">{role}</div><p style="font-size:13px;color:#334155;line-height:1.6;margin:0">{impact}</p></div>'
+        html += '</div>'
+        sections.append(("Влияние на участников рынка", "text", html, order))
+        order += 1
+
+    # Market sizing + financial metrics (investment report)
+    sizing = groq.get("market_sizing", "")
+    fin = groq.get("financial_metrics", "")
+    if (isinstance(sizing, dict) and sizing) or (isinstance(fin, dict) and fin):
+        html = ""
+        if isinstance(sizing, dict) and sizing:
+            html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">'
+            for label, key in [("Текущий объём", "current_volume"), ("Адресуемый рынок", "addressable_market"), ("Сценарии роста", "growth_scenario")]:
+                val = sizing.get(key, "")
+                if val:
+                    html += f'<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px"><div style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">{label}</div><div style="font-size:13px;font-weight:700;color:#1B2A4A;line-height:1.5">{val}</div></div>'
+            html += '</div>'
+        if isinstance(fin, dict) and fin:
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+            for label, key in [("Объём транзита", "transit_volume_trend"), ("Фрахтовые ставки", "freight_rate_trend"), ("Транзитное время", "transit_time_trend"), ("Загрузка мощностей", "infrastructure_utilization")]:
+                val = fin.get(key, "")
+                if val:
+                    html += f'<div style="padding:12px 16px;background:#f8fafc;border-radius:10px;font-size:12px"><b style="color:#1B2A4A">{label}:</b> <span style="color:#64748b">{val}</span></div>'
+            html += '</div>'
+        sections.append(("Рынок и финансовые индикаторы", "text", html, order))
         order += 1
 
     # Top events
@@ -832,7 +910,7 @@ def _groq_to_sections(groq, stats=None):
         order += 1
 
     # Risk matrix
-    matrix = groq.get("risk_matrix", [])
+    matrix = groq.get("risk_matrix", []) or groq.get("risk_matrix_for_investors", [])
     if matrix and any(matrix):
         html = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:separate;border-spacing:0;font-size:13px"><thead><tr style="background:#f8fafc">'
         if isinstance(matrix[0], dict):
@@ -852,7 +930,9 @@ def _groq_to_sections(groq, stats=None):
     recs = groq.get("recommendation", "") or ""
     policy_recs = groq.get("policy_recommendations", [])
     strategic_recs = groq.get("strategic_recommendations", [])
-    all_recs = policy_recs or strategic_recs
+    urgent = groq.get("urgent_actions", [])
+    dd_checklist = groq.get("due_diligence_checklist", [])
+    all_recs = (policy_recs or strategic_recs or []) + [f"⚡ {u}" for u in urgent if u] + [f"☑️ {c}" for c in dd_checklist if c]
     if recs or all_recs:
         html = ""
         if recs:
@@ -866,8 +946,8 @@ def _groq_to_sections(groq, stats=None):
         sections.append(("Рекомендации", "text", html, order))
         order += 1
 
-    # KPI watch
-    kpis = groq.get("kpi_watch", [])
+    # KPI watch + monitoring indicators
+    kpis = (groq.get("kpi_watch", []) or []) + (groq.get("monitoring_indicators", []) or [])
     if kpis and any(kpis):
         html = '<div style="display:flex;flex-wrap:wrap;gap:10px">'
         for kpi in kpis:
@@ -884,15 +964,23 @@ def _groq_to_sections(groq, stats=None):
         sections.append(("Прогноз", "text", html, order))
         order += 1
 
-    # Opportunities
+    # Opportunities + investment barriers + infrastructure gaps
     opps = groq.get("opportunities", [])
-    if opps and any(opps):
+    barriers = groq.get("investment_barriers", [])
+    gaps = groq.get("infrastructure_gaps_and_capex", [])
+    if (opps and any(opps)) or (barriers and any(barriers)) or (gaps and any(gaps)):
         html = '<div style="display:grid;gap:12px">'
-        for o in opps:
+        for o in opps or []:
             if o:
-                html += f'<div style="padding:16px 20px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #fde68a;border-radius:14px;font-size:14px;color:#92400e;line-height:1.6">{o}</div>'
+                html += f'<div style="padding:16px 20px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #fde68a;border-radius:14px;font-size:14px;color:#92400e;line-height:1.6">💡 {o}</div>'
+        for b in barriers or []:
+            if b:
+                html += f'<div style="padding:16px 20px;background:#fef2f2;border:1px solid #fecaca;border-radius:14px;font-size:14px;color:#991b1b;line-height:1.6">⛔ {b}</div>'
+        for gap in gaps or []:
+            if gap:
+                html += f'<div style="padding:16px 20px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;font-size:14px;color:#334155;line-height:1.6">🏗️ {gap}</div>'
         html += '</div>'
-        sections.append(("Возможности", "text", html, order))
+        sections.append(("Возможности и барьеры", "text", html, order))
         order += 1
 
     # Disclaimer
@@ -904,6 +992,8 @@ def _groq_to_sections(groq, stats=None):
     return sections
 
 
+@require_POST
+@login_required
 def report_publish_view(request):
     """Save generated report to user's cabinet. Admin can publish to catalog."""
     from apps.tcc_reports.models import Report, ReportTemplate, ReportSection

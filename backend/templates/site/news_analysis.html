@@ -202,7 +202,7 @@
         </div>
         <a href="{{ item.url }}" target="_blank" class="top-article-title" style="display:block;text-decoration:none;color:var(--navy)">{{ item.title }}</a>
         {% if item.groq_summary_ru %}
-        <div class="top-article-summary">{{ item.groq_summary_ru|truncatechars:200 }}</div>
+        <div class="top-article-summary">{{ item.groq_summary_ru }}</div>
         {% endif %}
       </div>
     </div>
